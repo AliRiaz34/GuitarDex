@@ -1,7 +1,58 @@
-#index-song-table {
+#index-song-div, #sAdd-div {
     width: 700px;
+    margin-left: 100px;
+}
+
+#index-container, #sAdd-section {
+    display: flex;
+    flex-direction: row;
 }
 
 th {
     text-align: left;
+}
+
+.form__input-group {
+    margin-top: 6px;
+    margin-bottom: 17px;
+}
+
+.form__input {
+    display: block;
+    width: 100%;
+    font-size: 0.85em;
+    padding: 0.65rem;
+    box-sizing: border-box;
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+    outline: none;
+    background: #eeeeee;
+}
+
+.sAdd-input {
+    width: 100%;
+    font-size: 0.9em;
+    padding: 0.65rem;
+    box-sizing: border-box;
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+    outline: none;
+    background: #eeeeee;
+}
+
+.sAdd-input-num {
+    display: block;
+    font-size: 0.9em;
+    padding: 0.65rem;
+    box-sizing: border-box;
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+    outline: none;
+    background: #eeeeee;
+}
+
+.form-label {
+    font-size: 1.1em;
+    padding-left: 5px;
+    margin-bottom: 8px;
 }

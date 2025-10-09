@@ -8,13 +8,9 @@
 </head>
 
 <body>
-    <header class="index-heading" id="index-heading">
-        <div id="index-heading-left"></div>
-        <div id="index-heading-right"></div>
-    </header>
-
     <section id="index-container">
-        <main id="index-score-div">
+        <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="400" height="400">
+        <main id="index-song-div">
             <table id="index-song-table">
                 <thead>
                     <tr>
@@ -27,6 +23,10 @@
                 </thead>
                 <tbody></tbody>
             </table>
+
+            <a href="/songs/add">
+  	            <button>add new song</button>
+            </a>
         </main>
     </section>
     

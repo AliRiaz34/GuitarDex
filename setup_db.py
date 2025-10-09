@@ -61,7 +61,8 @@ def add_song(conn, songID, title, artistName, learnDate, lastPracticeDate, ratin
         print(e)
 
 def init_song(conn):
-    init = [(1, "grace", "jeffy", "2023", "2025", 10)
+    init = [(1, "grace", "jeffy", "2023", "2025", 10), 
+            (2, "anything", "adrienne lenker", "2021", "2024", 10)
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5])
