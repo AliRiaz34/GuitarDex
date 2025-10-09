@@ -4,7 +4,7 @@ const indexSongTable = document.getElementById('index-song-table');
 
 document.addEventListener('DOMContentLoaded', function () {
     if (indexSongTable) {
-        loadIndexScores();
+        loadIndexSongs();
     }
 })
 
@@ -30,34 +30,25 @@ function checkIfEmpty(array, table) {
 
 //Load
 
-function loadIndexScores(which) {
-    let table;
-    fetchURL = `/songs`;
-    table = indexSongTable;    
-
-    fetch(fetchURL)
+function loadIndexSongs() {
+    fetch(`/songs`)
     .then(response => response.json())
-    .then(scores_info => {   
-        if (checkIfEmpty(scores_info, table) == true) {
+    .then(songs_info => {   
+        if (checkIfEmpty(songs_info, indexSongTable) == true) {
         } else {
-            scores_info.forEach(function(score) {
-                let newScoreRow = table.children[1].insertRow();
+            songs_info.forEach(function(song) {
+                let newSongRow = indexSongTable.children[1].insertRow();
 
-                for (let i = 0; i < 4; i++) {
-                    let newCell = newScoreRow.insertCell(); 
+                for (let i = 0; i < 6; i++) {
+                    let newCell = newSongRow.insertCell(); 
                     newCell.className = 'song-td';
                 }   
                 
-                createLink(score.artistName,"", "", `/search/${score.artistName}`, newScoreRow.cells[0]);
-                newScoreRow.cells[0].width = "25%";
-                createLink(score.scoreName,"", "", `/scores/${score.scoreID}`, newScoreRow.cells[1]);
-                newScoreRow.cells[1].width = "40%";
-                let dateEmtpyLink = createLink(score.lastModified,"", "", `#`, newScoreRow.cells[2]);
-                dateEmtpyLink.style.textDecoration = "none";
-                dateEmtpyLink.style.cursor = "inherit";
-
-                scoresID.push(score.scoreID);
-                createLink(score.creatorName,"", "", `/profile/${score.creatorID}`, newScoreRow.cells[3]);
+                newSongRow.cells[0].innerText = song.title;
+                newSongRow.cells[1].innerText = song.artistName;
+                newSongRow.cells[2].innerText = song.learnDate;
+                newSongRow.cells[3].innerText = song.lastPracticeDate;
+                newSongRow.cells[4].innerText = song.rating;
             })
         }
     })

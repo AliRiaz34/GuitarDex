@@ -24,5 +24,9 @@ def index():
 @app.route("/songs", methods=['GET'])
 def songs_info():
     conn = get_db_connection()
-    scores_info = setup_db.find_songs(conn)
-    return jsonify(scores_info)
+    songs_info = setup_db.find_songs(conn)
+    print(songs_info)
+    return jsonify(songs_info)
+
+if __name__ == "__main__":
+    app.run(debug=True)
