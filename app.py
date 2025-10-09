@@ -15,6 +15,14 @@ def get_db_connection():
     conn = setup_db.create_connection(setup_db.database)
     return conn
 
+
+### INDEX ###
 @app.route("/")
 def index():
     return render_template('index.html')
+
+@app.route("/songs", methods=['GET'])
+def songs_info():
+    conn = get_db_connection()
+    scores_info = setup_db.find_songs(conn)
+    return jsonify(scores_info)

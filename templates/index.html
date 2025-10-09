@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tune Score</title>
-    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <title>GuitarDex</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -14,27 +14,15 @@
     </header>
 
     <section id="index-container">
-        <aside id="index-user-div">
-            <header>
-                <h1 class="index-h1">Find users</h1>
-                <input type="text" class="searchbar" placeholder="search users" id="searchbarUsers" name="search" onkeyup="search(indexUsersTable)" ><br>
-            </header>
-            <div class="scrollit">
-                <table id="index-users-table">
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </aside>
         <main id="index-score-div">
             <table id="index-score-table">
                 <thead>
                     <tr>
-                        <th onclick="sortScores(0, 0)" class="index-score-th">Artist</th>
-                        <th onclick="sortScores(1, 0)"class="index-score-th">Song</th>
-                        <th onclick="sortScores(2, 0)"class="index-score-th">Last edit</th>
-                        <th onclick="sortScores(3, 0)"class="index-score-th">Author</th>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Learn Date</th>
+                        <th>Last Practice</th>
+                        <th>Rating</th>
                     </tr>
                 </thead>
                 <tbody></tbody>

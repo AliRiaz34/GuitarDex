@@ -62,13 +62,11 @@ def add_song(conn, songID, title, artistName, learnDate, lastPracticeDate, ratin
 
 def init_song(conn):
     init = [(1, "grace", "jeffy", "2023", "2025", 10)
-
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5])
 
 #### DELETE #######
-
 def delete_song(conn, songID):
     cur = conn.cursor()
     cur.execute("DELETE FROM songs WHERE songID = ?", (songID,))
@@ -76,14 +74,12 @@ def delete_song(conn, songID):
     return songID
 
 #### UPDATE ####
-
 def update_song_info(conn, songID, title, artistName, learnDate, lastPracticeDate, rating):
     cur = conn.cursor()
     cur.execute("UPDATE songs SET title = ?, artistName = ?, learnDate = ?, lastPracticeDate = ?, rating = ? WHERE songID = ?", (title, artistName, learnDate, lastPracticeDate, rating, songID))
     conn.commit()  
     cur.close()
     return 
-
 
 #### SELECT #######
 def find_songs(conn):
