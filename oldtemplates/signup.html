@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Sign up</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+    
+<body class="login-body">
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+
+    <main class="container">
+        <form action="/signup" method="POST" class="form" id="signup" onsubmit="return verifySignup(event)">
+            <h1 class="form__title">Sign up</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="form__message form__message-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <p id="errorText" class="errorText"></p>
+                
+            <div>
+                <label class="form-label">Username</label>
+                <input type="text" class="form__input" id="username" oninput="updateNameCount()" name="username" maxlength="12" autofocus placeholder="Username" required>
+                <span id="nameCount"></span>
+            </div>
+
+            <div class="form__input-group">
+                <label class="form-label">Email</label>
+                <input type="text" class="form__input" id="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="form__input-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form__input" id="password" name="password" placeholder="Password" required>
+            </div>
+            
+            <div class="form__input-group">
+                <label class="form-label">Confirm password</label>
+                <input type="password" class="form__input" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+            </div>
+
+            <button class="form__button" type="submit">Sign up</button>
+
+            <p class="form__text">
+                <a href="{{ url_for('login') }}" class="form__link">Already have account? Log in</a>
+            </p>
+        </form>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+    <footer></footer>
+</body>
+</html>

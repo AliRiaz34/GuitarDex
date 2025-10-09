@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+
+    <section id="index-container">
+        <aside id="index-user-div">
+            <header>
+                <h1 class="index-h1">Find users</h1>
+                <input type="text" class="searchbar" placeholder="search users" id="searchbarUsers" name="search" onkeyup="search(indexUsersTable)" ><br>
+            </header>
+            <div class="scrollit">
+                <table id="index-users-table">
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </aside>
+        <main id="index-score-div">
+            <table id="index-score-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortScores(0, 0)" class="index-score-th">Artist</th>
+                        <th onclick="sortScores(1, 0)"class="index-score-th">Song</th>
+                        <th onclick="sortScores(2, 0)"class="index-score-th">Last edit</th>
+                        <th onclick="sortScores(3, 0)"class="index-score-th">Author</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </main>
+    </section>
+    
+    <footer></footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>

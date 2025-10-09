@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Profile page</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+    
+    <main id="profile-container">
+        <section id="profile-upper">
+            <div id="profile-upper-left">   
+                <img id="profile-icon" src="{{ url_for('serve_image', filename=user_info.profilePicture) }}" alt="pfp">  
+                <div id="profile-button-div"></div> 
+            </div>
+            
+            <div id="profile-upper-right">    
+                <div id="profile-head-div">
+                    <h2 id="profile-name">{{ user_info.username }}</h2>
+                    <a class="follower_link" id="followers-modal" href="#"><h3 class="profile-head"> {{ user_info.followersCount }} followers</h3></a>    
+                    <a class="follower_link" id="following-modal" href="#"><h3 class="profile-head" > following {{ user_info.followingCount }} </h3></a>
+                </div>
+            
+                <div id="profile-subhead-div">
+                    <h4 class="profile-subhead"> From: {{ user_info.country }}</h4>
+                    <h4 class="profile-subhead"> Joined: {{ user_info.registrationDate }}</h4>
+                </div>
+
+                <textarea id="profile-bio" readonly> {{ user_info.userBio }}</textarea>
+            </div>
+
+            <dialog id="follow-modal">
+                <div id="modal-head-div">
+                    <h1 id="modal-head"></h1>
+                    <form> 
+                        <button value="cancel" formmethod="dialog" id="close-modal" class="close-modal">X</button>
+                    </form>
+                </div>
+                <input type="text" id="searchbarUsers" name="search" onkeyup="search(modalTable)" class="modal-searchbar" placeholder="search followers"><br>
+                <table class="modal-table" id="modal-table">
+                    <tbody>
+                    </tbody>
+                </table>
+            </dialog>
+        </section>
+
+        <section id="profile-scores-div">
+            <h1 class="profile-score-head">My scores</h1>
+            <table id="profile-score-table">
+                <thead>
+                    <tr>
+                        <th class="profile-score-th">Artist</th>
+                        <th class="profile-score-th">Song</th>
+                        <th style="text-align: right;" class="profile-score-th">Last edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for score in scores %}
+                    <tr>
+                        <td class="profile-score-td"><a href="{{ url_for('search_scores', query=score.artistName) }}">{{ score.artistName }}</a></td>
+                        <td class="profile-score-td"><a href="{{ url_for('score', scoreID=score.scoreID) }}">{{ score.scoreName }}</a></td>
+                        <td style="text-align: right;" class="profile-score-td">{{ score.lastModified }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer></footer>
+    <input id="SessionUserID" value="{{ SessionUserID }}" type="hidden">
+    <input id="ProfileID" value="{{ userID }}" type="hidden">
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>

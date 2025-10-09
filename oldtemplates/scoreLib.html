@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Score Library</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+</head>
+
+<body>
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+
+    <main id="scoreLib-container">
+        <div id="myScores-head">
+            <h1 id="myScores-h1">My scores</h1>
+            <form id="myScores-form" action="{{ url_for('score_editor', scoreID=0) }}" method="GET" class="form">
+                <button class="newScore-button">+ new score</button>
+            </form> 
+        </div>
+
+        <table id="myScores-table">
+            <thead>
+                <tr>
+                    <th onclick="sortScores(0, 1)" class="index-score-th">Artist</th>
+                    <th onclick="sortScores(1, 1)" class="index-score-th">Song</th>
+                    <th onclick="sortScores(2, 1)" class="index-score-th" style="min-width: 120px;">Last edit</th>
+                    <th class="index-score-th">Hidden</th>
+                    <th class="index-score-th"></th>
+                    <th class="index-score-th"></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div id="favorites-head">
+            <h1 id="favorites-h1">Favorites</h1>
+        </div>
+        <table id="favorites-table">
+            <thead>
+                <tr>
+                    <th onclick="sortScores(0, 2)" class="index-score-th">Artist</th>
+                    <th onclick="sortScores(1, 2)" class="index-score-th">Song</th>
+                    <th onclick="sortScores(2, 2)" class="index-score-th">Last edit</th>
+                    <th onclick="sortScores(3, 2)" class="index-score-th">Author</th>
+                    <th class="index-score-th"></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <dialog id="delete-score-modal">
+            <h1 id="modal-head"> Are you sure?</h1>
+            <div id="delete-score-modal-div">
+            </div>
+        </dialog>
+    </main>
+        
+    <footer></footer>
+    <input id="SessionUserID" value="{{ SessionUserID }}" type="hidden">
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>

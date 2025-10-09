@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Edit Profile</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body id="edit-profile-body">
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+
+    <main id="editProfile-container">
+        <h1 class="form__title">Edit account details</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="form__message form__message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+        <p id="errorText" class="errorText"></p>
+
+        <section>
+            <form action="{{ url_for('edit_profile', userID=SessionUserID) }}" method="POST" class="form" id="editProfile-form" enctype="multipart/form-data" onsubmit="return verifyEdit(event)">
+                <input type="hidden" name="_method" value="PATCH">
+                <div>
+                    <div>
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form__input" id="username" maxlength="12" oninput="updateNameCount()" name="username" value="{{ user_info.username }}" required>
+                        <span id="nameCount"></span>
+                    </div>
+
+                    <div class="form__input-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form__input" id="email" name="email" value="{{ user_info.email }}" required>
+                    </div>
+
+                    <div class="form__input-group">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form__input" id="country" name="country" maxlength="20" value="{{ user_info.country }}">
+                    </div>
+
+                    <div>
+                        <label for="userBio" class="form-label">User description </label>
+                        <textarea type="text" class="form__input_bio" id="userBio" name="userBio" required maxlength="200" oninput="updateBioCount()" value="{{ user_info.userBio }}">{{ user_info.userBio  }}</textarea>
+                        <span id="charCount"></span>
+                    </div>
+            
+                    <button class="form__button" type="submit">Save</button>
+
+                    <p class="form__text">
+                        <a href="{{ url_for('forgot_password') }}" class="form__link"> Want to change password? </a>
+                    </p>
+                </div>
+
+                <div >
+                    <img id="profile-edit-icon" src="{{ url_for('serve_image', filename=user_info.profilePicture) }}" alt="pfp"> 
+                    <div id="edit-picture-form-div">
+                        <label class="custom-file-upload">
+                            <input  type="file" accept=".png, .jpeg, .jpg" id="newPicture-input" name="newPicture-input"> 
+                            upload
+                        </label>
+                        <button id="cancel-picture-button" type="reset">cancel</button>
+                    </div>
+                </div>
+            </form>
+            <form id="delete-user-form" onsubmit="return verifyUserRemove(event)"> 
+                <button id="delete-user-button" type="submit">Delete user</button>
+            </form>
+           
+        </section> 
+        <dialog id="delete-user-modal">
+            <h1 id="modal-head"> Are you sure?</h1>
+            <div id="delete-user-modal-div">
+            </div>
+        </dialog>
+    </main>
+
+    <footer></footer>
+    <input id="originalPicture" value="{{ url_for('serve_image', filename=user_info.profilePicture) }}" type="hidden">
+    <input id="SessionUserID" value="{{ SessionUserID }}" type="hidden">
+    <input id="ProfileID" value="{{ SessionUserID }}" type="hidden">
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>
+

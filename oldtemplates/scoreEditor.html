@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Score Editor</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+
+    <div id="sEditor-container">
+        <aside id="sEditor-aside">
+            <div id="sEditor-head"><h1 class="sEditor-h1">My scores</h1></div>
+
+            <table id="sEditor-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </aside>
+
+        <section id="sEditor-forms-div">
+            <h2 id="sEditor-h2"></h2>
+            <form id="sEditor-form" action="{{ url_for('score_editor', scoreID=scoreID ) }}" method="POST" onsubmit="return patchScoreEdit(event)">
+                <div id="sEditor-input-fields">
+                    <div class="sEditor-input-div">
+                        <div class="form__input-group">
+                            <label for="songname-input" class="form-label">Song name</label>
+                            <input type="text" class="sEditor-input" id="songname-input" name="songname-input" maxlength="23" required>
+                        </div>
+                        <div class="form__input-group">
+                            <label for="artist-input" class="form-label">Artist</label>
+                            <input type="text" class="sEditor-input" id="artist-input" name="artist-input" maxlength="23" required>
+                        </div>
+                        
+                    </div>
+                    <div class="sEditor-input-div">
+                        <div class="form__input-group">
+                            <label for="time-signature-input" class="form-label">Time signature</label>
+                            <select class="sEditor-dropdown" name="time-signature-input" id="time-signature-input" required>
+                                <option class="sEditor-dropdown-option" value="1">1/4</option>
+                                <option class="sEditor-dropdown-option" value="2">2/4</option>
+                                <option class="sEditor-dropdown-option" value="3">3/4</option>
+                                <option class="sEditor-dropdown-option" value="4">4/4</option>
+                                <option class="sEditor-dropdown-option" value="5">5/4</option>
+                            </select>
+                        </div>
+                        <div class="form__input-group">
+                            <label for="tempo-input" class="form-label">BPM</label>
+                            <input type="number" class="sEditor-input-num" id="tempo-input" name="tempo-input" max="300" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form__input-group">
+                    <label for="chords-input" class="form-label">Enter chords here</label>
+                    <textarea type="text" class="sEditor-input" id="chords-input" name="chords-input" required></textarea>
+                    <a id="help-link">Need help?</a>
+                </div>
+                <button id="sEditor-save-button" type="submit" class="form__button">Save</button>
+
+                <dialog id="help-modal">
+                    <div id="modal-head-help-div">
+                        <h1 id="modal-head-help"> Chord input guide</h1>
+                        <form> 
+                            <button value="cancel" formmethod="dialog" id="close-help-modal" class="close-modal">X</button>
+                        </form>
+                    </div>
+                    <p>In this guide, we will go over how the chord input field works, and how you can use it to create chord progressions for your favourite songs!</p>
+                    <p>
+                        The chord input field is a textbox, where you write the chords you want to show up in your score.
+                        In addition to adding chords, you can also add rests and sections to your score.
+                        Your text input should be structured so that every chord/rest is seperated by a single space.
+                        Sections are added by adding an empty line. Here is an example of how your chord input can be structured:
+                    </p>
+                    <textarea readonly class="sEditor-input" id="modal-textarea">
+CM:4 Ebm:4 rest:2 DM:2 FMmaj7:4
+            
+CM:4 Ebm:4 rest:4 Bsus2b9:4
+                    </textarea>
+                    <p>
+                        In this example, the user adds 4 bars, a section, then a new bar. 
+                        The chords and rests might look a little bit intimidating here, so we will go through how they work next.
+                    </p>
+                    <h3>Chords</h3>
+                    <p>
+                        Chords can be entered similarly to how one would write chords normally.
+                        However, it is important that you enter chords accurately to get your desired result.
+                        A chord consists of a few parts.
+                        A full list of all options for chords, can be found at the bottom of the guide, but here is a short summary:
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Chord part</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Root + root accidental</td>
+                            <td>The root note (eg. C, F#, Bb)</td>
+                        </tr>
+                        <tr>
+                            <td>Triad</td>
+                            <td>Finishes the triad (eg. M, sus2, aug)</td>
+                        </tr>
+                        <tr>
+                            <td>Seventh + extension</td>
+                            <td>Adds a seventh + extra extensions (eg. maj7, dom9)</td>
+                        </tr>
+                        <tr>
+                            <td>Add note</td>
+                            <td>Alternative to seventh, only one extension note (eg. Add9, Add6)</td>
+                        </tr>
+                        <tr>
+                            <td>Accidental notes</td>
+                            <td>Adds accidentals to existing or non existing notes (eg. #9, b3)</td>
+                        </tr>
+                        <tr>
+                            <td>Duration</td>
+                            <td>Represents length of the chord in quarter notes (eg. :4, :2)</td>
+                        </tr>
+                        
+                    </table>
+                    <h3>Rests</h3>
+                    <p>
+                        A rest is similar to a chord, and is used for adding breaks in the score.
+                        To add a rest, you write "rest:" + the length of the rest in quarter notes, just like you would with a chord.
+                    </p>
+                    <h3>Chords (continuation)</h3>
+                    <p>Let's make a chord using the instructions below</p>
+                    <p>
+                        Every chord needs a root note.The supported root notes, are:
+                        Cb (B), C, C#, Db, D, D#, Eb, E, E# (F), Fb (E), F, F# Gb, G, G#, Ab, A, A#, Bb, B, B# (C)
+                        Let's use C# for our chord. Current chord = "C#"
+                    </p>
+                    <p>Triads can be ommited, but are required if you intend on adding an extension. The supported triads are:</p>
+                    <ul>
+                        <li>M - major</li>
+                        <li>m - minor</li>
+                        <li>5 - power chord</li>
+                        <li>dim - diminished</li>
+                        <li>ø - half diminished (extension is added automatically)</li>
+                        <li>aug - augmented</li>
+                        <li>sus2 - suspended 2</li>
+                        <li>sus4 - suspended 4</li>
+                    </ul>
+                    <p>Let's use major for our chord. Current chord = "C#M"</p>
+                    <p>Seventh + extension is optional, but can only be added if a triad has been added prior. The supported seventh chords are:</p>
+                    <ul>
+                        <li>maj - major</li>
+                        <li>dom - dominant/minor</li>
+                        <li>dim - CAN ONLY BE USED WITH DIM TRIAD. Does not have to be entered twice.</li>
+                        <li>ø - CAN ONLY BE USED WITH Ø TRIAD. Does not have to be entered twice.</li>
+                    </ul>   
+                    <p>
+                        With every seventh chord, you have to include an extension (7, 9, 11 or 13) at the end.
+                        Let's use dominant 9 for our chord. Current chord = "C#Mdom9"
+                    </p>
+                    <p>
+                        Add note is optional, and can only be added if seventh + extension has not.
+                        To add an add note, write "Add" or "add" followed by the note to add (eg. Add6).
+                        Because we added a seventh + extension to our chord, we can not add an Add note.
+                    </p>
+                    <p>
+                        Accidental notes are optional, but can be added as long a root note has been added.
+                        Accidental notes are added by first writing "b" or "#", followed by the note the accidental is to be applied to.
+                        You can add as many accidental notes as you want.
+                        For our chord, let's do a flat 9 and sharp 11. Current chord = "C#Mdom9b9#11"
+                    </p>
+                    <p>
+                        Duration is the last part of a chord. It is required.
+                        The duration is an integer number that represents the chord's length in quarter notes.
+                        The format of the duration is ":x" where x is the duration value.
+                        Let's make our chord 4 quarter notes long. Current chord = "C#Mdom9b9#11:4"
+                    </p>
+                    <p>
+                        Our chord "C#Mdom9b9#11:4", is a C# major, with a dominant nine, flat 9 and sharp 11. It lasts 4 quarter notes.
+                    </p>
+                </dialog>
+        </form>
+        </section>
+
+        <div id="chords-output-div" class="score-output-div">
+            <header id="score-header" class="score-header">
+                <p id="score-header-bpm" class="score-header-bpm">BPM:</p>
+                <h2 id="score-header-title" class="score-header-title">Untitled</h2>
+                <p id="score-header-artist" class="score-header-artist">Artist</p>
+            </header>
+            <section id="score" class="score"></section>
+        </div>
+    </div>
+
+    <footer id="score-footer">
+        <section id="score-playbar">
+            <div id="volume-div">
+                <button class="volume-button" id="volume-button"></button>
+                <input id="volume" name="volume" type="range" min="0" max="0.50" value="0.25" step="0.05" class="slider">
+            </div>
+            <button id="play-button"> PLAY</button>
+
+            <div id="speed-div">
+                <button id="reset-tempo-button"> SPEED</button>
+                <span id="tempo-value"></span>
+                <input id="tempo-slider" name="tempo-slider" type="range" min="10" max="150" value="100" class="slider">
+            </div>
+            <div id="bpm-div">
+                <input type="number" id="bpm-value" name="bpm-value" value="0" readonly>
+                <label id="bpm-label" for="bpm-value"> BPM</label>
+            </div>
+            <div id="transpose-div">
+                <button id="reset-transpose-button"> TRANSPOSE</button>
+                <input id="transpose-input" name="transpose" type="number" min="-12" max="12" value=0>
+            </div>
+        </section>
+    </footer>
+    <div id="notes-div">
+        <audio id="note_m13" src="{{ url_for('static', filename='notes/note_m13.mp3') }}"></audio>
+        <audio id="note_m12" src="{{ url_for('static', filename='notes/note_m12.mp3') }}"></audio>
+        <audio id="note_m11" src="{{ url_for('static', filename='notes/note_m11.mp3') }}"></audio>
+        <audio id="note_m10" src="{{ url_for('static', filename='notes/note_m10.mp3') }}"></audio>
+        <audio id="note_m9" src="{{ url_for('static', filename='notes/note_m9.mp3') }}"></audio>
+        <audio id="note_m8" src="{{ url_for('static', filename='notes/note_m8.mp3') }}"></audio>
+        <audio id="note_m7" src="{{ url_for('static', filename='notes/note_m7.mp3') }}"></audio>
+        <audio id="note_m6" src="{{ url_for('static', filename='notes/note_m6.mp3') }}"></audio>
+        <audio id="note_m5" src="{{ url_for('static', filename='notes/note_m5.mp3') }}"></audio>
+        <audio id="note_m4" src="{{ url_for('static', filename='notes/note_m4.mp3') }}"></audio>
+        <audio id="note_m3" src="{{ url_for('static', filename='notes/note_m3.mp3') }}"></audio>
+        <audio id="note_m2" src="{{ url_for('static', filename='notes/note_m2.mp3') }}"></audio>
+        <audio id="note_m1" src="{{ url_for('static', filename='notes/note_m1.mp3') }}"></audio>
+        <audio id="note_0" src="{{ url_for('static', filename='notes/note_0.mp3') }}"></audio>
+        <audio id="note_1" src="{{ url_for('static', filename='notes/note_1.mp3') }}"></audio>
+        <audio id="note_2" src="{{ url_for('static', filename='notes/note_2.mp3') }}"></audio>
+        <audio id="note_3" src="{{ url_for('static', filename='notes/note_3.mp3') }}"></audio>
+        <audio id="note_4" src="{{ url_for('static', filename='notes/note_4.mp3') }}"></audio>
+        <audio id="note_5" src="{{ url_for('static', filename='notes/note_5.mp3') }}"></audio>
+        <audio id="note_6" src="{{ url_for('static', filename='notes/note_6.mp3') }}"></audio>
+        <audio id="note_7" src="{{ url_for('static', filename='notes/note_7.mp3') }}"></audio>
+        <audio id="note_8" src="{{ url_for('static', filename='notes/note_8.mp3') }}"></audio>
+        <audio id="note_9" src="{{ url_for('static', filename='notes/note_9.mp3') }}"></audio>
+        <audio id="note_10" src="{{ url_for('static', filename='notes/note_10.mp3') }}"></audio>
+        <audio id="note_11" src="{{ url_for('static', filename='notes/note_11.mp3') }}"></audio>
+        <audio id="note_12" src="{{ url_for('static', filename='notes/note_12.mp3') }}"></audio>
+        <audio id="note_13" src="{{ url_for('static', filename='notes/note_13.mp3') }}"></audio>
+        <audio id="note_14" src="{{ url_for('static', filename='notes/note_14.mp3') }}"></audio>
+        <audio id="note_15" src="{{ url_for('static', filename='notes/note_15.mp3') }}"></audio>
+        <audio id="note_16" src="{{ url_for('static', filename='notes/note_16.mp3') }}"></audio>
+        <audio id="note_17" src="{{ url_for('static', filename='notes/note_17.mp3') }}"></audio>
+        <audio id="note_18" src="{{ url_for('static', filename='notes/note_18.mp3') }}"></audio>
+        <audio id="note_19" src="{{ url_for('static', filename='notes/note_19.mp3') }}"></audio>
+        <audio id="note_20" src="{{ url_for('static', filename='notes/note_20.mp3') }}"></audio>
+        <audio id="note_21" src="{{ url_for('static', filename='notes/note_21.mp3') }}"></audio>
+        <audio id="note_22" src="{{ url_for('static', filename='notes/note_22.mp3') }}"></audio>
+        <audio id="note_23" src="{{ url_for('static', filename='notes/note_23.mp3') }}"></audio>
+        <audio id="note_24" src="{{ url_for('static', filename='notes/note_24.mp3') }}"></audio>
+        <audio id="note_25" src="{{ url_for('static', filename='notes/note_25.mp3') }}"></audio>
+        <audio id="note_26" src="{{ url_for('static', filename='notes/note_26.mp3') }}"></audio>
+        <audio id="note_27" src="{{ url_for('static', filename='notes/note_27.mp3') }}"></audio>
+        <audio id="note_28" src="{{ url_for('static', filename='notes/note_28.mp3') }}"></audio>
+        <audio id="note_29" src="{{ url_for('static', filename='notes/note_29.mp3') }}"></audio>
+        <audio id="note_30" src="{{ url_for('static', filename='notes/note_30.mp3') }}"></audio>
+        <audio id="note_31" src="{{ url_for('static', filename='notes/note_31.mp3') }}"></audio>
+        <audio id="note_32" src="{{ url_for('static', filename='notes/note_32.mp3') }}"></audio>
+        <audio id="note_33" src="{{ url_for('static', filename='notes/note_33.mp3') }}"></audio>
+        <audio id="note_34" src="{{ url_for('static', filename='notes/note_34.mp3') }}"></audio>
+        <audio id="note_35" src="{{ url_for('static', filename='notes/note_35.mp3') }}"></audio>
+        <audio id="note_36" src="{{ url_for('static', filename='notes/note_36.mp3') }}"></audio>
+    </div>  
+      
+    <input id="scoreID" value="{{ scoreID }}" type="hidden">
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>

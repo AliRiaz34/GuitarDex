@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tune Score | Score </title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="index-heading" id="index-heading">
+        <div id="index-heading-left"></div>
+        <div id="index-heading-right"></div>
+    </header>
+    <section id="score-top-div">
+        <div id="score-head">
+            <div id="score-title-div">
+                <h1 id="score-h1">{{ score_info.scoreName }} by {{ score_info.artistName }}</h1>
+            </div>
+        </div>
+        
+        <div id="score-info-div">
+            <div class="score-sub-info-div">
+                <p class="score-sub-info">Author: </p>
+                <a class="score-sub-fill" href="{{ url_for('profile', userID=score_info.creatorID) }}">{{ score_info.creatorName }}</a>
+            </div>
+            <div class="score-sub-info-div">
+                <p class="score-sub-info">Creation date: </p>
+                <p class="score-sub-fill">{{ score_info.creationDate }}</p>
+            </div>
+            <div class="score-sub-info-div">
+                <p class="score-sub-info">Last modified: </p>
+                <p class="score-sub-fill">{{ score_info.lastModified }}</p>
+            </div>
+            <div class="score-sub-info-div">
+                <p class="score-sub-info">Time signature: </p>
+                <p class="score-sub-fill">{{ score_info.timeSignature }}/4</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="score-chords-div" class="score-output-div">
+        <header id="score-header" class="score-header">
+            <p id="score-header-bpm" class="score-header-bpm">BPM:</p>
+            <h2 id="score-header-title" class="score-header-title">Untitled</h2>
+            <p id="score-header-artist" class="score-header-artist">Artist</p>
+        </header>
+        <section id="score"></section>
+    </section>
+
+    <footer id="score-footer">
+        <section id="score-playbar">
+            <div id="volume-div">
+                <button class="volume-button" id="volume-button"></button>
+                <input id="volume" name="volume" type="range" min="0" max="0.5" value="0.25" step="0.05" class="slider">
+            </div>
+            <button id="play-button"> PLAY</button>
+
+            <div id="speed-div">
+                <button id="reset-tempo-button"> SPEED</button>
+                <span id="tempo-value"></span>
+                <input id="tempo-slider" name="tempo-slider" type="range" min="10" max="150" value="100" class="slider">
+            </div>
+            <div id="bpm-div">
+                <input id="bpm-value" name="bpm-value" readonly value="{{ score_info.tempo }}">
+                <label id="bpm-label" for="bpm-value"> BPM</label>
+            </div>
+            <div id="transpose-div">
+                <button id="reset-transpose-button"> TRANSPOSE</button>
+                <input id="transpose-input" name="transpose" type="number" min="-12" max="12" value=0>
+            </div>
+        </section>
+    </footer>
+    <div id="notes-div">
+        <audio id="note_m13" src="{{ url_for('static', filename='notes/note_m13.mp3') }}"></audio>
+        <audio id="note_m12" src="{{ url_for('static', filename='notes/note_m12.mp3') }}"></audio>
+        <audio id="note_m11" src="{{ url_for('static', filename='notes/note_m11.mp3') }}"></audio>
+        <audio id="note_m10" src="{{ url_for('static', filename='notes/note_m10.mp3') }}"></audio>
+        <audio id="note_m9" src="{{ url_for('static', filename='notes/note_m9.mp3') }}"></audio>
+        <audio id="note_m8" src="{{ url_for('static', filename='notes/note_m8.mp3') }}"></audio>
+        <audio id="note_m7" src="{{ url_for('static', filename='notes/note_m7.mp3') }}"></audio>
+        <audio id="note_m6" src="{{ url_for('static', filename='notes/note_m6.mp3') }}"></audio>
+        <audio id="note_m5" src="{{ url_for('static', filename='notes/note_m5.mp3') }}"></audio>
+        <audio id="note_m4" src="{{ url_for('static', filename='notes/note_m4.mp3') }}"></audio>
+        <audio id="note_m3" src="{{ url_for('static', filename='notes/note_m3.mp3') }}"></audio>
+        <audio id="note_m2" src="{{ url_for('static', filename='notes/note_m2.mp3') }}"></audio>
+        <audio id="note_m1" src="{{ url_for('static', filename='notes/note_m1.mp3') }}"></audio>
+        <audio id="note_0" src="{{ url_for('static', filename='notes/note_0.mp3') }}"></audio>
+        <audio id="note_1" src="{{ url_for('static', filename='notes/note_1.mp3') }}"></audio>
+        <audio id="note_2" src="{{ url_for('static', filename='notes/note_2.mp3') }}"></audio>
+        <audio id="note_3" src="{{ url_for('static', filename='notes/note_3.mp3') }}"></audio>
+        <audio id="note_4" src="{{ url_for('static', filename='notes/note_4.mp3') }}"></audio>
+        <audio id="note_5" src="{{ url_for('static', filename='notes/note_5.mp3') }}"></audio>
+        <audio id="note_6" src="{{ url_for('static', filename='notes/note_6.mp3') }}"></audio>
+        <audio id="note_7" src="{{ url_for('static', filename='notes/note_7.mp3') }}"></audio>
+        <audio id="note_8" src="{{ url_for('static', filename='notes/note_8.mp3') }}"></audio>
+        <audio id="note_9" src="{{ url_for('static', filename='notes/note_9.mp3') }}"></audio>
+        <audio id="note_10" src="{{ url_for('static', filename='notes/note_10.mp3') }}"></audio>
+        <audio id="note_11" src="{{ url_for('static', filename='notes/note_11.mp3') }}"></audio>
+        <audio id="note_12" src="{{ url_for('static', filename='notes/note_12.mp3') }}"></audio>
+        <audio id="note_13" src="{{ url_for('static', filename='notes/note_13.mp3') }}"></audio>
+        <audio id="note_14" src="{{ url_for('static', filename='notes/note_14.mp3') }}"></audio>
+        <audio id="note_15" src="{{ url_for('static', filename='notes/note_15.mp3') }}"></audio>
+        <audio id="note_16" src="{{ url_for('static', filename='notes/note_16.mp3') }}"></audio>
+        <audio id="note_17" src="{{ url_for('static', filename='notes/note_17.mp3') }}"></audio>
+        <audio id="note_18" src="{{ url_for('static', filename='notes/note_18.mp3') }}"></audio>
+        <audio id="note_19" src="{{ url_for('static', filename='notes/note_19.mp3') }}"></audio>
+        <audio id="note_20" src="{{ url_for('static', filename='notes/note_20.mp3') }}"></audio>
+        <audio id="note_21" src="{{ url_for('static', filename='notes/note_21.mp3') }}"></audio>
+        <audio id="note_22" src="{{ url_for('static', filename='notes/note_22.mp3') }}"></audio>
+        <audio id="note_23" src="{{ url_for('static', filename='notes/note_23.mp3') }}"></audio>
+        <audio id="note_24" src="{{ url_for('static', filename='notes/note_24.mp3') }}"></audio>
+        <audio id="note_25" src="{{ url_for('static', filename='notes/note_25.mp3') }}"></audio>
+        <audio id="note_26" src="{{ url_for('static', filename='notes/note_26.mp3') }}"></audio>
+        <audio id="note_27" src="{{ url_for('static', filename='notes/note_27.mp3') }}"></audio>
+        <audio id="note_28" src="{{ url_for('static', filename='notes/note_28.mp3') }}"></audio>
+        <audio id="note_29" src="{{ url_for('static', filename='notes/note_29.mp3') }}"></audio>
+        <audio id="note_30" src="{{ url_for('static', filename='notes/note_30.mp3') }}"></audio>
+        <audio id="note_31" src="{{ url_for('static', filename='notes/note_31.mp3') }}"></audio>
+        <audio id="note_32" src="{{ url_for('static', filename='notes/note_32.mp3') }}"></audio>
+        <audio id="note_33" src="{{ url_for('static', filename='notes/note_33.mp3') }}"></audio>
+        <audio id="note_34" src="{{ url_for('static', filename='notes/note_34.mp3') }}"></audio>
+        <audio id="note_35" src="{{ url_for('static', filename='notes/note_35.mp3') }}"></audio>
+        <audio id="note_36" src="{{ url_for('static', filename='notes/note_36.mp3') }}"></audio>
+    </div>
+
+    <input id="scoreID" value="{{ score_info.scoreID }}" type="hidden">
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>
