@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GuitarDex | Add song</title>
+    <title>GuitarDex | Edit song</title>
     <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -12,9 +12,9 @@
         <a href="/">
             <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="400" height="400">
         </a>       
-        <main id="sAdd-div">
-            <h2> Add new song</h2>
-            <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
+        <main>
+            <h2> Edit {{ song_info.title }} by {{ song_info.artistName }}</h2>
+            <form id="song-form" action="{{ url_for('song_edit', songID=songID ) }}" method="POST" >
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
@@ -39,6 +39,7 @@
         </main>
     </section>
       
+    <input id="songID" value="{{ song_info.songID }}" type="hidden">
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

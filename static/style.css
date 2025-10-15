@@ -1,6 +1,11 @@
-#index-song-div, #sAdd-div {
+#index-song-div, main {
     width: 700px;
-    margin-left: 100px;
+    margin-left: 80px;
+}
+
+#index-song-table {
+    width: 700px;
+    margin-bottom: 20px;
 }
 
 #index-container, #sAdd-section {

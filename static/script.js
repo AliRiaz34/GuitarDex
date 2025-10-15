@@ -28,6 +28,26 @@ function checkIfEmpty(array, table) {
     }
 }
 
+//Create
+function createButton(innerHTML, className, id, type) {
+    let button = document.createElement('button');
+    button.innerHTML = innerHTML;
+    button.id = id;
+    button.type = type;
+    button.className = className;
+    return(button)
+}
+
+function createLink(innerHTML, href, className, id, parent) {
+    let link = document.createElement('a');
+    link.innerHTML = innerHTML;
+    link.id = id;
+    link.className = className;
+    link.href = href;
+    parent.appendChild(link);
+    return(link);
+}
+
 //Load
 
 function loadIndexSongs() {
@@ -49,6 +69,7 @@ function loadIndexSongs() {
                 newSongRow.cells[2].innerText = song.learnDate;
                 newSongRow.cells[3].innerText = song.lastPracticeDate;
                 newSongRow.cells[4].innerText = song.rating;
+                createLink("edit", `/song/edit/${song.songID}`,"","", newSongRow.cells[5]);
             })
         }
     })

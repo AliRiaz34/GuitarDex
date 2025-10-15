@@ -83,7 +83,7 @@ def update_song_info(conn, songID, title, artistName, learnDate, lastPracticeDat
     return 
 
 #### SELECT #######
-def find_songs(conn):
+def find_songs_info(conn):
     cur = conn.cursor()
     cur.execute("SELECT songID, title, artistName, learnDate, lastPracticeDate, rating FROM songs")
     songs = cur.fetchall()  
@@ -100,7 +100,24 @@ def find_songs(conn):
         })
     return songs_info
 
-def new_songID(conn):
+def find_song_info(conn, songID):
+    cur = conn.cursor()
+    cur.execute("SELECT title, artistName, learnDate, lastPracticeDate, rating FROM songs WHERE songID = ?", (songID,))
+    song_row = cur.fetchone()  
+    
+    title, artistName, learnDate, lastPracticeDate, rating = song_row
+
+    song_info = { 
+        "songID": songID, 
+        "title": title,
+        "artistName": artistName,
+        "learnDate": learnDate,
+        "lastPracticeDate": lastPracticeDate,
+        "rating": rating
+        }
+    return song_info
+
+def create_new_songID(conn):
     cur = conn.cursor()
     cur.execute("SELECT MAX(songID) FROM songs") 
     result = cur.fetchone()[0]
