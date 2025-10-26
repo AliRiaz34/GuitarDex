@@ -21,8 +21,9 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 title TEXT NOT NULL,
                                 artistName TEXT, 
                                 learnDate TEXT, 
-                                rating FLOAT,
-                                complexity FLOAT
+                                level FLOAT,
+                                xp FLOAT,
+                                difficulty FLOAT
                             );"""
 
 sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
@@ -48,7 +49,7 @@ def create_table(conn, create_table_sql):
 
 #### INSERT #########
 
-def add_song(conn, songId, title, artistName, learnDate, rating, complexity):
+def add_song(conn, songId, title, artistName, learnDate, level, xp, difficulty):
     """
     Add a new song into the songs table
     :param conn:
@@ -56,24 +57,25 @@ def add_song(conn, songId, title, artistName, learnDate, rating, complexity):
     :param title:
     :param artistName:
     :param learnDate:
-    :param rating:
-    :param complexity:
+    :param level:
+    :param xp:
+    :param difficulty:
     """
-    sql = ''' INSERT INTO songs(songId, title, artistName, learnDate, rating, complexity)
-              VALUES(?, ?, ?, ?, ?, ?) '''
+    sql = ''' INSERT INTO songs(songId, title, artistName, learnDate, level, xp, difficulty)
+              VALUES(?, ?, ?, ?, ?, ?, ?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (songId, title, artistName, learnDate, rating, complexity))
+        cur.execute(sql, (songId, title, artistName, learnDate, level, xp, difficulty))
         conn.commit()
     except Error as e:
         print(e)
 
 def init_song(conn):
-    init = [(1, "grace", "jeffy", "2023", 10, 7), 
-            (2, "anything", "adrienne lenker", "2021", 10, 8)
+    init = [(1, "grace", "jeffy", "2023", 10, 45, 7), 
+            (2, "anything", "adrienne lenker", "2021", 10, 21, 8)
             ]
     for c in init:
-        add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5])
+        add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6])
 
 
 def add_practice(conn, practiceId, songId, duration, practiceDate):
@@ -110,28 +112,36 @@ def delete_song(conn, songId):
     return
 
 #### UPDATE ####
-def update_song_info(conn, songId, title, artistName, rating, complexity):
+def update_song_info(conn, songId, title, artistName):
     cur = conn.cursor()
-    cur.execute("UPDATE songs SET title = ?, artistName = ?, rating = ?, complexity = ? WHERE songId = ?", (title, artistName, rating, complexity, songId))
+    cur.execute("UPDATE songs SET title = ?, artistName = ? WHERE songId = ?", (title, artistName, songId))
     conn.commit()  
+    cur.close()
+    return 
+
+def update_song_level(conn, songId, level, xp, difficulty):
+    cur = conn.cursor()
+    cur.execute("UPDATE songs SET title level, xp WHERE songId = ?", (level, xp, difficulty, songId))
+    conn.commit() 
     cur.close()
     return 
 
 #### SELECT #######
 def find_songs_info(conn):
     cur = conn.cursor()
-    cur.execute("SELECT songId, title, artistName, learnDate, rating, complexity FROM songs")
+    cur.execute("SELECT songId, title, artistName, learnDate, level, xp, difficulty FROM songs")
     songs = cur.fetchall()  
     
     songs_info = []
-    for (songId, title, artistName, learnDate, rating, complexity) in songs:
+    for (songId, title, artistName, learnDate, level, xp, difficulty) in songs:
         songs_info.append({ 
             "songId": songId, 
             "title": title,
             "artistName": artistName,
             "learnDate": learnDate,
-            "rating": rating,
-            "complexity": complexity
+            "level": level,
+            "xp": xp,
+            "difficulty": difficulty
         })
     return songs_info
 
@@ -140,8 +150,6 @@ def find_practices_info(conn):
     cur.execute("SELECT practiceId, songId, duration, practiceDate FROM practices")
     practices = cur.fetchall()  
 
-   
-    
     practices_info = []
     for (practiceId, songId, duration, practiceDate) in practices:
         cur.execute("SELECT title FROM songs WHERE songId = ?", (songId,))
@@ -158,18 +166,19 @@ def find_practices_info(conn):
 
 def find_song_info(conn, songId):
     cur = conn.cursor()
-    cur.execute("SELECT title, artistName, learnDate, rating, complexity FROM songs WHERE songId = ?", (songId,))
+    cur.execute("SELECT title, artistName, learnDate, level, xp, difficulty FROM songs WHERE songId = ?", (songId,))
     song_row = cur.fetchone()  
     
-    title, artistName, learnDate, rating, complexity = song_row
+    title, artistName, learnDate, level, xp, difficulty = song_row
 
     song_info = { 
         "songId": songId, 
         "title": title,
         "artistName": artistName,
         "learnDate": learnDate,
-        "rating": rating,
-        "complexity": complexity
+        "level": level,
+        "xp": xp,
+        "difficulty": difficulty
         }
     return song_info
 

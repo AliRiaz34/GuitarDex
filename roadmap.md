@@ -9,9 +9,7 @@
 
 **Tasks:**
 
-2. **Play Logging**
-   - Add `/song/<id>/log-play` route → adds new `PlayEvent`
-   - When logging a play, update `last_played` + apply rating gain (`apply_play`)
+   - When logging a play apply rating gain (`apply_play`)
 3. **Rating Decay**
    - On any song list or detail load:
       call `decay_rating()` based on days since `last_played`

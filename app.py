@@ -40,8 +40,8 @@ def songs_add():
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
         learnDate = date.today() 
-        rating = float(request.form.get('rating-input'))
-        complexity = float(request.form.get('complexity-input') )
+        level = 0
+        difficulty = float(request.form.get('difficulty-input'))
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -51,14 +51,10 @@ def songs_add():
             flash("Artist name has to be longer than 1.", 'error')
             return render_template("signup.html")
 
-        if (rating < 0) or (rating > 10):
-            flash("InvalId rating", 'error')
-            return render_template("addSong.html")
-        
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, title, artistName, learnDate, rating, complexity)
+        setup_db.add_song(conn, songId, title, artistName, learnDate, level, difficulty)
         conn.close()
     return redirect(url_for('index'))
 
@@ -86,7 +82,6 @@ def song_edit(songId):
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
-        rating = float(request.form.get('rating-input') )
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -96,12 +91,8 @@ def song_edit(songId):
             flash("Artist name has to be longer than 1.", 'error')
             return render_template("signup.html")
 
-        if (rating < 0) or (rating > 10):
-            flash("Invalid rating", 'error')
-            return render_template("addSong.html")
-        
         conn = get_db_connection()
-        setup_db.update_song_info(conn, songId, title, artistName, rating)
+        setup_db.update_song_info(conn, songId, title, artistName)
         conn.close()
     return redirect(url_for('index'))
 
@@ -124,6 +115,9 @@ def practices_add():
         conn = get_db_connection()
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, duration, practiceDate)
+
+        ## IMPLEMENT level ALGORITHM
+
         conn.close()
 
     return redirect(url_for('index'))

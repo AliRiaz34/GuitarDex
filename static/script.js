@@ -83,8 +83,8 @@ function loadIndexSongs() {
                 newSongRow.cells[0].innerText = song.title;
                 newSongRow.cells[1].innerText = song.artistName;
                 newSongRow.cells[2].innerText = song.learnDate;
-                newSongRow.cells[3].innerText = song.rating;
-                newSongRow.cells[4].innerText = song.complexity;
+                newSongRow.cells[3].innerText = song.level;
+                newSongRow.cells[4].innerText = song.difficulty;
                 createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
             })
         }
@@ -118,7 +118,6 @@ function loadSongEditor(songId) {
         songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
         document.getElementById("title-input").value = song_info.title;
         document.getElementById("artistName-input").value = song_info.artistName;
-        document.getElementById("rating-input").value = song_info.rating;    
     })
 }  
 
