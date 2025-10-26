@@ -1,1 +1,1 @@
-ok now, create an edit page 
+create new play logging

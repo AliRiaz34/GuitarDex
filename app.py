@@ -32,6 +32,12 @@ def songs_info():
     songs_info = setup_db.find_songs_info(conn)
     return jsonify(songs_info)
 
+@app.route("/songs/", methods=['GET'])
+def songs_info():
+    conn = get_db_connection()
+    songs_info = setup_db.find_songs_info(conn)
+    return jsonify(songs_info)
+
 @app.route("/songs/add", methods=['GET', 'POST'])
 def songs_add():
     if request.method == 'GET':
@@ -40,8 +46,8 @@ def songs_add():
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
         learnDate = date.today() 
-        lastPracticeDate = date.today()
-        rating = float(request.form.get('rating-input') )
+        rating = float(request.form.get('rating-input'))
+        complexity = float(request.form.get('complexity-input') )
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -58,7 +64,7 @@ def songs_add():
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, title, artistName, learnDate, lastPracticeDate, rating)
+        setup_db.add_song(conn, songId, title, artistName, learnDate, rating, complexity)
         conn.close()
     return redirect(url_for('index'))
 

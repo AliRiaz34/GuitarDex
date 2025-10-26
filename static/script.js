@@ -74,8 +74,8 @@ function loadIndexSongs() {
                 newSongRow.cells[0].innerText = song.title;
                 newSongRow.cells[1].innerText = song.artistName;
                 newSongRow.cells[2].innerText = song.learnDate;
-                newSongRow.cells[3].innerText = song.lastPracticeDate;
                 newSongRow.cells[4].innerText = song.rating;
+                newSongRow.cells[5].innerText = song.complexity;
                 createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
             })
         }
@@ -84,7 +84,14 @@ function loadIndexSongs() {
 
 function loadSongEditor(songId) {    
     fetch(`/songs/${songId}/info`)
+    .then(rfetch(`/songs/${songId}/info`)
     .then(response => response.json())
+    .then(song_info => { 
+        songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
+        document.getElementById("title-input").value = song_info.title;
+        document.getElementById("artistName-input").value = song_info.artistName;
+        document.getElementById("rating-input").value = song_info.rating;    
+    })esponse => response.json())
     .then(song_info => { 
         songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
         document.getElementById("title-input").value = song_info.title;
@@ -92,3 +99,28 @@ function loadSongEditor(songId) {
         document.getElementById("rating-input").value = song_info.rating;    
     })
 }  
+
+function loadPractice() {    
+    fetch(`/songs`)
+    .then(response => response.json())
+    .then(songs_info => {   
+        if (checkIfEmpty(songs_info, indexSongTable) == true) {
+        } else {
+            songs_info.forEach(function(song) {
+                let newSongRow = indexSongTable.children[1].insertRow();
+
+                for (let i = 0; i < 6; i++) {
+                    let newCell = newSongRow.insertCell(); 
+                    newCell.className = 'song-td';
+                }   
+                
+                newSongRow.cells[0].innerText = song.title;
+                newSongRow.cells[1].innerText = song.artistName;
+                newSongRow.cells[2].innerText = song.learnDate;
+                newSongRow.cells[4].innerText = song.rating;
+                newSongRow.cells[5].innerText = song.complexity;
+                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
+            })
+        }
+    })
+}

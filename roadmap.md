@@ -9,9 +9,6 @@
 
 **Tasks:**
 
-1. **Song CRUD**
-   - Create routes: `/songs`, `/song/<id>`, `/add-song`, `/edit-song/<id>`, `/delete-song/<id>`
-   - Forms for adding/editing songs (title, artist, rating, notes)
 2. **Play Logging**
    - Add `/song/<id>/log-play` route → adds new `PlayEvent`
    - When logging a play, update `last_played` + apply rating gain (`apply_play`)

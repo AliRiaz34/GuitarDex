@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GuitarDex | Log practice</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <section id="sAdd-section"> 
+        <a href="/">
+            <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="200" height="200">
+        </a>       
+        <main>
+            <h2 id="sEditor-h2"></h2>
+            <form id="song-form" action="{{ url_for('practice_add') }}" method="POST" >
+                <div>
+                    <div class="sAdd-input-div">
+                        <div class="form__input-group">
+                            <label for="title-select" class="form-label">Song title</label>
+                            <select class="sAdd-input" id="title-select" name="title-select" required>
+                                <option value="volvo">MERN</option>
+                            </select>
+                        </div>
+                        <div class="form__input-group">
+                            <label for="duration-input" class="form-label"></label>
+                            <input type="text" class="sAdd-input" id="duration-input" name="duration-input" maxlength="40" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="sEdit-save-button" class="form__button">Save</button>
+            </form>
+
+            <form action="/songs/{{ song_info.songId }}/info" method="post">
+                <input type="hidden" name="_method" value="DELETE">
+                <button id="sDelete-button" type="submit" class="form__button">Delete</button>
+            </form>
+
+        </main>
+    </section>
+      
+    <input id="songId" value="{{ song_info.songId }}" type="hidden">
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>
