@@ -135,6 +135,27 @@ def find_songs_info(conn):
         })
     return songs_info
 
+def find_practices_info(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT practiceId, songId, duration, practiceDate FROM practices")
+    practices = cur.fetchall()  
+
+   
+    
+    practices_info = []
+    for (practiceId, songId, duration, practiceDate) in practices:
+        cur.execute("SELECT title FROM songs WHERE songId = ?", (songId,))
+        title = cur.fetchone()[0] 
+
+        practices_info.append({ 
+            "practiceId": practiceId,
+            "songId": songId, 
+            "title": title, 
+            "duration": duration,
+            "practiceDate": practiceDate
+        })
+    return practices_info
+
 def find_song_info(conn, songId):
     cur = conn.cursor()
     cur.execute("SELECT title, artistName, learnDate, rating, complexity FROM songs WHERE songId = ?", (songId,))
@@ -155,6 +176,12 @@ def find_song_info(conn, songId):
 def create_new_songId(conn):
     cur = conn.cursor()
     cur.execute("SELECT MAX(songId) FROM songs") 
+    result = cur.fetchone()[0]
+    return result+1
+
+def create_new_practiceId(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT MAX(practiceId) FROM practices") 
     result = cur.fetchone()[0]
     return result+1
 

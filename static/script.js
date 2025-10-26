@@ -1,9 +1,14 @@
 //Index
 const indexHeading = document.getElementById('index-heading');
 const indexSongTable = document.getElementById('index-song-table');
+const indexPracticeTable = document.getElementById('practice-table');
+
 1
 //Edit
 const songEditorH2 = document.getElementById("sEditor-h2");
+
+//Practice
+const titleSelect = document.getElementById("title-select");
 
 document.addEventListener('DOMContentLoaded', function () {
     if (indexSongTable) {
@@ -11,7 +16,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (songEditorH2) {
         let songId = parseInt(document.getElementById('songId').value);
-        loadSongEditor(songId)
+        loadSongEditor(songId);
+    }
+    if (titleSelect) {
+        //let songId = parseInt(document.getElementById('songId').value);    IMPLEMENT LATER TO PARSE SONG TITLE AUTO
+        loadPractice();
     }
 })
 
@@ -74,9 +83,29 @@ function loadIndexSongs() {
                 newSongRow.cells[0].innerText = song.title;
                 newSongRow.cells[1].innerText = song.artistName;
                 newSongRow.cells[2].innerText = song.learnDate;
-                newSongRow.cells[4].innerText = song.rating;
-                newSongRow.cells[5].innerText = song.complexity;
+                newSongRow.cells[3].innerText = song.rating;
+                newSongRow.cells[4].innerText = song.complexity;
                 createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
+            })
+        }
+    })
+
+    fetch(`/practices`)
+    .then(response => response.json())
+    .then(practices_info => {   
+        if (checkIfEmpty(practices_info, indexPracticeTable) == true) {
+        } else {
+            practices_info.forEach(function(practice) {
+                let newPracticeRow = indexPracticeTable.children[1].insertRow();
+
+                for (let i = 0; i < 3; i++) {
+                    let newCell = newPracticeRow.insertCell(); 
+                    newCell.className = 'song-td';
+                }   
+                
+                newPracticeRow.cells[0].innerText = practice.title;
+                newPracticeRow.cells[1].innerText = practice.duration;
+                newPracticeRow.cells[2].innerText = practice.practiceDate;
             })
         }
     })
@@ -84,14 +113,7 @@ function loadIndexSongs() {
 
 function loadSongEditor(songId) {    
     fetch(`/songs/${songId}/info`)
-    .then(rfetch(`/songs/${songId}/info`)
     .then(response => response.json())
-    .then(song_info => { 
-        songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
-        document.getElementById("title-input").value = song_info.title;
-        document.getElementById("artistName-input").value = song_info.artistName;
-        document.getElementById("rating-input").value = song_info.rating;    
-    })esponse => response.json())
     .then(song_info => { 
         songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
         document.getElementById("title-input").value = song_info.title;
@@ -103,24 +125,9 @@ function loadSongEditor(songId) {
 function loadPractice() {    
     fetch(`/songs`)
     .then(response => response.json())
-    .then(songs_info => {   
-        if (checkIfEmpty(songs_info, indexSongTable) == true) {
-        } else {
-            songs_info.forEach(function(song) {
-                let newSongRow = indexSongTable.children[1].insertRow();
-
-                for (let i = 0; i < 6; i++) {
-                    let newCell = newSongRow.insertCell(); 
-                    newCell.className = 'song-td';
-                }   
-                
-                newSongRow.cells[0].innerText = song.title;
-                newSongRow.cells[1].innerText = song.artistName;
-                newSongRow.cells[2].innerText = song.learnDate;
-                newSongRow.cells[4].innerText = song.rating;
-                newSongRow.cells[5].innerText = song.complexity;
-                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
-            })
-        }
+    .then(songs_info => {     
+        songs_info.forEach((song, key) => {
+           titleSelect[key+1] = new Option(song.title, song.songId);
+        })
     })
 }

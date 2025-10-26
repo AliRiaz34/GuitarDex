@@ -32,12 +32,6 @@ def songs_info():
     songs_info = setup_db.find_songs_info(conn)
     return jsonify(songs_info)
 
-@app.route("/songs/", methods=['GET'])
-def songs_info():
-    conn = get_db_connection()
-    songs_info = setup_db.find_songs_info(conn)
-    return jsonify(songs_info)
-
 @app.route("/songs/add", methods=['GET', 'POST'])
 def songs_add():
     if request.method == 'GET':
@@ -70,8 +64,6 @@ def songs_add():
 
 
 # EDIT PAGE
-
-
 @app.route("/songs/<int:songId>/info", methods=['GET', 'POST'])
 def song_info(songId):
     if request.method == 'GET':
@@ -111,6 +103,29 @@ def song_edit(songId):
         conn = get_db_connection()
         setup_db.update_song_info(conn, songId, title, artistName, rating)
         conn.close()
+    return redirect(url_for('index'))
+
+## PRACTICE
+@app.route("/practices", methods=['GET'])
+def practices_info():
+    conn = get_db_connection()
+    songs_info = setup_db.find_practices_info(conn)
+    return jsonify(songs_info)
+
+@app.route("/practices/add", methods=['GET', 'POST'])
+def practices_add():
+    if request.method == 'GET':
+        return render_template('addPractice.html')
+    elif request.method == 'POST':
+        songId = request.form.get('title-select') 
+        duration = float(request.form.get('duration-input'))
+        practiceDate = date.today() 
+
+        conn = get_db_connection()
+        practiceId = setup_db.create_new_practiceId(conn)
+        setup_db.add_practice(conn, practiceId, songId, duration, practiceDate)
+        conn.close()
+
     return redirect(url_for('index'))
 
 if __name__ == "__main__":

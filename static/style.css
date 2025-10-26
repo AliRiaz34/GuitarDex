@@ -3,9 +3,10 @@
     margin-left: 80px;
 }
 
-#index-song-table {
+#index-song-table, #practice-table {
     width: 700px;
     margin-bottom: 20px;
+    margin-top: 50px;
 }
 
 #index-container, #sAdd-section {

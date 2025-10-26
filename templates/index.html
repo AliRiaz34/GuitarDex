@@ -11,6 +11,7 @@
     <section id="index-container">
         <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="200" height="200">
         <main id="index-song-div">
+            <h2>Song table</h2>
             <table id="index-song-table">
                 <thead>
                     <tr>
@@ -19,7 +20,7 @@
                         <th>Learn Date</th>
                         <th>Rating</th>
                         <th>Complexity</th>
-                        <th>edit</th>
+                        <th>Edit</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -27,6 +28,22 @@
 
             <a href="/songs/add">
   	            <button>add song</button>
+            </a>
+
+            <h2>Practices table</h2>
+            <table id="practice-table">
+                <thead>
+                    <tr>
+                        <th>Song</th>
+                        <th>Duration</th>
+                        <th>Practice date</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <a href="/practices/add">
+  	            <button>add practice</button>
             </a>
         </main>
     </section>
