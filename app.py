@@ -52,27 +52,42 @@ def songs_add():
             return render_template("signup.html")
 
         if (rating < 0) or (rating > 10):
-            flash("Invalid rating", 'error')
+            flash("InvalId rating", 'error')
             return render_template("addSong.html")
         
         conn = get_db_connection()
-        songID = int(setup_db.create_new_songID(conn))
+        songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songID, title, artistName, learnDate, lastPracticeDate, rating)
+        setup_db.add_song(conn, songId, title, artistName, learnDate, lastPracticeDate, rating)
         conn.close()
     return redirect(url_for('index'))
 
-@app.route("/song/edit/<int:songID>", methods=['GET', 'POST'])
-def song_edit(songID):
+
+# EDIT PAGE
+
+
+@app.route("/songs/<int:songId>/info", methods=['GET', 'POST'])
+def song_info(songId):
     if request.method == 'GET':
         conn = get_db_connection()
-        song_info = setup_db.find_song_info(conn, songID)
-        return render_template('editSong.html', songID=songID, song_info=song_info)
+        song_info = setup_db.find_song_info(conn, songId)
+        return jsonify(song_info)
+    elif request.method == 'POST' and request.form.get('_method') == 'DELETE':
+        conn = get_db_connection()
+        setup_db.delete_song(conn, songId)
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+@app.route("/songs/<int:songId>/edit", methods=['GET', 'POST'])
+def song_edit(songId):
+    if request.method == 'GET':
+        conn = get_db_connection()
+        song_info = setup_db.find_song_info(conn, songId)
+        return render_template('editSong.html', songId=songId, song_info=song_info)
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
-        learnDate = date.today() 
-        lastPracticeDate = date.today()
         rating = float(request.form.get('rating-input') )
 
         if len(title) < 1:
@@ -88,11 +103,9 @@ def song_edit(songID):
             return render_template("addSong.html")
         
         conn = get_db_connection()
-        songID = int(setup_db.create_new_songID(conn))
-
-        setup_db.add_song(conn, songID, title, artistName, learnDate, lastPracticeDate, rating)
+        setup_db.update_song_info(conn, songId, title, artistName, rating)
         conn.close()
-    return redirect(url_for('edit'))
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)

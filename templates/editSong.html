@@ -10,11 +10,11 @@
 <body>
     <section id="sAdd-section"> 
         <a href="/">
-            <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="400" height="400">
+            <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="200" height="200">
         </a>       
         <main>
-            <h2> Edit {{ song_info.title }} by {{ song_info.artistName }}</h2>
-            <form id="song-form" action="{{ url_for('song_edit', songID=songID ) }}" method="POST" >
+            <h2 id="sEditor-h2"></h2>
+            <form id="song-form" action="{{ url_for('song_edit', songId=songId ) }}" method="POST" >
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
@@ -34,12 +34,18 @@
                     </div>
                 </div>
 
-                <button id="sAdd-save-button" type="submit" class="form__button">Save</button>
+                <button id="sEdit-save-button" class="form__button">Save</button>
             </form>
+
+            <form action="/songs/{{ song_info.songId }}/info" method="post">
+                <input type="hidden" name="_method" value="DELETE">
+                <button id="sDelete-button" type="submit" class="form__button">Delete</button>
+            </form>
+
         </main>
     </section>
       
-    <input id="songID" value="{{ song_info.songID }}" type="hidden">
+    <input id="songId" value="{{ song_info.songId }}" type="hidden">
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

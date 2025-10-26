@@ -17,7 +17,7 @@ def create_connection(db_file):
 ##### CREATE TABLES ######## 
 
 sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
-                                songID INTEGER PRIMARY KEY,
+                                songId INTEGER PRIMARY KEY,
                                 title TEXT NOT NULL,
                                 artistName TEXT, 
                                 learnDate TEXT, 
@@ -40,22 +40,22 @@ def create_table(conn, create_table_sql):
 
 #### INSERT #########
 
-def add_song(conn, songID, title, artistName, learnDate, lastPracticeDate, rating):
+def add_song(conn, songId, title, artistName, learnDate, lastPracticeDate, rating):
     """
     Add a new song into the songs table
     :param conn:
-    :param songID:
+    :param songId:
     :param title:
     :param artistName:
     :param learnDate:
     :param lastPracticeDate
     :param rating:
     """
-    sql = ''' INSERT INTO songs(songID, title, artistName, learnDate, lastPracticeDate, rating)
+    sql = ''' INSERT INTO songs(songId, title, artistName, learnDate, lastPracticeDate, rating)
               VALUES(?, ?, ?, ?, ?, ?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (songID, title, artistName, learnDate, lastPracticeDate, rating))
+        cur.execute(sql, (songId, title, artistName, learnDate, lastPracticeDate, rating))
         conn.commit()
     except Error as e:
         print(e)
@@ -68,16 +68,17 @@ def init_song(conn):
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5])
 
 #### DELETE #######
-def delete_song(conn, songID):
+def delete_song(conn, songId):
     cur = conn.cursor()
-    cur.execute("DELETE FROM songs WHERE songID = ?", (songID,))
+    cur.execute("DELETE FROM songs WHERE songId = ?", (songId,))
     conn.commit() 
-    return songID
+    cur.close()
+    return
 
 #### UPDATE ####
-def update_song_info(conn, songID, title, artistName, learnDate, lastPracticeDate, rating):
+def update_song_info(conn, songId, title, artistName, rating):
     cur = conn.cursor()
-    cur.execute("UPDATE songs SET title = ?, artistName = ?, learnDate = ?, lastPracticeDate = ?, rating = ? WHERE songID = ?", (title, artistName, learnDate, lastPracticeDate, rating, songID))
+    cur.execute("UPDATE songs SET title = ?, artistName = ?, rating = ? WHERE songId = ?", (title, artistName, rating, songId))
     conn.commit()  
     cur.close()
     return 
@@ -85,13 +86,13 @@ def update_song_info(conn, songID, title, artistName, learnDate, lastPracticeDat
 #### SELECT #######
 def find_songs_info(conn):
     cur = conn.cursor()
-    cur.execute("SELECT songID, title, artistName, learnDate, lastPracticeDate, rating FROM songs")
+    cur.execute("SELECT songId, title, artistName, learnDate, lastPracticeDate, rating FROM songs")
     songs = cur.fetchall()  
     
     songs_info = []
-    for (songID, title, artistName, learnDate, lastPracticeDate, rating) in songs:
+    for (songId, title, artistName, learnDate, lastPracticeDate, rating) in songs:
         songs_info.append({ 
-            "songID": songID, 
+            "songId": songId, 
             "title": title,
             "artistName": artistName,
             "learnDate": learnDate,
@@ -100,15 +101,15 @@ def find_songs_info(conn):
         })
     return songs_info
 
-def find_song_info(conn, songID):
+def find_song_info(conn, songId):
     cur = conn.cursor()
-    cur.execute("SELECT title, artistName, learnDate, lastPracticeDate, rating FROM songs WHERE songID = ?", (songID,))
+    cur.execute("SELECT title, artistName, learnDate, lastPracticeDate, rating FROM songs WHERE songId = ?", (songId,))
     song_row = cur.fetchone()  
     
     title, artistName, learnDate, lastPracticeDate, rating = song_row
 
     song_info = { 
-        "songID": songID, 
+        "songId": songId, 
         "title": title,
         "artistName": artistName,
         "learnDate": learnDate,
@@ -117,9 +118,9 @@ def find_song_info(conn, songID):
         }
     return song_info
 
-def create_new_songID(conn):
+def create_new_songId(conn):
     cur = conn.cursor()
-    cur.execute("SELECT MAX(songID) FROM songs") 
+    cur.execute("SELECT MAX(songId) FROM songs") 
     result = cur.fetchone()[0]
     return result+1
 

@@ -1,10 +1,17 @@
 //Index
 const indexHeading = document.getElementById('index-heading');
 const indexSongTable = document.getElementById('index-song-table');
+1
+//Edit
+const songEditorH2 = document.getElementById("sEditor-h2");
 
 document.addEventListener('DOMContentLoaded', function () {
     if (indexSongTable) {
         loadIndexSongs();
+    }
+    if (songEditorH2) {
+        let songId = parseInt(document.getElementById('songId').value);
+        loadSongEditor(songId)
     }
 })
 
@@ -12,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function checkIfEmpty(array, table) {
     if (array.length == 0) {
-        table.style.visibility = "hidden";
+        table.style.visibility = "hIdden";
         table.children[0].style.display = "none";
         table.children[1].style.display = "none";
         let emptyText = document.createElement("p");
@@ -69,8 +76,19 @@ function loadIndexSongs() {
                 newSongRow.cells[2].innerText = song.learnDate;
                 newSongRow.cells[3].innerText = song.lastPracticeDate;
                 newSongRow.cells[4].innerText = song.rating;
-                createLink("edit", `/song/edit/${song.songID}`,"","", newSongRow.cells[5]);
+                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
             })
         }
     })
 }
+
+function loadSongEditor(songId) {    
+    fetch(`/songs/${songId}/info`)
+    .then(response => response.json())
+    .then(song_info => { 
+        songEditorH2.innerHTML = `Edit ${song_info.title} by ${song_info.artistName}`;
+        document.getElementById("title-input").value = song_info.title;
+        document.getElementById("artistName-input").value = song_info.artistName;
+        document.getElementById("rating-input").value = song_info.rating;    
+    })
+}  
