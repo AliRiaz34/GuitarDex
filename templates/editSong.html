@@ -31,7 +31,7 @@
                 <button id="sEdit-save-button" class="form__button">Save</button>
             </form>
 
-            <form action="/songs/{{ song_info.songId }}/info" method="post">
+            <form action="/songs/{{ songInfo.songId }}/info" method="post">
                 <input type="hidden" name="_method" value="DELETE">
                 <button id="sDelete-button" type="submit" class="form__button">Delete</button>
             </form>

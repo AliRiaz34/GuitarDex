@@ -1,4 +1,2 @@
-implement leveling up system in app.py
-
-- fix last decay date as if statement in app.oy
-- decide when decay is called. 
+design decisions i should remember:
+- when new song is added i set lastPlayedDate and lastDecayDate to when song is added. 

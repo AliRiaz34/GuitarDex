@@ -3,25 +3,6 @@
 ### NEXT UP
 
 
-## ⚙️ PHASE 1 — Core CRUD & Rating System
-
-**Goal:** Be able to add songs, log plays, and auto-update ratings.
-
-**Tasks:**
-
-3. **Rating Decay**
-   - On any song list or detail load:
-      call `decay_rating()` based on days since `last_played`
-   - Save the new rating automatically after decay
-4. **Display**
-   - Show rating and “last played X days ago” on the list
-   - Color-code rating (1–3 red, 4–6 yellow, 7–10 green)
-
-✅ **Deliverable:**
- Functional personal tracker: add songs, log practice, ratings go up and down automatically.
-
-------
-
 ## 🎛️ PHASE 2 — Sorting, Filtering, and “Stale Songs”
 
 **Goal:** Turn it from a data log into a tool that helps you *practice smarter.*

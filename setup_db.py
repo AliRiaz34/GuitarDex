@@ -27,7 +27,8 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 xp FLOAT,
                                 difficulty FLOAT,
                                 songDuration FLOAT,
-                                lastDecayDate DATE
+                                lastDecayDate DATE,
+                                lastPracticeDate DATE
                             );"""
 
 sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
@@ -53,7 +54,7 @@ def create_table(conn, create_table_sql):
 
 #### INSERT #########
 
-def add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate):
+def add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate):
     """
     Add a new song into the songs table
     :param conn:
@@ -67,23 +68,24 @@ def add_song(conn, songId, title, artistName, learnDate, highestLevelReached, le
     :param songDuration:
     :param highestLevelReached:
     :param lastDecayDate:
+    :param lastPracticeDate:
 
     """
-    sql = ''' INSERT INTO songs(songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate)
-              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) '''
+    sql = ''' INSERT INTO songs(songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate)
+              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate))
+        cur.execute(sql, (songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate))
         conn.commit()
     except Error as e:
         print(e)
 
 def init_song(conn):
-    init = [(1, "grace", "jeffy", "2023-03-05", 25, 10, 45, 2, 5, "2025-02-11"), 
-            (2, "anything", "adrienne lenker", "2021-05-12", 11, 10, 21, 3, 5, "2025-01-11")
+    init = [(1, "grace", "jeffy", "2023-03-05", 25, 10, 45, 2, 5, "2025-02-11", "2025-02-11"), 
+            (2, "anything", "adrienne lenker", "2021-05-12", 11, 10, 21, 3, 5, "2025-01-11", "2025-02-11")
             ]
     for c in init:
-        add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9])
+        add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10])
 
 
 def add_practice(conn, practiceId, songId, minPlayed, practiceDate):
@@ -134,16 +136,22 @@ def update_song_level(conn, songId, level, xp):
     cur.close()
     return 
 
+def update_lastPracticeDate(conn, songId, lastPracticeDate):
+    cur = conn.cursor()
+    cur.execute("UPDATE songs SET lastPracticeDate = ? WHERE songId = ?", (lastPracticeDate, songId))
+    conn.commit() 
+    cur.close()
+    return 
 
 
 #### SELECT #######
 def find_songs_info(conn):
     cur = conn.cursor()
-    cur.execute("SELECT songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate FROM songs")
+    cur.execute("SELECT songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate FROM songs")
     songs = cur.fetchall()  
     
     songs_info = []
-    for (songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate) in songs:
+    for (songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate) in songs:
         songs_info.append({ 
             "songId": songId, 
             "title": title,
@@ -154,7 +162,8 @@ def find_songs_info(conn):
             "xp": xp,
             "difficulty": difficulty,
             "songDuration": songDuration,
-            "lastDecayDate": lastDecayDate
+            "lastDecayDate": lastDecayDate,
+            "lastPracticeDate": lastPracticeDate
         })
     return songs_info
 
@@ -179,10 +188,10 @@ def find_practices_info(conn):
 
 def find_song_info(conn, songId):
     cur = conn.cursor()
-    cur.execute("SELECT title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate FROM songs WHERE songId = ?", (songId,))
+    cur.execute("SELECT title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate FROM songs WHERE songId = ?", (songId,))
     song_row = cur.fetchone()  
     
-    title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate = song_row
+    title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate = song_row
 
     song_info = { 
         "songId": songId, 
@@ -194,15 +203,16 @@ def find_song_info(conn, songId):
         "xp": xp,
         "difficulty": difficulty,
         "songDuration": songDuration,
-        "lastDecayDate": lastDecayDate
+        "lastDecayDate": lastDecayDate,
+        "lastPracticeDate": lastPracticeDate
         }
     return song_info
 
-def find_last_song_practiceDate(conn, songId):
+def find_lastPracticeDate(conn, songId):
     cur = conn.cursor()
     cur.execute("""
-        SELECT MAX(practicedate)
-        FROM practices
+        SELECT lastPracticeDate
+        FROM songs
         WHERE songId = ?;
     """, (songId,))
     

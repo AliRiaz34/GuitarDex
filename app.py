@@ -49,6 +49,7 @@ def songs_add():
         difficulty = float(request.form.get('difficulty-input'))
         songDuration = float(request.form.get('duration-input'))
         lastDecayDate = date.today() 
+        lastPracticeDate = date.today()
 
 
         if len(title) < 1:
@@ -62,7 +63,7 @@ def songs_add():
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate)
+        setup_db.add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate)
         conn.close()
     return redirect(url_for('index'))
 
@@ -123,12 +124,12 @@ def practices_add():
 
         conn = get_db_connection()
         practiceId = setup_db.create_new_practiceId(conn)
-        daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_last_song_practiceDate(conn, songId))
         setup_db.add_practice(conn, practiceId, songId, minPlayed, practiceDate)
+        setup_db.update_lastPracticeDate(conn, songId, practiceDate)
 
-        ## level ALGORITHM
+
         songInfo = setup_db.find_song_info(conn, songId)
-        newXp = songInfo["xp"] + xp_gain(songInfo, minPlayed, daysSinceSongPracticed)
+        newXp = songInfo["xp"] + xp_gain(songInfo, minPlayed)
 
         ## potential ui event to show xp gain or smt here:
 
@@ -147,7 +148,8 @@ def days_between(d1, d2):
 def xp_threshold(level, baseXP=30, exponent=1.4):
     return int(baseXP * (level ** exponent))
 
-def xp_gain(songInfo, minPlayed, daysSinceSongPracticed, baseXp=50):
+def xp_gain(songInfo, minPlayed, baseXp=50):
+    daysSinceSongPracticed = days_between(str(date.today()), songInfo["lastPlayedDate"])
     difficulty = songInfo["difficulty"]
     songDuration = songInfo["songDuration"]
     highestLevelReached = songInfo["highestLevelReached"]
@@ -173,7 +175,7 @@ def level_up(songInfo, currentXp):
     
 def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
     conn = get_db_connection()
-    daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_last_song_practiceDate(conn, songId))
+    daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_lastPracticeDate(conn, songId))
     daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
     songInfo = setup_db.find_song_info(conn, songId)
     
@@ -192,6 +194,7 @@ def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
         adjustedXp += xp_threshold(level)
 
     setup_db.update_song_level(conn, songId, level, adjustedXp)
+    return
 
 if __name__ == "__main__":
     app.run(debug=True)
