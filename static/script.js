@@ -69,10 +69,10 @@ function createLink(innerHTML, href, className, id, parent) {
 function loadIndexSongs() {
     fetch(`/songs`)
     .then(response => response.json())
-    .then(songs_info => {   
-        if (checkIfEmpty(songs_info, indexSongTable) == true) {
+    .then(songsInfo => {   
+        if (checkIfEmpty(songsInfo, indexSongTable) == true) {
         } else {
-            songs_info.forEach(function(song) {
+            songsInfo.forEach(function(song) {
                 let newSongRow = indexSongTable.children[1].insertRow();
 
                 for (let i = 0; i < 6; i++) {
@@ -92,10 +92,10 @@ function loadIndexSongs() {
 
     fetch(`/practices`)
     .then(response => response.json())
-    .then(practices_info => {   
-        if (checkIfEmpty(practices_info, indexPracticeTable) == true) {
+    .then(practicesInfo => {   
+        if (checkIfEmpty(practicesInfo, indexPracticeTable) == true) {
         } else {
-            practices_info.forEach(function(practice) {
+            practicesInfo.forEach(function(practice) {
                 let newPracticeRow = indexPracticeTable.children[1].insertRow();
 
                 for (let i = 0; i < 3; i++) {
@@ -104,7 +104,7 @@ function loadIndexSongs() {
                 }   
                 
                 newPracticeRow.cells[0].innerText = practice.title;
-                newPracticeRow.cells[1].innerText = practice.duration;
+                newPracticeRow.cells[1].innerText = practice.minPlayed;
                 newPracticeRow.cells[2].innerText = practice.practiceDate;
             })
         }

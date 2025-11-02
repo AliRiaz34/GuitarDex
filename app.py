@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session, jsonify
 import setup_db, re
 import os
-from datetime import date
+from datetime import date, datetime
 
 app = Flask(__name__)
 app.secret_key = 'secretsecret'
@@ -29,8 +29,11 @@ def index():
 @app.route("/songs", methods=['GET'])
 def songs_info():
     conn = get_db_connection()
-    songs_info = setup_db.find_songs_info(conn)
-    return jsonify(songs_info)
+    songsInfo = setup_db.find_songs_info(conn)
+
+    for song in songsInfo:
+        apply_decay(song["songId"])
+    return jsonify(songsInfo)
 
 @app.route("/songs/add", methods=['GET', 'POST'])
 def songs_add():
@@ -41,9 +44,12 @@ def songs_add():
         artistName = request.form.get('artistName-input') 
         learnDate = date.today() 
         level = 1
+        xp = 0
         highestLevelReached = level
         difficulty = float(request.form.get('difficulty-input'))
-        duration = float(request.form.get('duration-input'))
+        songDuration = float(request.form.get('duration-input'))
+        lastDecayDate = date.today() 
+
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -56,7 +62,7 @@ def songs_add():
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, difficulty, duration)
+        setup_db.add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate)
         conn.close()
     return redirect(url_for('index'))
 
@@ -117,7 +123,7 @@ def practices_add():
 
         conn = get_db_connection()
         practiceId = setup_db.create_new_practiceId(conn)
-        daysSinceSongPracticed = setup_db.find_days_since_song_practiced(conn, songId)
+        daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_last_song_practiceDate(conn, songId))
         setup_db.add_practice(conn, practiceId, songId, minPlayed, practiceDate)
 
         ## level ALGORITHM
@@ -132,11 +138,14 @@ def practices_add():
 
     return redirect(url_for('index'))
 
-
 ## leveling system
+def days_between(d1, d2):
+    d1 = datetime.strptime(d1, "%Y-%m-%d")
+    d2 = datetime.strptime(d2, "%Y-%m-%d")
+    return abs((d2 - d1).days)
+
 def xp_threshold(level, baseXP=30, exponent=1.4):
     return int(baseXP * (level ** exponent))
-
 
 def xp_gain(songInfo, minPlayed, daysSinceSongPracticed, baseXp=50):
     difficulty = songInfo["difficulty"]
@@ -164,13 +173,14 @@ def level_up(songInfo, currentXp):
     
 def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
     conn = get_db_connection()
-    daysSinceSongPracticed = setup_db.find_days_since_song_practiced(conn, songId)
+    daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_last_song_practiceDate(conn, songId))
+    daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
     songInfo = setup_db.find_song_info(conn, songId)
-
+    
     xp = songInfo["xp"]
     level = songInfo["level"]
 
-    if daysSinceSongPracticed <= decayStart:
+    if (daysSinceSongPracticed <= decayStart) or (daysSinceDecay <= 1):
         return level, xp 
 
     decayDays = daysSinceSongPracticed - decayStart
@@ -182,8 +192,6 @@ def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
         adjustedXp += xp_threshold(level)
 
     setup_db.update_song_level(conn, songId, level, adjustedXp)
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)

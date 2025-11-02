@@ -9,7 +9,6 @@
 
 **Tasks:**
 
-   - When logging a play apply rating gain (`apply_play`)
 3. **Rating Decay**
    - On any song list or detail load:
       call `decay_rating()` based on days since `last_played`

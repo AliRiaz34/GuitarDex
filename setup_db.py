@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error 
+from datetime import date
 
 database = r"./database.db"
 
@@ -20,20 +21,20 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 songId INTEGER PRIMARY KEY,
                                 title TEXT NOT NULL,
                                 artistName TEXT, 
-                                learnDate TEXT, 
+                                learnDate DATE, 
                                 highestLevelReached INT,
                                 level INT,
                                 xp FLOAT,
                                 difficulty FLOAT,
                                 songDuration FLOAT,
-                                lastDecayDate TEXT
+                                lastDecayDate DATE
                             );"""
 
 sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
                                 practiceId INTEGER PRIMARY KEY,
                                 songId INTEGER,
                                 minPlayed INTEGER,
-                                practiceDate TEXT,
+                                practiceDate DATE,
                                 FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
                             );"""
 
@@ -78,8 +79,8 @@ def add_song(conn, songId, title, artistName, learnDate, highestLevelReached, le
         print(e)
 
 def init_song(conn):
-    init = [(1, "grace", "jeffy", "2023", 25, 10, 45, 2, 5, "2025"), 
-            (2, "anything", "adrienne lenker", "2021", 11, 10, 21, 3, 5, "2025")
+    init = [(1, "grace", "jeffy", "2023-03-05", 25, 10, 45, 2, 5, "2025-02-11"), 
+            (2, "anything", "adrienne lenker", "2021-05-12", 11, 10, 21, 3, 5, "2025-01-11")
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9])
@@ -104,8 +105,8 @@ def add_practice(conn, practiceId, songId, minPlayed, practiceDate):
         print(e)
 
 def init_practice(conn):
-    init = [(1, 2, 50, 2023), 
-            (2, 1, 28, 2021)
+    init = [(1, 2, 50, "2024-02-12"), 
+            (2, 1, 28, "2023-01-24")
             ]
     for c in init:
         add_practice(conn, c[0], c[1], c[2], c[3])
@@ -128,7 +129,7 @@ def update_song_info(conn, songId, title, artistName):
 
 def update_song_level(conn, songId, level, xp):
     cur = conn.cursor()
-    cur.execute("UPDATE songs SET level, xp WHERE songId = ?", (level, xp, songId))
+    cur.execute("UPDATE songs SET level = ?, xp = ? WHERE songId = ?", (level, xp, songId))
     conn.commit() 
     cur.close()
     return 
@@ -138,7 +139,7 @@ def update_song_level(conn, songId, level, xp):
 #### SELECT #######
 def find_songs_info(conn):
     cur = conn.cursor()
-    cur.execute("SELECT songId, title, artistName, learnDate, level, xp, difficulty FROM songs")
+    cur.execute("SELECT songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate FROM songs")
     songs = cur.fetchall()  
     
     songs_info = []
@@ -178,7 +179,7 @@ def find_practices_info(conn):
 
 def find_song_info(conn, songId):
     cur = conn.cursor()
-    cur.execute("SELECT title, artistName, learnDate, level, xp, difficulty FROM songs WHERE songId = ?", (songId,))
+    cur.execute("SELECT title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate FROM songs WHERE songId = ?", (songId,))
     song_row = cur.fetchone()  
     
     title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate = song_row
@@ -197,19 +198,32 @@ def find_song_info(conn, songId):
         }
     return song_info
 
-def find_days_since_song_practiced(conn,  songId):
+def find_last_song_practiceDate(conn, songId):
     cur = conn.cursor()
     cur.execute("""
-        SELECT 
-            julianday('now') - julianday(MAX(practicedate))
+        SELECT MAX(practicedate)
         FROM practices
+        WHERE songId = ?;
+    """, (songId,))
+    
+    row = cur.fetchone()
+    if not row or row[0] is None:
+        return None  
+    return (row[0]) 
+
+def find_lastDecayDate(conn,  songId):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT lastDecayDate
+        FROM songs
         WHERE songId = ? 
     """, (songId,))
     
     result = cur.fetchone()[0]
     if result is None:
         return None  
-    return int(result)  
+    return (result)  
+
 
 def create_new_songId(conn):
     cur = conn.cursor()
