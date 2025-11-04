@@ -23,27 +23,27 @@
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
-                            <label for="title-input" class="form-label">Song title</label>
-                            <input type="text" class="sAdd-input" id="title-input" name="title-input" maxlength="40" required>
+                            <label for="title-input" class="form-label">Song: </label>
+                            <input type="text" class="input" id="title-input" name="title-input" maxlength="40" required autofocus>
+                            <span class="fake-caret"></span>
                         </div>
                         <div class="form__input-group">
-                            <label for="artistName-input" class="form-label">Artist name</label>
-                            <input type="text" class="sAdd-input" id="artistName-input" name="artistName-input" maxlength="40" required>
+                            <label for="artistName-input" class="form-label">Artist: </label>
+                            <input type="text" class="input" id="artistName-input" name="artistName-input" maxlength="40" required>
                         </div>
-                        <div class="form__input-group">
-                            <label for="difficulty-select" class="form-label">Difficulty</label>
-                            <select class="sAdd-input" id="difficulty-select" name="difficulty-select" required>
-                                <option value="" selected disabled hidden>Choose here</option>
-                                <option value="easy">Easy</option>
-                                <option value="normal">Normal</option>
-                                <option value="hard">Hard</option>
-                            </select>
+                        <div class="difficulty-menu">
+                            <label class="form-label">Difficulty: </label>
+                            <button type="button" value="easy">Easy</button>
+                            <button type="button" value="normal" class="selected">Normal</button>
+                            <button type="button" value="hard">Hard</button>
                         </div>
+                            <input type="hidden" id="difficulty-input" name="difficulty-input" value="normal">
                     </div>
-                    
                 </div>
 
-                <button id="sAdd-save-button" type="submit" class="form__button">Save</button>
+                <div style="text-align: right;">
+                    <button id="sAdd-save-button" type="submit" class="form__button">Save</button>
+                </div>
             </form>
         </main>
     </section>

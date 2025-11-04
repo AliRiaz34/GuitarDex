@@ -1,3 +1,13 @@
+body {
+    font-family: 'Pokemon-Classic'; 
+    display: flex;           
+    flex-direction: column;  
+    align-items: center;     
+    margin: 0;              
+    padding: 0;
+}
+
+
 #index-song-table, #practice-table {
     width: 700px;
     margin-bottom: 20px;
@@ -14,31 +24,10 @@ th {
 }
 
 .form__input-group {
+    display: flex;
+    flex-direction: row;
     margin-top: 6px;
     margin-bottom: 17px;
-}
-
-.form__input {
-    display: block;
-    width: 100%;
-    font-size: 0.85em;
-    padding: 0.65rem;
-    box-sizing: border-box;
-    border: 1px solid #dddddd;
-    border-radius: 12px;
-    outline: none;
-    background: #eeeeee;
-}
-
-.sAdd-input {
-    width: 100%;
-    font-size: 0.9em;
-    padding: 0.65rem;
-    box-sizing: border-box;
-    border: 1px solid #dddddd;
-    border-radius: 12px;
-    outline: none;
-    background: #eeeeee;
 }
 
 .sAdd-input-num {
@@ -52,26 +41,13 @@ th {
     background: #eeeeee;
 }
 
-.form-label {
-    font-size: 1.1em;
-    padding-left: 5px;
-    margin-bottom: 8px;
-}
-
 #navbar li {
     width: 100%;
     text-align: center;
     display: inline;
 }
 
-body {
-    font-family: 'Pokemon-Classic'; 
-    display: flex;           /* use Flexbox */
-    flex-direction: column;  /* stack elements vertically */
-    align-items: center;     /* center horizontally */
-    margin: 0;               /* remove default body margin */
-    padding: 0;
-}
+
 
 header {
     width: 100%;
@@ -89,4 +65,48 @@ header a {
 
 #guitardex-icon, #menu-icon{
     margin: 21px;
+}
+
+
+
+/* some copied poke css */
+
+button, .button {
+    font-family: 'Pokemon-Classic'; 
+    font-size: 1em;
+    font-weight: bold;
+    position: relative;
+    background: none;
+    border: none;
+    text-transform: uppercase;
+    text-align: left;
+    cursor: pointer;
+}
+
+.form-label {
+    font-size: 1.1em;
+    padding-left: 5px;
+    margin: 0px;
+    margin-right: 6px;
+}
+
+.input {
+    font-family: 'Pokemon-Classic'; 
+    width: 100%;
+    font-size: 1.1em;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    border: 0px solid;
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+}
+
+.difficulty-menu button:hover {
+  background-color: #ddd;
+}
+
+.difficulty-menu button.selected {
+  color: rgb(15, 72, 230);
 }

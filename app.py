@@ -47,7 +47,7 @@ def songs_add():
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
-        difficulty = request.form.get('difficulty-select')
+        difficulty = request.form.get('difficulty-input')
         status = "seen"
         
         ## You havent learnt song, only "seen" it

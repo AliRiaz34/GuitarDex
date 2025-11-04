@@ -12,6 +12,11 @@ const songEditorH2 = document.getElementById("sEditor-h2");
 //Practice
 const titleSelect = document.getElementById("title-select");
 
+//Add
+
+const difficultyButtons = document.querySelectorAll('.difficulty-menu button');
+
+
 document.addEventListener('DOMContentLoaded', function () {
     if (indexSongTable) {
         loadIndexSongs();
@@ -26,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (titleSelect) {
         //let songId = parseInt(document.getElementById('songId').value);    IMPLEMENT LATER TO PARSE SONG TITLE AUTO
         loadPractice();
+    }
+    if (difficultyButtons) {
+        loadAdd();
     }
 })
 
@@ -168,6 +176,22 @@ function loadSongView(song) {
     document.getElementById("difficulty").innerText = `Difficulty: ${song.difficulty}`;
     document.getElementById("duration").innerText = `Duration: ${song.songDuration} min`;
     document.getElementById("last-practice").innerText = `Last practice: ${song.lastPracticeDate}`;
+}
+
+function loadAdd() {
+    const hiddenInput = document.getElementById('difficulty-input');
+
+    difficultyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // remove 'selected' from all
+            difficultyButtons.forEach(b => b.classList.remove('selected'));
+            // add 'selected' to clicked button
+            btn.classList.add('selected');
+            // update hidden input for form submission
+            hiddenInput.value = btn.value;
+            console.log(btn.value);
+        });
+    });
 }
 
 
