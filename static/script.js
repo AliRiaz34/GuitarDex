@@ -13,8 +13,7 @@ const songEditorH2 = document.getElementById("sEditor-h2");
 const titleSelect = document.getElementById("title-select");
 
 //Add
-
-const difficultyButtons = document.querySelectorAll('.difficulty-menu button');
+const addDiv = document.getElementById("sAdd-div");
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -23,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (libraryTable) {
         loadLibrary();
+        searchbarLogic();
     }
     if (songEditorH2) {
         let songId = parseInt(document.getElementById('songId').value);
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         //let songId = parseInt(document.getElementById('songId').value);    IMPLEMENT LATER TO PARSE SONG TITLE AUTO
         loadPractice();
     }
-    if (difficultyButtons) {
+    if (addDiv) {
         loadAdd();
     }
 })
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function checkIfEmpty(array, table) {
     if (array.length == 0) {
-        table.style.visibility = "hIdden";
+        table.style.visibility = "hidden";
         table.children[0].style.display = "none";
         table.children[1].style.display = "none";
         let emptyText = document.createElement("p");
@@ -83,43 +83,37 @@ function loadIndexSongs() {
     fetch(`/songs`)
     .then(response => response.json())
     .then(songsInfo => {   
-        if (checkIfEmpty(songsInfo, indexSongTable) == true) {
-        } else {
-            songsInfo.forEach(function(song) {
-                let newSongRow = indexSongTable.children[1].insertRow();
+        songsInfo.forEach(function(song) {
+            let newSongRow = indexSongTable.children[1].insertRow();
 
-                for (let i = 0; i < 5; i++) {
-                    let newCell = newSongRow.insertCell(); 
-                    newCell.className = 'song-td';
-                }   
-                
-                newSongRow.cells[0].innerText = song.title;
-                newSongRow.cells[1].innerText = song.artistName;
-                newSongRow.cells[2].innerText = song.level;
-                newSongRow.cells[3].innerText = song.difficulty;
-                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[4]);
-            })
-        }
+            for (let i = 0; i < 5; i++) {
+                let newCell = newSongRow.insertCell(); 
+                newCell.className = 'song-td';
+            }   
+            
+            newSongRow.cells[0].innerText = song.title;
+            newSongRow.cells[1].innerText = song.artistName;
+            newSongRow.cells[2].innerText = song.level;
+            newSongRow.cells[3].innerText = song.difficulty;
+            createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[4]);
+        })
     })
 
     fetch(`/practices`)
     .then(response => response.json())
     .then(practicesInfo => {   
-        if (checkIfEmpty(practicesInfo, indexPracticeTable) == true) {
-        } else {
-            practicesInfo.forEach(function(practice) {
-                let newPracticeRow = indexPracticeTable.children[1].insertRow();
+        practicesInfo.forEach(function(practice) {
+            let newPracticeRow = indexPracticeTable.children[1].insertRow();
 
-                for (let i = 0; i < 3; i++) {
-                    let newCell = newPracticeRow.insertCell(); 
-                    newCell.className = 'song-td';
-                }   
-                
-                newPracticeRow.cells[0].innerText = practice.title;
-                newPracticeRow.cells[1].innerText = practice.minPlayed;
-                newPracticeRow.cells[2].innerText = practice.practiceDate;
-            })
-        }
+            for (let i = 0; i < 3; i++) {
+                let newCell = newPracticeRow.insertCell(); 
+                newCell.className = 'song-td';
+            }   
+            
+            newPracticeRow.cells[0].innerText = practice.title;
+            newPracticeRow.cells[1].innerText = practice.minPlayed;
+            newPracticeRow.cells[2].innerText = practice.practiceDate;
+        })
     })
 }
 
@@ -130,7 +124,9 @@ async function loadLibrary() {
     allSongs = await response.json();
 
     renderTable(allSongs); 
+}
 
+async function searchbarLogic() {
     let searchbar = document.getElementById("searchbar");
 
     searchbar.addEventListener('input', () => {
@@ -141,9 +137,19 @@ async function loadLibrary() {
             song.artistName.toLowerCase().includes(query)
         );
 
-        renderTable(filteredSongs);
+        
+        if (filteredSongs.length > 0){
+            renderTable(filteredSongs);
+        } else {
+            libraryTable.children[0].innerHTML = ''; 
+            let emptySearchText = document.createElement("a");
+            emptySearchText.innerText = "Seen a new song?";
+            emptySearchText.href = `/songs/add/${query}`;
+            libraryTable.children[0].appendChild(emptySearchText);
+        }
     });
 }
+
 
 function renderTable(songs) {
     const tableBody = document.querySelector('#library-table tbody');
@@ -158,7 +164,10 @@ function renderTable(songs) {
         cell0.textContent = `${song.title}`;
         cell1.textContent = song.level != null ? `Lv ${song.level}` : '???';
 
-        cell0.className = cell1.className = 'song-td';
+        cell0.className = 'song-td';
+        cell1.className = 'song-td-lv';
+        row.className = 'song-tr';
+
 
         cell0.addEventListener('click', () => {
             console.log("Clicked on artist/title cell!", song.songId);
@@ -179,6 +188,7 @@ function loadSongView(song) {
 }
 
 function loadAdd() {
+    const difficultyButtons = document.querySelectorAll('.difficulty-menu button');
     const hiddenInput = document.getElementById('difficulty-input');
 
     difficultyButtons.forEach(btn => {
@@ -192,6 +202,16 @@ function loadAdd() {
             console.log(btn.value);
         });
     });
+    
+    // if title is parsed, start text cursor at end
+    let titleInput = document.getElementById('title-input');
+
+    if (titleInput.value) {
+        // Move cursor to the end of the text
+        titleInput.selectionStart = titleInput.selectionEnd = titleInput.value.length;
+    }
+
+    titleInput.focus();
 }
 
 

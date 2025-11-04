@@ -14,7 +14,7 @@
             <img id="guitardex-icon" src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="50" height="50">
             <h3 id="guitardex-heading"> GuitarDex</h3>
         </a>
-        <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">
+        <!--  <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">-->
     </header>
     <section id="sAdd-section">    
         <main>
@@ -31,12 +31,12 @@
                         <div class="sAdd-input-div">
                             <div class="form__input-group">
                                 <label for="minPlayed-input" class="form-label">Practice duration in minutes</label>
-                                <input type="number" step="0.1" class="sAdd-input-num" id="minPlayed-input" name="minPlayed-input" min="1">
+                                <input type="number" step="1" class="input" id="minPlayed-input" name="minPlayed-input" min="1">
                             </div>
                         </div>
                         <div id="duration-div"class="form__input-group">
                             <label for="duration-input" class="form-label">Song duration in minutes</label>
-                            <input type="number" step="0.1" class="sAdd-input-num" id="duration-input" name="duration-input" max="30" min="0.1">
+                            <input type="number" step="1" class="input" id="duration-input" name="duration-input" max="30" min="0.1">
                         </div>
                     </div>
                 </div>

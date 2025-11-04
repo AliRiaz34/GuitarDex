@@ -40,10 +40,11 @@ def library():
     return render_template('library.html')
 
 
-@app.route("/songs/add", methods=['GET', 'POST'])
-def songs_add():
+@app.route("/songs/add", defaults={'title': None}, methods=['GET', 'POST'])
+@app.route("/songs/add/<string:title>", methods=['GET', 'POST'])
+def songs_add(title):
     if request.method == 'GET':
-        return render_template('addSong.html')
+        return render_template('addSong.html', title=title)
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 

@@ -14,17 +14,17 @@
             <img id="guitardex-icon" src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="50" height="50">
             <h3 id="guitardex-heading"> GuitarDex</h3>
         </a>
-        <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">
+        <!--  <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">-->
     </header>
     <section id="sAdd-section">    
         <main id="sAdd-div">
-            <h2> Add new song</h2>
+            <h2> Add song</h2>
             <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
                             <label for="title-input" class="form-label">Song: </label>
-                            <input type="text" class="input" id="title-input" name="title-input" maxlength="40" required autofocus>
+                            <input type="text" class="input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="40" required autofocus>
                             <span class="fake-caret"></span>
                         </div>
                         <div class="form__input-group">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
 
-                <div style="text-align: right;">
+                <div id="save-div">
                     <button id="sAdd-save-button" type="submit" class="form__button">Save</button>
                 </div>
             </form>
@@ -49,11 +49,10 @@
     </section>
     
     <nav>
-        <a href="/songs/add"> Spot</a>
+        <a href="/songs/add/"> Spot</a>
         <a href="/library"> Library</a>
         <a href="/practices/add"> Practice</a>
     </nav>
-
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

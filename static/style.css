@@ -63,13 +63,26 @@ header a {
     justify-content: space-between;
 }
 
-#guitardex-icon, #menu-icon{
-    margin: 21px;
+#guitardex-heading {
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 15px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.5em;
 }
 
+a {
+    text-decoration: none;
+}
 
+#guitardex-icon, #menu-icon{
+    margin-top: 10px;
+    margin-right: 5px;
+    margin-left: 15px;
 
-/* some copied poke css */
+}
 
 button, .button {
     font-family: 'Pokemon-Classic'; 
@@ -83,6 +96,10 @@ button, .button {
     cursor: pointer;
 }
 
+button:hover {
+    text-decoration: underline;
+}
+
 .form-label {
     font-size: 1.1em;
     padding-left: 5px;
@@ -92,7 +109,6 @@ button, .button {
 
 .input {
     font-family: 'Pokemon-Classic'; 
-    width: 100%;
     font-size: 1.1em;
     padding: 0px;
     margin: 0px;
@@ -103,10 +119,35 @@ button, .button {
     background-color: transparent;
 }
 
-.difficulty-menu button:hover {
-  background-color: #ddd;
-}
-
 .difficulty-menu button.selected {
   color: rgb(15, 72, 230);
+}
+
+#save-div {
+    margin-top: 50px;
+    text-align: right;
+}
+
+#searchbar {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    margin-left: 2px;
+}
+
+.song-tr {
+    width: 100%;
+}
+
+.song-td {
+    padding: 0px;
+}
+
+.song-td-lv{
+    padding: 0px;
+    width: 80px;
+}
+
+#library-table {
+    width: 100%;
+    padding: 0px;
 }
