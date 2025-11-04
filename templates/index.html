@@ -17,7 +17,6 @@
                     <tr>
                         <th>Title</th>
                         <th>Artist</th>
-                        <th>Learn Date</th>
                         <th>Level</th>
                         <th>Difficulty</th>
                         <th>Edit</th>
@@ -25,11 +24,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
-
-            <a href="/songs/add">
-  	            <button>add song</button>
-            </a>
-
+            
             <h2>Practices table</h2>
             <table id="practice-table">
                 <thead>
@@ -41,14 +36,16 @@
                 </thead>
                 <tbody></tbody>
             </table>
-
-            <a href="/practices/add">
-  	            <button>add practice</button>
-            </a>
         </main>
     </section>
     
-    <footer></footer>
+    <footer> 
+        <ul id="navbar">
+            <li><a href="/songs/add"> Spot</a></li>
+            <li><a href="/library"> Library</a></li>
+            <li><a href="/practices/add"> Practice</a></li>
+        </ul>
+    </footer>
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

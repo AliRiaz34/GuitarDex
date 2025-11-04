@@ -3,7 +3,9 @@ const indexHeading = document.getElementById('index-heading');
 const indexSongTable = document.getElementById('index-song-table');
 const indexPracticeTable = document.getElementById('practice-table');
 
-1
+//Library
+const libraryTable = document.getElementById('library-table');
+
 //Edit
 const songEditorH2 = document.getElementById("sEditor-h2");
 
@@ -13,6 +15,9 @@ const titleSelect = document.getElementById("title-select");
 document.addEventListener('DOMContentLoaded', function () {
     if (indexSongTable) {
         loadIndexSongs();
+    }
+    if (libraryTable) {
+        loadLibrary();
     }
     if (songEditorH2) {
         let songId = parseInt(document.getElementById('songId').value);
@@ -75,17 +80,16 @@ function loadIndexSongs() {
             songsInfo.forEach(function(song) {
                 let newSongRow = indexSongTable.children[1].insertRow();
 
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 5; i++) {
                     let newCell = newSongRow.insertCell(); 
                     newCell.className = 'song-td';
                 }   
                 
                 newSongRow.cells[0].innerText = song.title;
                 newSongRow.cells[1].innerText = song.artistName;
-                newSongRow.cells[2].innerText = song.learnDate;
-                newSongRow.cells[3].innerText = song.level;
-                newSongRow.cells[4].innerText = song.difficulty;
-                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[5]);
+                newSongRow.cells[2].innerText = song.level;
+                newSongRow.cells[3].innerText = song.difficulty;
+                createLink("edit", `/songs/${song.songId}/edit`,"","", newSongRow.cells[4]);
             })
         }
     })
@@ -111,6 +115,47 @@ function loadIndexSongs() {
     })
 }
 
+let allSongs = [];
+
+async function loadLibrary() {
+    const response = await fetch('/songs');
+    allSongs = await response.json();
+
+    renderTable(allSongs); 
+
+    let searchbar = document.getElementById("searchbar");
+
+    searchbar.addEventListener('input', () => {
+        const query = searchbar.value.toLowerCase();
+
+        const filteredSongs = allSongs.filter(song => 
+            song.title.toLowerCase().includes(query) || 
+            song.artistName.toLowerCase().includes(query)
+        );
+
+        renderTable(filteredSongs);
+    });
+}
+
+function renderTable(songs) {
+    const tableBody = document.querySelector('#library-table tbody');
+    tableBody.innerHTML = ''; 
+
+    songs.forEach(song => {
+        const row = tableBody.insertRow();
+
+        const cell0 = row.insertCell();
+        const cell1 = row.insertCell();
+
+        cell0.textContent = `${song.artistName} - ${song.title}`;
+        cell1.textContent = song.level != null ? `Lv ${song.level}` : '???';
+
+        cell0.className = cell1.className = 'song-td';
+    });
+}
+
+
+
 function loadSongEditor(songId) {    
     fetch(`/songs/${songId}/info`)
     .then(response => response.json())
@@ -129,4 +174,56 @@ function loadPractice() {
            titleSelect[key+1] = new Option(song.title, song.songId);
         })
     })
+}
+
+
+// SORT
+
+function sortTable(n, which) {
+    let scoreObjects = [];
+    let tableToSortDict = [index-song-table];
+    let tableToSort = tableToSortDict[which];
+    let tableheads = tableToSort.children[0].children[0].children;
+
+    if (!tableToSort.originalHeads) {
+        tableToSort.originalHeads = {};
+        for (let i = 0; i < tableheads.length; i++) {
+            tableToSort.originalHeads[i] = tableheads[i].innerHTML;
+        }
+    }
+      
+    for (let row = 0; row < tableToSort.children[1].children.length; row++) {
+        scoreObjects[row] = {};
+        for (let cell = 0; cell < tableheads.length; cell++) {
+            scoreObjects[row][cell] = tableToSort.children[1].children[row].children[cell].children[0];
+        }
+    }
+
+    for (let th = 0; th < tableheads.length; th++) {
+        if (th !== n) {
+            tableheads[th].innerHTML = tableToSort.originalHeads[th];
+        } 
+    }
+    
+    let currentHeader = tableheads[n];
+    let originalHead = tableToSort.originalHeads[n];
+
+    if (sortDirection[which].split(":")[1] == "ascend") {
+        currentHeader.innerText = `${originalHead} ▴`;
+        scoreObjects.sort((a, b) => (a[n].innerHTML > b[n].innerHTML) ? 1 : (a[n].innerHTML < b[n].innerHTML) ? -1 : 0);
+        sortDirection[which] = String(n) + ":descend";
+    }
+    else {
+        currentHeader.innerText = `${originalHead} ▾`;
+        scoreObjects.sort((a, b) => (a[n].innerHTML < b[n].innerHTML) ? 1 : (a[n].innerHTML > b[n].innerHTML) ? -1 : 0);
+        sortDirection[which] = String(n) + ":ascend";
+    }
+       
+    for (let row = 0; row < tableToSort.children[1].children.length; row++) {
+        for (let m = 0; m < tableheads.length; m++) {
+            
+            tableToSort.children[1].children[row].children[m].innerHTML = "";
+            tableToSort.children[1].children[row].children[m].append(scoreObjects[row][m]);
+        } 
+    }
 }

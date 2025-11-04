@@ -35,6 +35,11 @@ def songs_info():
         apply_decay(song["songId"])
     return jsonify(songsInfo)
 
+@app.route("/library", methods=['GET'])
+def library():
+    return render_template('library.html')
+
+
 @app.route("/songs/add", methods=['GET', 'POST'])
 def songs_add():
     if request.method == 'GET':
@@ -42,15 +47,17 @@ def songs_add():
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
-        learnDate = date.today() 
-        level = 1
-        xp = 0
-        highestLevelReached = level
         difficulty = float(request.form.get('difficulty-input'))
-        songDuration = float(request.form.get('duration-input'))
-        lastDecayDate = date.today() 
-        lastPracticeDate = date.today()
+        status = "seen"
+        
 
+        ## You havent learnt song, only "seen" it
+        songDuration = None
+        level = None
+        xp = None
+        highestLevelReached = None
+        lastDecayDate = None
+        lastPracticeDate = None
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -63,7 +70,7 @@ def songs_add():
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, title, artistName, learnDate, highestLevelReached, level, xp, difficulty, songDuration, lastDecayDate, lastPracticeDate)
+        setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate)
         conn.close()
     return redirect(url_for('index'))
 
@@ -121,11 +128,18 @@ def practices_add():
         songId = request.form.get('title-select') 
         minPlayed = float(request.form.get('minPlayed-input'))
         practiceDate = date.today() 
+        songDuration = float(request.form.get('duration-input'))
+        level = 1
+        xp = 0
+        highestLevelReached = level
+        lastPracticeDate = date.today() 
+        lastDecayDate = date.today()
+        status = "learnt"
 
         conn = get_db_connection()
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, minPlayed, practiceDate)
-        setup_db.update_lastPracticeDate(conn, songId, practiceDate)
+        setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, practiceDate,  lastPracticeDate, lastDecayDate)
 
 
         songInfo = setup_db.find_song_info(conn, songId)
@@ -175,15 +189,19 @@ def level_up(songInfo, currentXp):
     
 def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
     conn = get_db_connection()
+    songInfo = setup_db.find_song_info(conn, songId)
+
+    if songInfo["status"] == "seen":
+        return
+    
     daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_lastPracticeDate(conn, songId))
     daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
-    songInfo = setup_db.find_song_info(conn, songId)
-    
-    xp = songInfo["xp"]
-    level = songInfo["level"]
 
     if (daysSinceSongPracticed <= decayStart) or (daysSinceDecay <= 1):
-        return level, xp 
+        return
+
+    xp = songInfo["xp"]
+    level = songInfo["level"]
 
     decayDays = daysSinceSongPracticed - decayStart
     decayFactor = (1 - dailyDecayRate) ** decayDays

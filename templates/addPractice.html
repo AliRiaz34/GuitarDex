@@ -23,12 +23,17 @@
                                 <option value="" selected disabled hidden>Choose here</option>
                             </select>
                         </div>
-                     <div class="sAdd-input-div">
-                        <div class="form__input-group">
-                            <label for="minPlayed-input" class="form-label">Duration in minutes</label>
-                            <input type="number" step="0.1" class="sAdd-input-num" id="minPlayed-input" name="minPlayed-input" min="1">
+                        <div class="sAdd-input-div">
+                            <div class="form__input-group">
+                                <label for="minPlayed-input" class="form-label">Practice duration in minutes</label>
+                                <input type="number" step="0.1" class="sAdd-input-num" id="minPlayed-input" name="minPlayed-input" min="1">
+                            </div>
                         </div>
-                    </div>
+                        <!-- add a if (first time practicing song) -->
+                        <div class="form__input-group">
+                            <label for="duration-input" class="form-label">Song duration in minutes</label>
+                            <input type="number" step="0.1" class="sAdd-input-num" id="duration-input" name="duration-input" max="30" min="0.1">
+                        </div>
                     </div>
                 </div>
 
@@ -37,6 +42,14 @@
 
         </main>
     </section>
+
+    <footer> 
+        <ul id="navbar">
+            <li><a href="/songs/add"> Spot</a></li>
+            <li><a href="/library"> Library</a></li>
+            <li><a href="/practices/add"> Practice</a></li>
+        </ul>
+    </footer>
       
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
