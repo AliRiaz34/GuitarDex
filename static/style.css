@@ -1,8 +1,3 @@
-#index-song-div, main {
-    width: 700px;
-    margin-left: 80px;
-}
-
 #index-song-table, #practice-table {
     width: 700px;
     margin-bottom: 20px;
@@ -70,6 +65,7 @@ th {
 }
 
 body {
+    font-family: 'Pokemon-Classic'; 
     display: flex;           /* use Flexbox */
     flex-direction: column;  /* stack elements vertically */
     align-items: center;     /* center horizontally */

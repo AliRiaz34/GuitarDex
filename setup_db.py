@@ -24,7 +24,7 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 artistName TEXT, 
                                 level INT,
                                 xp FLOAT,
-                                difficulty FLOAT,
+                                difficulty TEXT CHECK(difficulty IN ('easy', 'normal', 'hard')) DEFAULT 'normal',
                                 songDuration FLOAT,
                                 highestLevelReached INT,
                                 lastPracticeDate DATE,
@@ -65,8 +65,8 @@ def add_song(conn, songId, status, title, artistName, level, xp, difficulty, son
         print(e)
 
 def init_song(conn):
-    init = [(1, "mastered", "grace", "jeffy", 10, 45, 2, 5, 12, "2025-02-11", "2025-02-11"), 
-            (2, "mastered", "anything", "adrienne lenker", 10, 21, 3, 5, 11, "2025-01-11", "2025-02-11")
+    init = [(1, "mastered", "grace", "jeffy", 10, 45, "normal", 5, 12, "2025-02-11", "2025-02-11"), 
+            (2, "mastered", "anything", "adrienne lenker", 10, 21, "easy", 5, 11, "2025-01-11", "2025-02-11")
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10])
@@ -120,9 +120,9 @@ def update_song_level(conn, songId, level, xp):
     cur.close()
     return 
 
-def update_song(conn, songId, lastPracticeDate):
+def update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate):
     cur = conn.cursor()
-    cur.execute("UPDATE songs SET lastPracticeDate = ? WHERE songId = ?", (lastPracticeDate, songId))
+    cur.execute("UPDATE songs SET status = ?, level = ?, xp = ?, songDuration = ?, highestLevelReached = ?, lastPracticeDate = ?, lastDecayDate = ? WHERE songId = ?", (status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, songId))
     conn.commit() 
     cur.close()
     return 

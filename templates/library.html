@@ -5,6 +5,7 @@
     <title>GuitarDex | Library</title>
     <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://c.webfontfree.com/c.js?f=Pokemon-Classic" type="text/javascript"></script>
 </head>
 
 <body>
@@ -15,23 +16,39 @@
         </a>
         <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">
     </header>
-    <main>
-        <form method="GET">
+    <div id="content">
+        <div id="library-view">
             <input id="searchbar" type="text" placeholder="Whatcha lookin for?">
-        </form>
-        <table id="library-table">
-            <tbody></tbody>
-        </table>
-    </main>
+            <table id="library-table">
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="song-view">
+            <div>
+                <div style="flex-direction: row; display: flex;justify-content: space-between;">
+                    <h2 id="title"></h3>
+                    <h2 id="level"></h2>
+                </div>
+                <p id="artistName"></p>
+            </div>
+            <div>
+                <p id="status"></p>
+                <p id="xp"></p>
+                <p id="difficulty"></p>
+            </div>
+                <div>
+                <p id="duration"></p>
+                <p id="last-practice"></p>
+            </div>
+        </div>
+    </div>
     
-    
-    <footer> 
-        <ul id="navbar">
-            <li><a href="/songs/add"> Spot</a></li>
-            <li><a href="/library"> Library</a></li>
-            <li><a href="/practices/add"> Practice</a></li>
-        </ul>
-    </footer>
+    <nav>
+        <a href="/songs/add"> Spot</a>
+        <a href="/library"> Library</a>
+        <a href="/practices/add"> Practice</a>
+    </nav>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

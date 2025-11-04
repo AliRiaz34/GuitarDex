@@ -47,10 +47,9 @@ def songs_add():
     elif request.method == 'POST':
         title = request.form.get('title-input') 
         artistName = request.form.get('artistName-input') 
-        difficulty = float(request.form.get('difficulty-input'))
+        difficulty = request.form.get('difficulty-select')
         status = "seen"
         
-
         ## You havent learnt song, only "seen" it
         songDuration = None
         level = None
@@ -123,6 +122,7 @@ def practices_info():
 @app.route("/practices/add", methods=['GET', 'POST'])
 def practices_add():
     if request.method == 'GET':
+        conn = get_db_connection()
         return render_template('addPractice.html')
     elif request.method == 'POST':
         songId = request.form.get('title-select') 
@@ -132,14 +132,13 @@ def practices_add():
         level = 1
         xp = 0
         highestLevelReached = level
-        lastPracticeDate = date.today() 
         lastDecayDate = date.today()
-        status = "learnt"
+        status = 'learning'
 
         conn = get_db_connection()
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, minPlayed, practiceDate)
-        setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, practiceDate,  lastPracticeDate, lastDecayDate)
+        setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, practiceDate, lastDecayDate)
 
 
         songInfo = setup_db.find_song_info(conn, songId)
@@ -163,7 +162,7 @@ def xp_threshold(level, baseXP=30, exponent=1.4):
     return int(baseXP * (level ** exponent))
 
 def xp_gain(songInfo, minPlayed, baseXp=50):
-    daysSinceSongPracticed = days_between(str(date.today()), songInfo["lastPlayedDate"])
+    daysSinceSongPracticed = days_between(str(date.today()), songInfo["lastPracticeDate"])
     difficulty = songInfo["difficulty"]
     songDuration = songInfo["songDuration"]
     highestLevelReached = songInfo["highestLevelReached"]
@@ -175,7 +174,12 @@ def xp_gain(songInfo, minPlayed, baseXp=50):
     else:
         streakBonus = streakBonusValues[8]
 
-    return (baseXp * (1/difficulty) * (minPlayed/songDuration) * (1 + 0.1*highestLevelReached) * (1 + streakBonus))
+    difficulty_conv = {
+        "easy": 1,
+        "normal": 2,
+        "hard": 3
+    }
+    return (baseXp * (1/difficulty_conv[difficulty]) * (minPlayed/songDuration) * (1 + 0.1*highestLevelReached) * (1 + streakBonus))
 
 def level_up(songInfo, currentXp):
     currentLevel = songInfo["level"]

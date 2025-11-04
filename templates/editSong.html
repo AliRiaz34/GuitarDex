@@ -5,13 +5,18 @@
     <title>GuitarDex | Edit song</title>
     <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://c.webfontfree.com/c.js?f=Pokemon-Classic" type="text/javascript"></script>
 </head>
 
 <body>
-    <section id="sAdd-section"> 
+    <header>
         <a href="/">
-            <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="200" height="200">
-        </a>       
+            <img id="guitardex-icon" src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="50" height="50">
+            <h3 id="guitardex-heading"> GuitarDex</h3>
+        </a>
+        <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">
+    </header>
+    <section id="sAdd-section"> 
         <main>
             <h2 id="sEditor-h2"></h2>
             <form id="song-form" action="{{ url_for('song_edit', songId=songId ) }}" method="POST" >
@@ -39,13 +44,11 @@
         </main>
     </section>
       
-    <footer> 
-        <ul id="navbar">
-            <li><a href="/songs/add"> Spot</a></li>
-            <li><a href="/library"> Library</a></li>
-            <li><a href="/practices/add"> Practice</a></li>
-        </ul>
-    </footer>
+    <nav>
+        <a href="/songs/add"> Spot</a>
+        <a href="/library"> Library</a>
+        <a href="/practices/add"> Practice</a>
+    </nav>
 
     <input id="songId" value="{{ songInfo.songId }}" type="hidden">
     <script src="{{ url_for('static', filename='script.js') }}"></script> 

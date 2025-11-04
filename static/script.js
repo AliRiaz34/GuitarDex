@@ -147,13 +147,28 @@ function renderTable(songs) {
         const cell0 = row.insertCell();
         const cell1 = row.insertCell();
 
-        cell0.textContent = `${song.artistName} - ${song.title}`;
+        cell0.textContent = `${song.title}`;
         cell1.textContent = song.level != null ? `Lv ${song.level}` : '???';
 
         cell0.className = cell1.className = 'song-td';
+
+        cell0.addEventListener('click', () => {
+            console.log("Clicked on artist/title cell!", song.songId);
+            loadSongView(song)
+        });
     });
 }
 
+function loadSongView(song) {
+    document.getElementById("title").innerText = `${song.title}`;
+    document.getElementById("level").innerText = `Lv ${song.level}`;
+    document.getElementById("artistName").innerText = `${song.artistName}`;
+    document.getElementById("status").innerText = `Status: ${song.status}`;
+    document.getElementById("xp").innerText = `XP: ${Math.floor(song.xp)}`
+    document.getElementById("difficulty").innerText = `Difficulty: ${song.difficulty}`;
+    document.getElementById("duration").innerText = `Duration: ${song.songDuration} min`;
+    document.getElementById("last-practice").innerText = `Last practice: ${song.lastPracticeDate}`;
+}
 
 
 function loadSongEditor(songId) {    
@@ -173,6 +188,20 @@ function loadPractice() {
         songs_info.forEach((song, key) => {
            titleSelect[key+1] = new Option(song.title, song.songId);
         })
+
+        titleSelect.addEventListener('change', () => {
+        const selectedId = titleSelect.value;
+        const selectedSong = songs_info.find(s => s.songId == selectedId);
+
+        const durationDiv = document.getElementById("duration-div");
+        document.getElementById("duration-input").value = selectedSong.songDuration;
+
+        if (selectedSong && selectedSong.songDuration != null) {
+        durationDiv.style.display = "none";
+        } else {
+        durationDiv.style.display = "block"; 
+        }
+        });
     })
 }
 

@@ -5,13 +5,18 @@
     <title>GuitarDex | Log practice</title>
     <link rel="icon" type="image/x-icon" href="/static/images/guitarDexIcon.ico">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://c.webfontfree.com/c.js?f=Pokemon-Classic" type="text/javascript"></script>
 </head>
 
 <body>
-    <section id="sAdd-section"> 
+    <header>
         <a href="/">
-            <img src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="200" height="200">
-        </a>       
+            <img id="guitardex-icon" src="{{ url_for('static', filename='images/guitarDexIcon.png') }}" alt="website icon" width="50" height="50">
+            <h3 id="guitardex-heading"> GuitarDex</h3>
+        </a>
+        <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">
+    </header>
+    <section id="sAdd-section">    
         <main>
             <h2 id="practice-h2"></h2>
             <form id="song-form" action="{{ url_for('practices_add') }}" method="POST" >
@@ -29,8 +34,7 @@
                                 <input type="number" step="0.1" class="sAdd-input-num" id="minPlayed-input" name="minPlayed-input" min="1">
                             </div>
                         </div>
-                        <!-- add a if (first time practicing song) -->
-                        <div class="form__input-group">
+                        <div id="duration-div"class="form__input-group">
                             <label for="duration-input" class="form-label">Song duration in minutes</label>
                             <input type="number" step="0.1" class="sAdd-input-num" id="duration-input" name="duration-input" max="30" min="0.1">
                         </div>
@@ -43,13 +47,11 @@
         </main>
     </section>
 
-    <footer> 
-        <ul id="navbar">
-            <li><a href="/songs/add"> Spot</a></li>
-            <li><a href="/library"> Library</a></li>
-            <li><a href="/practices/add"> Practice</a></li>
-        </ul>
-    </footer>
+    <nav>
+        <a href="/songs/add"> Spot</a>
+        <a href="/library"> Library</a>
+        <a href="/practices/add"> Practice</a>
+    </nav>
       
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
