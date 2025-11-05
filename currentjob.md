@@ -11,11 +11,7 @@ fix, when do song go from learnt to stale, decide if mastered songs can go stale
 
 consider having a decay table to keep track
 
-include xpgain in practice table
-
 have sort menu in library
-
-add options menu in song view
 
 question mark in searchbar blinks
 
@@ -38,3 +34,5 @@ find api to find song cover, or give user option to upload
 have a settings page (gotta figure out what)
 
 if theres been level up, and you revisit song page, then have animation
+
+add options menu in song view

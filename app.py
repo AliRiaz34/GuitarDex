@@ -21,7 +21,7 @@ def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-### INDEX ###
+### INDEX ###a
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -131,27 +131,33 @@ def practices_add(title):
     elif request.method == 'POST':
         songId = request.form.get('title-select') 
         minPlayed = float(request.form.get('minPlayed-input'))
-        practiceDate = date.today() 
+        lastPracticeDate = date.today() 
         songDuration = float(request.form.get('duration-input'))
-        level = 1
-        xp = 0
-        highestLevelReached = level
-        lastDecayDate = date.today()
-        status = 'learning'
 
         conn = get_db_connection()
-        practiceId = setup_db.create_new_practiceId(conn)
-        setup_db.add_practice(conn, practiceId, songId, minPlayed, practiceDate)
-        setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, practiceDate, lastDecayDate)
+        songInfo = setup_db.find_song_info(conn, songId)
 
+        # if first practice, you have to initialize 
+        if songInfo["status"] == "seen":
+            print("this is a seen song")
+            status = 'learning'
+            level = 1
+            xp = 0
+            highestLevelReached = level
+            lastDecayDate = date.today()
+            setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate)
 
         songInfo = setup_db.find_song_info(conn, songId)
-        newXp = songInfo["xp"] + xp_gain(songInfo, minPlayed)
+        xpGain = xp_gain(songInfo, minPlayed)
 
         ## potential ui event to show xp gain or smt here:
 
-        newLevel, adjustedXp = level_up(songInfo, newXp)
+        newLevel, adjustedXp = level_up(songInfo, int(songInfo["xp"] + xpGain))
+        print("adjusted xp", adjustedXp)
         setup_db.update_song_level(conn, songId, newLevel, adjustedXp)
+
+        practiceId = setup_db.create_new_practiceId(conn)
+        setup_db.add_practice(conn, practiceId, songId, minPlayed, xpGain, lastPracticeDate)
         conn.close()
 
     return redirect(url_for('index'))
@@ -185,9 +191,9 @@ def xp_gain(songInfo, minPlayed, baseXp=50):
     }
     return (baseXp * (1/difficulty_conv[difficulty]) * (minPlayed/songDuration) * (1 + 0.1*highestLevelReached) * (1 + streakBonus))
 
-def level_up(songInfo, currentXp):
+def level_up(songInfo, newXp):
     currentLevel = songInfo["level"]
-    xp = currentXp
+    xp = newXp
 
     while xp >= xp_threshold(currentLevel):
         xp -= xp_threshold(currentLevel)
@@ -220,6 +226,7 @@ def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
         adjustedXp += xp_threshold(level)
 
     setup_db.update_song_level(conn, songId, level, adjustedXp)
+    setup_db.update_song_lastDecayDate(conn, songId, date.today())
     return
 
 if __name__ == "__main__":

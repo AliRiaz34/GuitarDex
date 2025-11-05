@@ -181,15 +181,30 @@ function renderTable(songs) {
 function loadSongView(song, songs) {
     document.getElementById("song-view").style.display = "block";
     document.getElementById("library-view").style.display = "none";
+    let xpDiv = document.getElementById("song-xp-div");
 
+    let duration = document.getElementById("duration");
+    let difficulty = document.getElementById("difficulty");
+    let level = document.getElementById("level");
+    let xp = document.getElementById("xp");
+
+    if (song.level == null) {
+        duration.innerText = "";
+        difficulty.innerText = "";
+        level.innerText = "";
+        xp.innerText = "";
+        xpDiv.style.display = "none";
+    } else {
+        duration.innerText = `${song.songDuration} min`;
+        difficulty.innerText = `Difficulty: ${song.difficulty.toUpperCase()}`;
+        level.innerText = `Lv ${song.level}`;
+        xp.innerText = `XP ${Math.floor(song.xp)} / ${Math.floor(song.xpThreshold)}`
+    }
+    
     document.getElementById("title").innerText = `${song.title}`;
     document.getElementById("artistName").innerText = `${song.artistName}`;
-    document.getElementById("duration").innerText = `${song.songDuration} min`;
-        document.getElementById("status").innerText = `Status: ${song.status.toUpperCase()}`;
-    document.getElementById("difficulty").innerText = `Difficulty: ${song.difficulty.toUpperCase()}`;
-    document.getElementById("level").innerText = `Lv ${song.level}`;
-    document.getElementById("xp").innerText = `XP ${Math.floor(song.xp)} / ${Math.floor(song.xpThreshold)}`
-
+    document.getElementById("status").innerText = `Status: ${song.status.toUpperCase()}`;
+    
     document.getElementById("back-button").addEventListener('click', () => {
             renderTable(songs)
     });
