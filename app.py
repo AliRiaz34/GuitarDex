@@ -33,12 +33,13 @@ def songs_info():
 
     for song in songsInfo:
         apply_decay(song["songId"])
+        if song["level"] != None:
+            song["xpThreshold"] = xp_threshold(song["level"])
     return jsonify(songsInfo)
 
 @app.route("/library", methods=['GET'])
 def library():
     return render_template('library.html')
-
 
 @app.route("/songs/add", defaults={'title': None}, methods=['GET', 'POST'])
 @app.route("/songs/add/<string:title>", methods=['GET', 'POST'])
@@ -82,6 +83,7 @@ def song_info(songId):
         conn = get_db_connection()
         apply_decay(songId)
         songInfo = setup_db.find_song_info(conn, songId)
+        songInfo["xpThreshold"] = xp_threshold(songInfo["xpThreshold"])
         return jsonify(songInfo)
     elif request.method == 'POST' and request.form.get('_method') == 'DELETE':
         conn = get_db_connection()
@@ -120,11 +122,12 @@ def practices_info():
     practicesInfo = setup_db.find_practices_info(conn)
     return jsonify(practicesInfo)
 
-@app.route("/practices/add", methods=['GET', 'POST'])
-def practices_add():
+@app.route("/practices/add", defaults={'title': None}, methods=['GET', 'POST'])
+@app.route("/practices/add/<string:title>", methods=['GET', 'POST'])
+def practices_add(title):
     if request.method == 'GET':
         conn = get_db_connection()
-        return render_template('addPractice.html')
+        return render_template('addPractice.html', title=title)
     elif request.method == 'POST':
         songId = request.form.get('title-select') 
         minPlayed = float(request.form.get('minPlayed-input'))

@@ -23,9 +23,9 @@
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
-                            <label for="title-select" class="form-label">Song title: </label>
+                            <label for="title-select" class="form-label">Song: </label>
                             <select class="input" id="title-select" name="title-select" required>
-                                <option value="" selected disabled hidden>Choose here</option>
+                                <option value="{{ title or '' }}" selected disabled hidden>Choose here</option>
                             </select>
                         </div>
                         <div class="sAdd-input-div">
@@ -47,7 +47,7 @@
         </main>
     </section>
 
-    <nav>
+    <nav id="navbar">
         <a href="/songs/add"> Spot</a>
         <a href="/library"> Library</a>
         <a href="/practices/add"> Practice</a>

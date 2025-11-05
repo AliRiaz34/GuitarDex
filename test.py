@@ -1,3 +1,3 @@
-numbers = [0,30,40,560,4231,33321,32131,33333]
+exp = 1.4
 
-print(numbers[1:])
+print(2 ** exp)

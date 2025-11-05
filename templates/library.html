@@ -25,25 +25,35 @@
         </div>
         <div id="song-view">
             <div>
-                <div style="flex-direction: row; display: flex;justify-content: space-between;">
-                    <h2 id="title"></h3>
-                    <h2 id="level"></h2>
+                <h2 id="title"></h3>
+                <div id="song-head-div-2">
+                    <h3 id="artistName"></h3>
+                    <p id="duration"></p>
                 </div>
-                <p id="artistName"></p>
+            </div>
+            <div id="song-xp-div">
+                <p id="level"></p>
+                <div id="xp-container">
+                    <div id="xp-bar"></div>
+                </div>
+                <p id="xp"></p>
             </div>
             <div>
-                <p id="status"></p>
-                <p id="xp"></p>
-                <p id="difficulty"></p>
+                <div id="song-mid-div">
+                    <p id="status"></p>
+                    <p id="difficulty"></p>
+                </div>
             </div>
-                <div>
-                <p id="duration"></p>
-                <p id="last-practice"></p>
+            <div id="song-bottom-buttons-div">
+                <button id="back-button">BACK</button>
+                <button id="practice-button">
+                    <a id="practice-button-link"> Practice</a>
+                </button>    
             </div>
         </div>
     </div>
     
-    <nav>
+    <nav id="navbar">
         <a href="/songs/add"> Spot</a>
         <a href="/library"> Library</a>
         <a href="/practices/add"> Practice</a>

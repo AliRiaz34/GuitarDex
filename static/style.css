@@ -41,23 +41,23 @@ th {
     background: #eeeeee;
 }
 
-#navbar li {
-    width: 100%;
-    text-align: center;
-    display: inline;
+#navbar {
+    margin-top: 100px;
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
 }
-
-
 
 header {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    border-bottom: #ffffff 2px dashed;
+    padding-bottom: 20px;
 }
 
 header a {
-    width: 150px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -130,8 +130,8 @@ button:hover {
 
 #searchbar {
     margin-top: 30px;
-    margin-bottom: 20px;
-    margin-left: 2px;
+    margin-bottom: 15px;
+    margin-left: 150px;
 }
 
 .song-tr {
@@ -140,6 +140,8 @@ button:hover {
 
 .song-td {
     padding: 0px;
+    margin-bottom: 20px;
+
 }
 
 .song-td-lv{
@@ -150,4 +152,112 @@ button:hover {
 #library-table {
     width: 100%;
     padding: 0px;
+    border-spacing: 0 20px;
 }
+
+.song-artist {
+    font-size: 0.7em;
+    font-style: italic;
+    margin-left: 20px;
+}
+
+/* song view */
+
+#song-view {
+    width: 500px;
+}
+
+#title {
+    margin-bottom: 0px;
+}
+
+#artistName {
+    margin-top: 0px;
+    margin-left: 25px;
+    margin-bottom: 0px;
+
+    font-weight: lighter;
+    font-style: italic;
+}
+
+#duration {
+    margin: 0px;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+#song-head-div-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#song-xp-div {
+    margin-top: 30px;
+}
+
+#level {
+    margin: 0px;
+    margin-bottom: 6px;
+    margin-left: 5px;
+}
+
+#xp {
+    margin: 0px;
+    text-align: right;
+    font-style: italic;
+    font-weight: lighter;
+    font-size: 0.7em;
+}
+
+#song-mid-div {
+    margin: 0px;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-weight: lighter;
+    font-size: 0.9em;
+}
+
+
+#song-xp-text-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    vertical-align: top;
+}
+
+#song-bottom-buttons-div {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#practice-button-link {
+    color:white;
+}
+
+/* song view progreess bar */
+#xp-bar {
+    height: 100%; 
+    width: 0%; 
+    border-radius: 0px;
+}
+
+#xp-container {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background: #1a1a1a;              /* dark background behind the fill */
+  border: 2px solid transparent;    /* needed for border-image */
+  border-image-source: url('/static/images/progress-frame.png'); /* your frame sprite */
+  border-image-slice: 1;
+  border-image-width: 2px;
+  border-image-repeat: stretch;
+  border-image-outset: 2px;
+  border-radius: 0;                 /* sharp corners */
+  overflow: hidden;                 /* hides fill overflow */
+}
+

@@ -1,6 +1,6 @@
 deviating a bit from roadmap. 
 
-i want to focus on setting up what html templates im going to use. not gonna focus on looks, just want elements and fuctionality im gonna have.
+i want to focus on setting up what html templates im going to use.
 
 
 
@@ -8,8 +8,26 @@ i want to focus on setting up what html templates im going to use. not gonna foc
 
 ## IMPLEMENTATIONS TO REMEMBER
 fix, when do song go from learnt to stale, decide if mastered songs can go stale?
-how much xp to level in song view
-what is xp threshold ( 54/?)
+
+consider having a decay table to keep track
+
+include xpgain in practice table
+
+have sort menu in library
+
+add options menu in song view
+
+question mark in searchbar blinks
+
+selection highlight when hovering a entry in lib
+
+long text needs to wrap!!!
+
+fix navbar ui
+
+library is scrollable
+
+PRACTICE PAGE!!!!
 
 
 ### long term IDEAS
@@ -17,4 +35,6 @@ what is xp threshold ( 54/?)
 have a main 10 song roster, team
 have playlists
 find api to find song cover, or give user option to upload
+have a settings page (gotta figure out what)
 
+if theres been level up, and you revisit song page, then have animation

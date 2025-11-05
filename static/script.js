@@ -142,16 +142,16 @@ async function searchbarLogic() {
             renderTable(filteredSongs);
         } else {
             libraryTable.children[0].innerHTML = ''; 
-            let emptySearchText = document.createElement("a");
-            emptySearchText.innerText = "Seen a new song?";
-            emptySearchText.href = `/songs/add/${query}`;
-            libraryTable.children[0].appendChild(emptySearchText);
+            createLink("Seen a new song?", `/songs/add/${query}`, null, null, libraryTable.children[0])
         }
     });
 }
 
 
 function renderTable(songs) {
+    document.getElementById("song-view").style.display = "none";
+    document.getElementById("library-view").style.display = "block";
+
     const tableBody = document.querySelector('#library-table tbody');
     tableBody.innerHTML = ''; 
 
@@ -161,7 +161,10 @@ function renderTable(songs) {
         const cell0 = row.insertCell();
         const cell1 = row.insertCell();
 
-        cell0.textContent = `${song.title}`;
+        cell0.innerHTML = `
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artistName}</div>
+        `;        
         cell1.textContent = song.level != null ? `Lv ${song.level}` : '???';
 
         cell0.className = 'song-td';
@@ -170,21 +173,38 @@ function renderTable(songs) {
 
 
         cell0.addEventListener('click', () => {
-            console.log("Clicked on artist/title cell!", song.songId);
-            loadSongView(song)
+            loadSongView(song, songs) // need both to render table when back button is clicked
         });
     });
 }
 
-function loadSongView(song) {
+function loadSongView(song, songs) {
+    document.getElementById("song-view").style.display = "block";
+    document.getElementById("library-view").style.display = "none";
+
     document.getElementById("title").innerText = `${song.title}`;
-    document.getElementById("level").innerText = `Lv ${song.level}`;
     document.getElementById("artistName").innerText = `${song.artistName}`;
-    document.getElementById("status").innerText = `Status: ${song.status}`;
-    document.getElementById("xp").innerText = `XP: ${Math.floor(song.xp)}`
-    document.getElementById("difficulty").innerText = `Difficulty: ${song.difficulty}`;
-    document.getElementById("duration").innerText = `Duration: ${song.songDuration} min`;
-    document.getElementById("last-practice").innerText = `Last practice: ${song.lastPracticeDate}`;
+    document.getElementById("duration").innerText = `${song.songDuration} min`;
+        document.getElementById("status").innerText = `Status: ${song.status.toUpperCase()}`;
+    document.getElementById("difficulty").innerText = `Difficulty: ${song.difficulty.toUpperCase()}`;
+    document.getElementById("level").innerText = `Lv ${song.level}`;
+    document.getElementById("xp").innerText = `XP ${Math.floor(song.xp)} / ${Math.floor(song.xpThreshold)}`
+
+    document.getElementById("back-button").addEventListener('click', () => {
+            renderTable(songs)
+    });
+
+    document.getElementById("practice-button-link").href = `/practices/add/${song.title}`
+
+    // --- XP Bar ---
+    const xpBar = document.getElementById("xp-bar");
+    const maxXP = song.xpThreshold; // Or your max XP per level
+    const xpPercent = Math.min((song.xp / maxXP) * 100, 100); // Calculate % filled
+
+    xpBar.style.width = `${xpPercent}%`;
+
+    // Color based on XP (like Pokémon)
+    xpBar.style.backgroundColor = "#4dff88"; // green
 }
 
 function loadAdd() {
@@ -232,7 +252,7 @@ function loadPractice() {
         songs_info.forEach((song, key) => {
            titleSelect[key+1] = new Option(song.title, song.songId);
         })
-
+        
         titleSelect.addEventListener('change', () => {
         const selectedId = titleSelect.value;
         const selectedSong = songs_info.find(s => s.songId == selectedId);
@@ -300,3 +320,6 @@ function sortTable(n, which) {
         } 
     }
 }
+
+
+//progress bar
