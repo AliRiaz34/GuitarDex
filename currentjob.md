@@ -7,7 +7,12 @@ i want to focus on setting up what html templates im going to use.
 
 
 ## IMPLEMENTATIONS TO REMEMBER
-fix, when do song go from learnt to stale, decide if mastered songs can go stale?
+fix, when do song go from learnt to stale and mastered
+
+
+
+
+
 
 consider having a decay table to keep track
 
@@ -20,6 +25,7 @@ selection highlight when hovering a entry in lib
 long text needs to wrap!!!
 
 fix navbar ui
+-make it so clicking on page icon youre on it dosent refetch page, just shows default
 
 library is scrollable
 

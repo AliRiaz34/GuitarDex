@@ -121,6 +121,13 @@ def update_song_level(conn, songId, level, xp):
     cur.close()
     return 
 
+def update_song_status(conn, songId, status):
+    cur = conn.cursor()
+    cur.execute("UPDATE songs SET status = ? WHERE songId = ?", (status, songId))
+    conn.commit() 
+    cur.close()
+    return 
+
 def update_song_lastDecayDate(conn, songId, lastDecayDate):
     cur = conn.cursor()
     cur.execute("UPDATE songs SET lastDecayDate = ? WHERE songId = ?", (lastDecayDate, songId))

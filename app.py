@@ -201,19 +201,25 @@ def level_up(songInfo, newXp):
 
     return currentLevel, xp
     
-def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
+def apply_decay(songId, decayStart=7, masteredDecayStart=90, dailyDecayRate=0.05):
     conn = get_db_connection()
     songInfo = setup_db.find_song_info(conn, songId)
 
+    
     if songInfo["status"] == "seen":
         return
     
     daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_lastPracticeDate(conn, songId))
     daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
 
-    if (daysSinceSongPracticed <= decayStart) or (daysSinceDecay <= 1):
-        return
-
+    if songInfo["status"] == "mastered":
+        if (daysSinceSongPracticed <= masteredDecayStart):
+            return
+        setup_db.update_song_status(conn, songId, "learning")
+    else:
+        if (daysSinceSongPracticed <= decayStart) or (daysSinceDecay <= 1):
+            return
+        
     xp = songInfo["xp"]
     level = songInfo["level"]
 
@@ -221,13 +227,14 @@ def apply_decay(songId, decayStart=7, dailyDecayRate=0.05):
     decayFactor = (1 - dailyDecayRate) ** decayDays
     adjustedXp = int(xp * decayFactor)
 
-    while adjustedXp < 0 and level > 1:
+    while level > 1 and adjustedXp < xp_threshold(level - 1):
         level -= 1
-        adjustedXp += xp_threshold(level)
 
     setup_db.update_song_level(conn, songId, level, adjustedXp)
     setup_db.update_song_lastDecayDate(conn, songId, date.today())
     return
+    
+   
 
 if __name__ == "__main__":
     app.run(debug=True)
