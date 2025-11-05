@@ -18,21 +18,21 @@
     </header>
     <section id="sAdd-section">    
         <main id="sAdd-div">
-            <h2> Add song</h2>
+            <h2> log a new song!</h2>
             <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
-                            <label for="title-input" class="form-label">Song: </label>
+                            <label for="title-input" class="form-label">song: </label>
                             <input type="text" class="input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="40" required autofocus>
                             <span class="fake-caret"></span>
                         </div>
                         <div class="form__input-group">
-                            <label for="artistName-input" class="form-label">Artist: </label>
+                            <label for="artistName-input" class="form-label">artist: </label>
                             <input type="text" class="input" id="artistName-input" name="artistName-input" maxlength="40" required>
                         </div>
                         <div class="difficulty-menu">
-                            <label class="form-label">Difficulty: </label>
+                            <label class="form-label">difficulty: </label>
                             <button type="button" value="easy">Easy</button>
                             <button type="button" value="normal" class="selected">Normal</button>
                             <button type="button" value="hard">Hard</button>
@@ -49,9 +49,9 @@
     </section>
     
     <nav id="navbar">
-        <a href="/songs/add"> Spot</a>
-        <a href="/library"> Library</a>
-        <a href="/practices/add"> Practice</a>
+        <a href="/songs/add"> spot</a>
+        <a href="/library"> library</a>
+        <a href="/practices/add"> practice</a>
     </nav>
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>

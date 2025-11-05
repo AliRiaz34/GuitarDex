@@ -4,25 +4,14 @@ i want to focus on setting up what html templates im going to use.
 
 
 
-
-
 ## IMPLEMENTATIONS TO REMEMBER
 fix, when do song go from learnt to stale and mastered
 
-
-
-
-
-
 consider having a decay table to keep track
 
-have sort menu in library
+# have sort menu in library
 
-question mark in searchbar blinks
 
-selection highlight when hovering a entry in lib
-
-long text needs to wrap!!!
 
 fix navbar ui
 -make it so clicking on page icon youre on it dosent refetch page, just shows default
@@ -31,8 +20,12 @@ library is scrollable
 
 PRACTICE PAGE!!!!
 
+MAKE EVERYTHING TO IPHONE SCALE
 
 ### long term IDEAS
+question mark in searchbar blinks
+
+animation when js page changes
 
 have a main 10 song roster, team
 have playlists

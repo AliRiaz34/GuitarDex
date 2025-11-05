@@ -19,17 +19,32 @@
     <div id="content">
         <div id="library-view">
             <input id="searchbar" class="input" name="searchbar" type="text" placeholder="Whatcha lookin for?">
+            <div class="sort-menu">
+                <button class="sort-button">
+                    <div style="display: flex;flex-direction: row;">
+                        <p class="sort-p">^</p>
+                        <p class="sort-p" style="transform: rotate(180deg);">^</p>
+                        <p class="sort-p-text">recents</p>
+                    </div>
+                </button>
+                <!-- <div class="sort-options">
+                    <button>Easy</button>
+                    <button>Normal</button>
+                    <button>Hard</button>
+                </div> -->
+            </div>
             <table id="library-table">
                 <tbody></tbody>
             </table>
         </div>
-        <div id="song-view">
+        <div id="song-view" style="display: none;">
             <div>
                 <h2 id="title"></h3>
                 <div id="song-head-div-2">
                     <h3 id="artistName"></h3>
                     <p id="duration"></p>
                 </div>
+                <p id="empty-info-p"> come on! learn the song already!</p>
             </div>
             <div id="song-xp-div">
                 <p id="level"></p>
@@ -47,16 +62,16 @@
             <div id="song-bottom-buttons-div">
                 <button id="back-button">BACK</button>
                 <button id="practice-button">
-                    <a id="practice-button-link"> Practice</a>
+                    <a id="practice-button-link"> practice</a>
                 </button>    
             </div>
         </div>
     </div>
     
     <nav id="navbar">
-        <a href="/songs/add"> Spot</a>
-        <a href="/library"> Library</a>
-        <a href="/practices/add"> Practice</a>
+        <a href="/songs/add"> spot</a>
+        <a href="/library"> library</a>
+        <a href="/practices/add"> practice</a>
     </nav>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
