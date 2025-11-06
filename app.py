@@ -24,7 +24,7 @@ MASTERED_DECAY_GRACE_PERIOD_DAYS = 90
 DECAY_RATE_PER_DAY = 0.05  
 
 # Level Thresholds
-MAX_LEVEL_BEFORE_MASTERY = 20  
+MAX_LEVEL_BEFORE_MASTERY = 25  
 
 # Difficulty Multipliers
 DIFFICULTY_MULTIPLIERS = {
@@ -41,7 +41,6 @@ def get_db_connection():
 @app.route('/static/images/<filename>', methods=['GET'])
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 
 ### INDEX ###
 @app.route("/")
@@ -96,7 +95,7 @@ def songs_add(title):
 
         setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate)
         conn.close()
-    return redirect(url_for('index'))
+    return redirect(url_for('library'))
 
 # EDIT PAGE
 @app.route("/songs/<int:songId>/info", methods=['GET', 'POST'])

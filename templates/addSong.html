@@ -16,37 +16,34 @@
         </a>
         <!--  <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">-->
     </header>
-    <section id="sAdd-section">    
-        <main id="sAdd-div">
-            <h2> add a song!</h2>
-            <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
-                <div>
-                    <div class="sAdd-input-div">
-                        <div class="form__input-group">
-                            <label for="title-input" class="form-label">song: </label>
-                            <input type="text" class="input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="60" required>
-                            <span class="fake-caret"></span>
-                        </div>
-                        <div class="form__input-group">
-                            <label for="artistName-input" class="form-label">artist: </label>
-                            <input type="text" class="input" id="artistName-input" name="artistName-input" maxlength="60" required>
-                        </div>
-                        <div class="difficulty-menu">
-                            <label class="form-label">difficulty: </label>
-                            <button type="button" value="easy">Easy</button>
-                            <button type="button" value="normal" class="selected">Normal</button>
-                            <button type="button" value="hard">Hard</button>
-                        </div>
-                            <input type="hidden" id="difficulty-input" name="difficulty-input" value="normal">
+
+    <main>
+        <h1 id="add-song-title"> spot a song</h1>
+        <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
+            <div id="add-input-div">
+                <div id="title-input-div">
+                    <label for="title-input" class="form-label">Whats the song called?</label>
+                    <input type="text" class="song-input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="60" required placeholder="...">
+                    <span class="fake-caret"></span>
+                </div>
+                <div id="artistName-input-div">
+                    <label for="artistName-input" class="form-label">Who played it?</label>
+                    <input type="text" class="song-input" id="artistName-input" name="artistName-input" maxlength="60" required placeholder="...">
+                </div>
+                <div class="difficulty-menu">
+                    <div id="add-buttons-div">
+                        <button type="button" value="easy" id="add-diff-easy-button">Easy</button>
+                        <button type="button" value="normal" id="add-diff-normal-button" class="selected">Normal</button>
+                        <button type="button" value="hard" id="add-diff-hard-button">Hard</button>
                     </div>
                 </div>
-
-                <div class="save-div">
-                    <button type="submit" class="form__button">Save</button>
-                </div>
-            </form>
-        </main>
-    </section>
+                    <input type="hidden" id="difficulty-input" name="difficulty-input" value="normal">
+            </div>
+            <div class="save-div">
+                <button type="submit" class="form__button">Save</button>
+            </div>
+        </form>
+    </main>
     
     <nav id="navbar">
         <a href="/songs/add"> spot</a>

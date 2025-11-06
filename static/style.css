@@ -47,13 +47,6 @@ th {
     text-align: left;
 }
 
-.form__input-group {
-    display: flex;
-    flex-direction: row;
-    margin-top: 6px;
-    margin-bottom: 17px;
-}
-
 #navbar {
     margin-top: 100px;
     width: 25%;
@@ -115,15 +108,9 @@ button, .button {
     cursor: pointer;
 }
 
-button:hover {
-    text-decoration: underline;
-}
-
 .form-label {
     font-size: 1.1em;
-    padding-left: 5px;
     margin: 0px;
-    margin-right: 6px;
 }
 
 .input {
@@ -136,15 +123,6 @@ button:hover {
     border-radius: 0px;
     outline: none;
     background-color: transparent;
-}
-
-.difficulty-menu button.selected {
-  color: rgb(15, 72, 230);
-}
-
-.save-div {
-    margin-top: 70px;
-    text-align: right;
 }
 
 #searchbar {
@@ -381,4 +359,50 @@ button:hover {
 
 #song-practice-title {
     text-align: center;
+}
+
+/* songs add */
+#title-input-div, #artistName-input-div,
+.difficulty-menu  {
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.difficulty-menu button.selected {
+  color: rgb(15, 72, 230);
+}
+
+.save-div {
+    margin-top: 70px;
+    text-align: right;
+}
+
+#add-song-title {
+    font-size: 2em;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#add-input-div{
+    margin: auto;
+    text-align: center;
+}
+
+#add-buttons-div {
+    margin-top: 10px;
+}
+
+.song-input {
+    text-align: center;
+    font-family: 'Pokemon-Classic'; 
+    font-size: 1.1em;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 20px;
+    box-sizing: border-box;
+    border: 0px solid;
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
 }

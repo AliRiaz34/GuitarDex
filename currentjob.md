@@ -3,12 +3,12 @@ deviating a bit from roadmap.
 ## IMPLEMENTATIONS TO REMEMBER
 
 fix navbar ui
-
 MAKE EVERYTHING TO IPHONE SCALE
 - dark mode
 - library is scrollable
 
 ### long term IDEAS
+
 # convert to SPA
 
 
@@ -22,8 +22,6 @@ animations
 have a main 10 song roster, team
 
 have playlists
-
-find api to find song cover, or give user option to upload
 
 have a settings page (gotta figure out what)
 

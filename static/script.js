@@ -13,7 +13,7 @@ const songEditorH2 = document.getElementById("sEditor-h2");
 const durationDiv = document.getElementById("duration-div");
 
 //Add
-const addDiv = document.getElementById("sAdd-div");
+const addSongTitle = document.getElementById("add-song-title");
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let songId = parseInt(document.getElementById('songId').value);
         loadPractice(songId);
     }
-    if (addDiv) {
+    if (addSongTitle) {
         loadAdd();
     }
 })
@@ -324,20 +324,23 @@ function loadSongView(song, songs) {
 }
 
 function loadAdd() {
-    const difficultyButtons = document.querySelectorAll('.difficulty-menu button');
+    const difficultyButtons = [
+        document.getElementById("add-diff-easy-button"),
+        document.getElementById("add-diff-normal-button"),
+        document.getElementById("add-diff-hard-button")
+        ];
     const hiddenInput = document.getElementById('difficulty-input');
 
-    difficultyButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // remove 'selected' from all
-            difficultyButtons.forEach(b => b.classList.remove('selected'));
+    for (let i = 0; i < difficultyButtons.length; i++) {
+        difficultyButtons[i].addEventListener('click', () => {
+            // remove 'selected' from all buttons first
+            difficultyButtons.forEach(btn => btn.classList.remove('selected'));
             // add 'selected' to clicked button
-            btn.classList.add('selected');
+            difficultyButtons[i].classList.add('selected');
             // update hidden input for form submission
-            hiddenInput.value = btn.value;
-            console.log(btn.value);
+            hiddenInput.value = difficultyButtons[i].value;
         });
-    });
+    }
     
     // if title is parsed, start text cursor at end
     let titleInput = document.getElementById('title-input');
