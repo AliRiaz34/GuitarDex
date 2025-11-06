@@ -51,6 +51,7 @@ def songs_add(title):
         artistName = request.form.get('artistName-input') 
         difficulty = request.form.get('difficulty-input')
         status = "seen"
+        seenDate = date.today()
         
         ## You havent learnt song, only "seen" it
         songDuration = None
@@ -71,7 +72,7 @@ def songs_add(title):
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate)
+        setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate)
         conn.close()
     return redirect(url_for('index'))
 

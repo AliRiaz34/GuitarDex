@@ -118,12 +118,16 @@ function loadIndexSongs() {
 }
 
 let allSongs = [];
+let sortState = "recent";
+let filteredSongs = [];
 
 async function loadLibrary() {
     const response = await fetch('/songs');
     allSongs = await response.json();
+    filteredSongs = allSongs;
 
-    renderTable(allSongs); 
+    renderTable(allSongs, "recent"); 
+    sortLibrary();
 }
 
 async function searchbarLogic() {
@@ -132,21 +136,59 @@ async function searchbarLogic() {
     searchbar.addEventListener('input', () => {
         const query = searchbar.value.toLowerCase();
 
-        const filteredSongs = allSongs.filter(song => 
+        filteredSongs = allSongs.filter(song => 
             song.title.toLowerCase().includes(query) || 
             song.artistName.toLowerCase().includes(query)
         );
 
-        
         if (filteredSongs.length > 0){
             renderTable(filteredSongs);
         } else {
             libraryTable.children[0].innerHTML = ''; 
-            createLink("Seen a new song?", `/songs/add/${query}`, null, null, libraryTable.children[0])
+            createLink("Seen a new song?", `/songs/add/${query}`, null, null, libraryTable.children[0]);
         }
     });
 }
 
+async function sortLibrary() {
+    let sortMenuIcon = document.getElementById("sort-icon");
+    let sortMenuTextDiv = document.getElementById("sort-menu-text-div");
+    let sortRecentText = document.getElementById("sort-state-recent");
+    let sortLevelText = document.getElementById("sort-state-level");
+    let sortSeenText = document.getElementById("sort-state-seen");
+    let sortEasyText = document.getElementById("sort-state-easy");
+    let sortHardText = document.getElementById("sort-state-hard");
+    let sortStateText = document.getElementById("sort-state");
+
+    let sortTextArray = [sortRecentText, sortLevelText, sortSeenText, sortEasyText, sortHardText];
+    
+    // default is recent
+    sortMenuTextDiv.style.display = "none";
+    
+    sortMenuIcon.addEventListener('click', () => {
+        const isOpen = sortMenuTextDiv.style.display === "flex";
+
+        if (isOpen) {
+            sortMenuTextDiv.style.display = "none";
+            sortStateText.style.display = "block";
+        } else {
+            sortMenuTextDiv.style.display = "flex";
+            sortStateText.style.display = "none";
+        }
+    });
+
+    console.log(sortTextArray);
+    for (let i = 0; i < sortTextArray.length; i++) {
+        sortTextArray[i].addEventListener('click', () => {
+            sortMenuTextDiv.style.display = "none";
+            sortStateText.style.display = "block";
+            sortStateText.innerText = sortTextArray[i].innerText;
+            sortState = sortTextArray[i].innerText;
+            renderTable(filteredSongs);
+        });
+    }
+    
+}
 
 function renderTable(songs) {
     document.getElementById("song-view").style.display = "none";
@@ -154,6 +196,54 @@ function renderTable(songs) {
 
     const tableBody = document.querySelector('#library-table tbody');
     tableBody.innerHTML = ''; 
+
+    if (sortState == "recent") {
+        songs.sort((a, b) => new Date(b.lastPracticeDate) - new Date(a.lastPracticeDate));
+    }
+    else if (sortState == "level") {
+        songs.sort((a, b) => {
+        const aSeen = a.status === "seen";
+        const bSeen = b.status === "seen";
+
+        if (aSeen && !bSeen) return 1;
+        if (!aSeen && bSeen) return -1;
+        return b.level - a.level;
+        });
+    }
+    else if (sortState == "seen") {
+        songs.sort((a, b) => {
+            const aSeen = a.status === "seen";
+            const bSeen = b.status === "seen";
+
+            if (aSeen && !bSeen) return -1;
+            if (!aSeen && bSeen) return 1;
+
+            if (aSeen && bSeen) {
+                return new Date(a.seenDate) - new Date(b.seenDate);
+            }
+            return a.level - b.level;
+        });
+    }
+    else if (sortState == "easy") {
+         songs.sort((a, b) => {
+            const difficultyConv = {
+            "easy": 1,
+            "normal": 2,
+            "hard": 3
+            };
+            return difficultyConv[a.difficulty] - difficultyConv[b.difficulty];
+        });
+    }
+    else if (sortState == "hard") {
+         songs.sort((a, b) => {
+            const difficultyConv = {
+            "easy": 1,
+            "normal": 2,
+            "hard": 3
+            };
+            return difficultyConv[b.difficulty] - difficultyConv[a.difficulty];
+        });
+    }
 
     songs.forEach(song => {
         const row = tableBody.insertRow();
@@ -197,7 +287,6 @@ function loadSongView(song, songs) {
         level.innerText = "";
         xp.innerText = "";
         status.innerText = "";
-
         xpDiv.style.display = "none";
         emptyInfo.style.display = "block"
     } else {
@@ -295,19 +384,9 @@ function loadPractice() {
 
 // SORT
 
-function sortTable(n, which) {
+function sortTable(n, tableToSort) {
     let scoreObjects = [];
-    let tableToSortDict = [index-song-table];
-    let tableToSort = tableToSortDict[which];
-    let tableheads = tableToSort.children[0].children[0].children;
 
-    if (!tableToSort.originalHeads) {
-        tableToSort.originalHeads = {};
-        for (let i = 0; i < tableheads.length; i++) {
-            tableToSort.originalHeads[i] = tableheads[i].innerHTML;
-        }
-    }
-      
     for (let row = 0; row < tableToSort.children[1].children.length; row++) {
         scoreObjects[row] = {};
         for (let cell = 0; cell < tableheads.length; cell++) {
@@ -343,6 +422,3 @@ function sortTable(n, which) {
         } 
     }
 }
-
-
-//progress bar

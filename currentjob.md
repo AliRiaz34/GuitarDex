@@ -9,9 +9,9 @@ fix, when do song go from learnt to stale and mastered
 
 consider having a decay table to keep track
 
-# have sort menu in library
+# CURRENT TASK have sort menu in library
 
-
+be able to pin song in library
 
 fix navbar ui
 -make it so clicking on page icon youre on it dosent refetch page, just shows default

@@ -19,19 +19,19 @@
     <div id="content">
         <div id="library-view">
             <input id="searchbar" class="input" name="searchbar" type="text" placeholder="Whatcha lookin for?">
-            <div class="sort-menu">
-                <button class="sort-button">
-                    <div style="display: flex;flex-direction: row;">
-                        <p class="sort-p">^</p>
-                        <p class="sort-p" style="transform: rotate(180deg);">^</p>
-                        <p class="sort-p-text">recents</p>
-                    </div>
-                </button>
-                <!-- <div class="sort-options">
-                    <button>Easy</button>
-                    <button>Normal</button>
-                    <button>Hard</button>
-                </div> -->
+            <div id="sort-menu">
+                <div id="sort-icon" style="display: flex;flex-direction: row;">
+                    <p class="sort-p">^</p>
+                    <p class="sort-p" style="transform: rotate(180deg);">^</p>
+                </div>
+                <div id="sort-menu-text-div" style="display: none;flex-direction: row;">
+                        <p type="button" class="sort-menu-p-state" id="sort-state-recent" data-value="recent">recent</p>
+                        <p type="button" class="sort-menu-p-state" id="sort-state-level" data-value="recent">level</p>
+                        <p type="button" class="sort-menu-p-state" id="sort-state-seen" data-value="recent">seen</p>
+                        <p type="button" class="sort-menu-p-state" id="sort-state-easy" data-value="recent">easy</p>
+                        <p type="button" class="sort-menu-p-state" id="sort-state-hard" data-value="recent">hard</p>
+                </div>
+                <p class="sort-p-state" id="sort-state" data-value="recent">recent</p>
             </div>
             <table id="library-table">
                 <tbody></tbody>
