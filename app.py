@@ -4,12 +4,34 @@ import os
 from datetime import date, datetime
 
 app = Flask(__name__)
-app.secret_key = 'secretsecret'
 BASE_DIR = os.getcwd()
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/images')
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+
+# XP System Configuration
+XP_BASE_AMOUNT = 30  # Base XP required for level 1
+XP_SCALING_EXPONENT = 1.4  # How quickly XP requirements increase per level
+XP_PRACTICE_BASE = 50  # Base XP earned per practice session
+
+# Streak Bonus Configuration (index = days since last practice)
+STREAK_BONUS_VALUES = [0, 0.1, 0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0]  # 0=today, 1=yesterday, etc.
+
+# Decay System Configuration
+DECAY_GRACE_PERIOD_DAYS = 7  
+MASTERED_DECAY_GRACE_PERIOD_DAYS = 90  
+DECAY_RATE_PER_DAY = 0.05  
+
+# Level Thresholds
+MAX_LEVEL_BEFORE_MASTERY = 20  
+
+# Difficulty Multipliers
+DIFFICULTY_MULTIPLIERS = {
+    "easy": 1,
+    "normal": 2,
+    "hard": 3
+}  
 
 def get_db_connection():
     conn = setup_db.create_connection(setup_db.database)
@@ -21,7 +43,7 @@ def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-### INDEX ###a
+### INDEX ###
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -33,7 +55,7 @@ def songs_info():
 
     for song in songsInfo:
         apply_decay(song["songId"])
-        if song["level"] != None:
+        if song["status"] != "seen":
             song["xpThreshold"] = xp_threshold(song["level"])
     return jsonify(songsInfo)
 
@@ -67,7 +89,7 @@ def songs_add(title):
         
         if len(artistName) < 1:
             flash("Artist name has to be longer than 1.", 'error')
-            return render_template("signup.html")
+            return render_template("addSong.html")
 
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
@@ -76,7 +98,6 @@ def songs_add(title):
         conn.close()
     return redirect(url_for('index'))
 
-
 # EDIT PAGE
 @app.route("/songs/<int:songId>/info", methods=['GET', 'POST'])
 def song_info(songId):
@@ -84,7 +105,8 @@ def song_info(songId):
         conn = get_db_connection()
         apply_decay(songId)
         songInfo = setup_db.find_song_info(conn, songId)
-        songInfo["xpThreshold"] = xp_threshold(songInfo["xpThreshold"])
+        if songInfo["status"] != "seen":
+            songInfo["xpThreshold"] = xp_threshold(songInfo["level"])
         return jsonify(songInfo)
     elif request.method == 'POST' and request.form.get('_method') == 'DELETE':
         conn = get_db_connection()
@@ -123,24 +145,21 @@ def practices_info():
     practicesInfo = setup_db.find_practices_info(conn)
     return jsonify(practicesInfo)
 
-@app.route("/practices/add", defaults={'title': None}, methods=['GET', 'POST'])
-@app.route("/practices/add/<string:title>", methods=['GET', 'POST'])
-def practices_add(title):
+@app.route("/practices/add/<int:songId>", methods=['GET', 'POST'])
+def practices_add(songId):
     if request.method == 'GET':
         conn = get_db_connection()
-        return render_template('addPractice.html', title=title)
+        return render_template('addPractice.html', songId=songId)
     elif request.method == 'POST':
-        songId = request.form.get('title-select') 
         minPlayed = float(request.form.get('minPlayed-input'))
         lastPracticeDate = date.today() 
-        songDuration = float(request.form.get('duration-input'))
+        songDuration = float(request.form.get('songDuration-input'))
 
         conn = get_db_connection()
         songInfo = setup_db.find_song_info(conn, songId)
 
         # if first practice, you have to initialize 
         if songInfo["status"] == "seen":
-            print("this is a seen song")
             status = 'learning'
             level = 1
             xp = 0
@@ -153,15 +172,14 @@ def practices_add(title):
 
         ## potential ui event to show xp gain or smt here:
 
-        newLevel, adjustedXp = level_up(songInfo, int(songInfo["xp"] + xpGain))
-        print("adjusted xp", adjustedXp)
-        setup_db.update_song_level(conn, songId, newLevel, adjustedXp)
+        newLevel, adjustedXp, newStatus = level_up(songInfo, int(songInfo["xp"] + xpGain))
+        setup_db.update_song_level(conn, songId, newLevel, adjustedXp, newStatus)
 
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, minPlayed, xpGain, lastPracticeDate)
         conn.close()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('library'))
 
 ## leveling system
 def days_between(d1, d2):
@@ -169,69 +187,73 @@ def days_between(d1, d2):
     d2 = datetime.strptime(d2, "%Y-%m-%d")
     return abs((d2 - d1).days)
 
-def xp_threshold(level, baseXP=30, exponent=1.4):
-    return int(baseXP * (level ** exponent))
+def xp_threshold(level):
+    return int(XP_BASE_AMOUNT * (level ** XP_SCALING_EXPONENT))
 
-def xp_gain(songInfo, minPlayed, baseXp=50):
+def xp_gain(songInfo, minPlayed):
     daysSinceSongPracticed = days_between(str(date.today()), songInfo["lastPracticeDate"])
     difficulty = songInfo["difficulty"]
     songDuration = songInfo["songDuration"]
     highestLevelReached = songInfo["highestLevelReached"]
 
-    streakBonusValues = [0, 0.1, 0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0]
-
-    if daysSinceSongPracticed < 8:
-        streakBonus = streakBonusValues[daysSinceSongPracticed]
+    if daysSinceSongPracticed < len(STREAK_BONUS_VALUES):
+        streakBonus = STREAK_BONUS_VALUES[daysSinceSongPracticed]
     else:
-        streakBonus = streakBonusValues[8]
+        streakBonus = STREAK_BONUS_VALUES[-1]
 
-    difficulty_conv = {
-        "easy": 1,
-        "normal": 2,
-        "hard": 3
-    }
-    return (baseXp * (1/difficulty_conv[difficulty]) * (minPlayed/songDuration) * (1 + 0.1*highestLevelReached) * (1 + streakBonus))
+    return (XP_PRACTICE_BASE *
+            (1 / DIFFICULTY_MULTIPLIERS[difficulty]) *
+            (minPlayed / songDuration) *
+            (1 + 0.1 * highestLevelReached) *
+            (1 + streakBonus))
 
 def level_up(songInfo, newXp):
     currentLevel = songInfo["level"]
     xp = newXp
+    status = songInfo["status"]
 
     while xp >= xp_threshold(currentLevel):
         xp -= xp_threshold(currentLevel)
         currentLevel += 1
 
-    return currentLevel, xp
+    if currentLevel >= MAX_LEVEL_BEFORE_MASTERY:
+        status = "mastered"
+
+    return currentLevel, xp, status
     
-def apply_decay(songId, decayStart=7, masteredDecayStart=90, dailyDecayRate=0.05):
+def apply_decay(songId):
     conn = get_db_connection()
     songInfo = setup_db.find_song_info(conn, songId)
+    status = songInfo["status"]
 
-    
-    if songInfo["status"] == "seen":
+    if status == "seen":
         return
-    
+
     daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_lastPracticeDate(conn, songId))
     daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
 
-    if songInfo["status"] == "mastered":
-        if (daysSinceSongPracticed <= masteredDecayStart):
+    if status == "mastered":
+        if daysSinceSongPracticed <= MASTERED_DECAY_GRACE_PERIOD_DAYS:
             return
         setup_db.update_song_status(conn, songId, "learning")
     else:
-        if (daysSinceSongPracticed <= decayStart) or (daysSinceDecay <= 1):
+        if (daysSinceSongPracticed <= DECAY_GRACE_PERIOD_DAYS) or (daysSinceDecay <= 1):
             return
-        
+
     xp = songInfo["xp"]
     level = songInfo["level"]
 
-    decayDays = daysSinceSongPracticed - decayStart
-    decayFactor = (1 - dailyDecayRate) ** decayDays
+    decayDays = daysSinceSongPracticed - DECAY_GRACE_PERIOD_DAYS
+    decayFactor = (1 - DECAY_RATE_PER_DAY) ** decayDays
     adjustedXp = int(xp * decayFactor)
 
     while level > 1 and adjustedXp < xp_threshold(level - 1):
         level -= 1
 
-    setup_db.update_song_level(conn, songId, level, adjustedXp)
+    if (level == 1) and (songInfo["highestLevelReached"] > 1):
+        status = "stale"
+
+    setup_db.update_song_level(conn, songId, level, adjustedXp, status)
     setup_db.update_song_lastDecayDate(conn, songId, date.today())
     return
     

@@ -10,7 +10,7 @@ const libraryTable = document.getElementById('library-table');
 const songEditorH2 = document.getElementById("sEditor-h2");
 
 //Practice
-const titleSelect = document.getElementById("title-select");
+const durationDiv = document.getElementById("duration-div");
 
 //Add
 const addDiv = document.getElementById("sAdd-div");
@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function () {
         let songId = parseInt(document.getElementById('songId').value);
         loadSongEditor(songId);
     }
-    if (titleSelect) {
-        //let songId = parseInt(document.getElementById('songId').value);    IMPLEMENT LATER TO PARSE SONG TITLE AUTO
-        loadPractice();
+    if (durationDiv) {
+        let songId = parseInt(document.getElementById('songId').value);
+        loadPractice(songId);
     }
     if (addDiv) {
         loadAdd();
@@ -177,7 +177,6 @@ async function sortLibrary() {
         }
     });
 
-    console.log(sortTextArray);
     for (let i = 0; i < sortTextArray.length; i++) {
         sortTextArray[i].addEventListener('click', () => {
             sortMenuTextDiv.style.display = "none";
@@ -247,9 +246,9 @@ function renderTable(songs) {
 
     songs.forEach(song => {
         const row = tableBody.insertRow();
-
         const cell0 = row.insertCell();
         const cell1 = row.insertCell();
+        const cell2 = row.insertCell();
 
         cell0.innerHTML = `
         <div class="song-title">${song.title}</div>
@@ -257,10 +256,16 @@ function renderTable(songs) {
         `;        
         cell1.textContent = song.level != null ? `Lv ${song.level}` : '???';
 
+        let quickPracticeLink = document.createElement('a');
+        quickPracticeLink.innerHTML = "+";
+        quickPracticeLink.href = `/practices/add/${parseInt(song.songId)}`;
+        cell2.appendChild(quickPracticeLink);
+
         cell0.className = 'song-td';
         cell1.className = 'song-td-lv';
-        row.className = 'song-tr';
+        cell2.className = 'song-td-qprac';
 
+        row.className = 'song-tr';
 
         cell0.addEventListener('click', () => {
             loadSongView(song, songs) // need both to render table when back button is clicked
@@ -306,16 +311,15 @@ function loadSongView(song, songs) {
             renderTable(songs)
     });
 
-    document.getElementById("practice-button-link").href = `/practices/add/${song.title}`
+    document.getElementById("practice-button-link").href = `/practices/add/${song.songId}`
 
-    // --- XP Bar ---
+    // XP Bar 
     const xpBar = document.getElementById("xp-bar");
     const maxXP = song.xpThreshold; // Or your max XP per level
     const xpPercent = Math.min((song.xp / maxXP) * 100, 100); // Calculate % filled
 
     xpBar.style.width = `${xpPercent}%`;
 
-    // Color based on XP (like Pokémon)
     xpBar.style.backgroundColor = "#4dff88"; // green
 }
 
@@ -357,68 +361,46 @@ function loadSongEditor(songId) {
     })
 }  
 
-function loadPractice() {    
-    fetch(`/songs`)
+function loadPractice(songId) {    
+    fetch(`/songs/${songId}/info`)
     .then(response => response.json())
-    .then(songs_info => {     
-        songs_info.forEach((song, key) => {
-           titleSelect[key+1] = new Option(song.title, song.songId);
-        })
-        
-        titleSelect.addEventListener('change', () => {
-        const selectedId = titleSelect.value;
-        const selectedSong = songs_info.find(s => s.songId == selectedId);
+    .then(songInfo => {   
+        document.getElementById("song-practice-title").innerText = songInfo.title;
+        let practiceInput = document.getElementById("minPlayed-input");
+        let songDurationInput = document.getElementById("songDuration-input");  
 
-        const durationDiv = document.getElementById("duration-div");
-        document.getElementById("duration-input").value = selectedSong.songDuration;
-
-        if (selectedSong && selectedSong.songDuration != null) {
-        durationDiv.style.display = "none";
+        if (songInfo.songDuration != null) {
+            durationDiv.style.display = "none";
+            songDurationInput.value = songInfo.songDuration;
         } else {
-        durationDiv.style.display = "block"; 
+            durationDiv.style.display = "flex"; 
+
+            const songButtons = [
+            document.getElementById("QSelect-3-song-duration-button"),
+            document.getElementById("QSelect-4-song-duration-button"),
+            document.getElementById("QSelect-5-song-duration-button")
+            ];
+
+            for (let i = 0; i < songButtons.length; i++) {
+                songButtons[i].addEventListener('click', () => {
+                    songDurationInput.innerHTML = parseFloat(songButtons[i].innerHTML);
+                    songDurationInput.value = parseFloat(songButtons[i].value);
+                });
+            }
         }
-        });
-    })
-}
 
-
-// SORT
-
-function sortTable(n, tableToSort) {
-    let scoreObjects = [];
-
-    for (let row = 0; row < tableToSort.children[1].children.length; row++) {
-        scoreObjects[row] = {};
-        for (let cell = 0; cell < tableheads.length; cell++) {
-            scoreObjects[row][cell] = tableToSort.children[1].children[row].children[cell].children[0];
-        }
-    }
-
-    for (let th = 0; th < tableheads.length; th++) {
-        if (th !== n) {
-            tableheads[th].innerHTML = tableToSort.originalHeads[th];
-        } 
-    }
+        const practiceButtons = [
+            document.getElementById("QSelect-15-practice-duration-button"),
+            document.getElementById("QSelect-30-practice-duration-button"),
+            document.getElementById("QSelect-45-practice-duration-button"),
+            document.getElementById("QSelect-60-practice-duration-button")
+        ];
     
-    let currentHeader = tableheads[n];
-    let originalHead = tableToSort.originalHeads[n];
-
-    if (sortDirection[which].split(":")[1] == "ascend") {
-        currentHeader.innerText = `${originalHead} ▴`;
-        scoreObjects.sort((a, b) => (a[n].innerHTML > b[n].innerHTML) ? 1 : (a[n].innerHTML < b[n].innerHTML) ? -1 : 0);
-        sortDirection[which] = String(n) + ":descend";
-    }
-    else {
-        currentHeader.innerText = `${originalHead} ▾`;
-        scoreObjects.sort((a, b) => (a[n].innerHTML < b[n].innerHTML) ? 1 : (a[n].innerHTML > b[n].innerHTML) ? -1 : 0);
-        sortDirection[which] = String(n) + ":ascend";
-    }
-       
-    for (let row = 0; row < tableToSort.children[1].children.length; row++) {
-        for (let m = 0; m < tableheads.length; m++) {
-            
-            tableToSort.children[1].children[row].children[m].innerHTML = "";
-            tableToSort.children[1].children[row].children[m].append(scoreObjects[row][m]);
-        } 
-    }
+        for (let i = 0; i < practiceButtons.length; i++) {
+            practiceButtons[i].addEventListener('click', () => {
+                practiceInput.innerHTML = practiceButtons[i].innerHTML;
+                practiceInput.value = practiceButtons[i].value;
+            });
+        }
+    });
 }

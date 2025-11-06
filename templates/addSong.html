@@ -18,18 +18,18 @@
     </header>
     <section id="sAdd-section">    
         <main id="sAdd-div">
-            <h2> log a new song!</h2>
+            <h2> add a song!</h2>
             <form class="song-form" action="{{ url_for('songs_add') }}" method="POST">
                 <div>
                     <div class="sAdd-input-div">
                         <div class="form__input-group">
                             <label for="title-input" class="form-label">song: </label>
-                            <input type="text" class="input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="40" required autofocus>
+                            <input type="text" class="input" id="title-input" value="{{ title or '' }}" name="title-input" maxlength="60" required>
                             <span class="fake-caret"></span>
                         </div>
                         <div class="form__input-group">
                             <label for="artistName-input" class="form-label">artist: </label>
-                            <input type="text" class="input" id="artistName-input" name="artistName-input" maxlength="40" required>
+                            <input type="text" class="input" id="artistName-input" name="artistName-input" maxlength="60" required>
                         </div>
                         <div class="difficulty-menu">
                             <label class="form-label">difficulty: </label>
@@ -41,7 +41,7 @@
                     </div>
                 </div>
 
-                <div id="save-div">
+                <div class="save-div">
                     <button type="submit" class="form__button">Save</button>
                 </div>
             </form>
@@ -51,7 +51,6 @@
     <nav id="navbar">
         <a href="/songs/add"> spot</a>
         <a href="/library"> library</a>
-        <a href="/practices/add"> practice</a>
     </nav>
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>

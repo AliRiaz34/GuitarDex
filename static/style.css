@@ -13,22 +13,34 @@ body {
     padding: 0;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
 #index-song-table, #practice-table {
     width: 700px;
     margin-bottom: 20px;
     margin-top: 50px;
 }
 
-#index-container, #sAdd-section {
+#index-container {
     display: flex;
     flex-direction: row;
 }
 
-.sAdd-input-div {
+.input-div {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 150px;
+    margin-top: 80px;
 }
 
 th {
@@ -42,23 +54,18 @@ th {
     margin-bottom: 17px;
 }
 
-.sAdd-input-num {
-    display: block;
-    font-size: 0.9em;
-    padding: 0.65rem;
-    box-sizing: border-box;
-    border: 1px solid #dddddd;
-    border-radius: 12px;
-    outline: none;
-    background: #eeeeee;
-}
-
 #navbar {
     margin-top: 100px;
-    width: 70%;
+    width: 25%;
     display: flex;
     justify-content: space-between;
+    
+    position: fixed;
+    bottom: 0;
+    padding-bottom: 40px;
+    z-index: 1000;     /* stay on top */
 }
+
 
 header {
     width: 100%;
@@ -135,8 +142,8 @@ button:hover {
   color: rgb(15, 72, 230);
 }
 
-#save-div {
-    margin-top: 50px;
+.save-div {
+    margin-top: 70px;
     text-align: right;
 }
 
@@ -162,6 +169,13 @@ button:hover {
     text-align: center;
     padding-bottom: 20px;
 
+}
+
+.song-td-qprac {
+    padding: 0px;
+    width: 20px;
+    text-align: center;
+    padding-bottom: 17px;
 }
 
 .song-artist {
@@ -318,4 +332,53 @@ button:hover {
 
 .sort-menu-p-state:hover {
     color: rgb(255, 255, 255);
+}
+
+
+#minPlayed-div, #duration-div{
+    margin-top: 50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+#duration-div {
+    display: none;
+}
+
+.practice-input {
+    text-align: center;
+    font-family: 'Pokemon-Classic'; 
+    font-size: 1.1em;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 30px;
+    box-sizing: border-box;
+    border: 0px solid;
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+}
+
+.quick-select-button-div {
+    margin: auto;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+.quick-select-button:hover {
+    text-decoration: none;
+    color: rgb(15, 72, 230);
+}
+
+.between-button-line {
+    margin: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: default;
+}
+
+#song-practice-title {
+    text-align: center;
 }

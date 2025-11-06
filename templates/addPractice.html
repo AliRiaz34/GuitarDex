@@ -16,43 +16,45 @@
         </a>
         <!--  <img id="menu-icon" src="{{ url_for('static', filename='images/menuIcon.png') }}" alt="menu icon" width="50" height="50">-->
     </header>
-    <section id="sAdd-section">    
-        <main>
-            <h2 id="practice-h2"></h2>
-            <form id="song-form" action="{{ url_for('practices_add') }}" method="POST" >
-                <div>
-                    <div class="sAdd-input-div">
-                        <div class="form__input-group">
-                            <label for="title-select" class="form-label">Song: </label>
-                            <select class="input" id="title-select" name="title-select" required>
-                                <option value="{{ title or '' }}" selected disabled hidden>Choose here</option>
-                            </select>
-                        </div>
-                        <div class="sAdd-input-div">
-                            <div class="form__input-group">
-                                <label for="minPlayed-input" class="form-label">Practice duration in minutes: </label>
-                                <input type="number" step="1" class="input" id="minPlayed-input" name="minPlayed-input" min="1">
-                            </div>
-                        </div>
-                        <div id="duration-div"class="form__input-group">
-                            <label for="duration-input" class="form-label">Song duration in minutes: </label>
-                            <input type="number" step="1" class="input" id="duration-input" name="duration-input" max="30" min="0">
-                        </div>
-                    </div>
-                </div>
-
+    <main>
+        <h1 id="song-practice-title"></h1>
+        <form id="practice-form" action="{{ url_for('practices_add', songId=songId ) }}" method="POST" >
+            <div id="minPlayed-div">
+                <label for="minPlayed-input" class="form-label">How many minutes did you play? </label>
+                <div class="quick-select-button-div">
+                    <button type="button" class="quick-select-button" id="QSelect-15-practice-duration-button" value="15">15</button>
+                    <p class="between-button-line">|</p>
+                    <button type="button" class="quick-select-button" id="QSelect-30-practice-duration-button" value="30">30</button>
+                    <p class="between-button-line">|</p>
+                    <button type="button" class="quick-select-button" id="QSelect-45-practice-duration-button" value="45">45</button>
+                    <p class="between-button-line">|</p>
+                    <button type="button" class="quick-select-button" id="QSelect-60-practice-duration-button" value="60">60</button>        
+                </div>                     
+                <input type="number" step="1" class="practice-input" id="minPlayed-input" name="minPlayed-input" min="1" max="999" placeholder="...">
+            </div>
+            <div id="duration-div">
+                <label for="duration-input" class="form-label">How many minutes is the song? </label>
+                <div class="quick-select-button-div">
+                    <button type="button" class="quick-select-button" id="QSelect-3-song-duration-button" value="3">3</button>
+                    <p class="between-button-line">|</p>
+                    <button type="button" class="quick-select-button" id="QSelect-4-song-duration-button" value="4">4</button>
+                    <p class="between-button-line">|</p>
+                    <button type="button" class="quick-select-button" id="QSelect-5-song-duration-button" value="5">5</button>
+                </div>   
+                <input type="number" step="0.1" class="practice-input" id="songDuration-input" name="songDuration-input" max="30" min="0" placeholder="...">
+            </div>
+            <div class="save-div">
                 <button type="submit" id="practice-save-button" class="form__button">Save</button>
-            </form>
-
-        </main>
-    </section>
+            </div>
+        </form>
+    </main>
 
     <nav id="navbar">
         <a href="/songs/add"> spot</a>
         <a href="/library"> library</a>
-        <a href="/practices/add"> practice</a>
     </nav>
-      
+
+    <input id="songId" value="{{ songId }}" type="hidden">
     <script src="{{ url_for('static', filename='script.js') }}"></script> 
 </body>
 </html>

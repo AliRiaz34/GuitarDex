@@ -103,45 +103,37 @@ def init_practice(conn):
 def delete_song(conn, songId):
     cur = conn.cursor()
     cur.execute("DELETE FROM songs WHERE songId = ?", (songId,))
-    conn.commit() 
+    conn.commit()
     cur.close()
     return
 
 #### UPDATE ####
-def update_song_info(conn, songId, title, artistName):
+def _execute_update(conn, sql, params):
+    """Helper to reduce cursor management boilerplate"""
     cur = conn.cursor()
-    cur.execute("UPDATE songs SET title = ?, artistName = ? WHERE songId = ?", (title, artistName, songId))
-    conn.commit()  
+    cur.execute(sql, params)
+    conn.commit()
     cur.close()
-    return 
 
-def update_song_level(conn, songId, level, xp):
-    cur = conn.cursor()
-    cur.execute("UPDATE songs SET level = ?, xp = ? WHERE songId = ?", (level, xp, songId))
-    conn.commit() 
-    cur.close()
-    return 
+def update_song_info(conn, songId, title, artistName):
+    sql = "UPDATE songs SET title = ?, artistName = ? WHERE songId = ?"
+    _execute_update(conn, sql, (title, artistName, songId)) 
+
+def update_song_level(conn, songId, level, xp, status):
+    sql = "UPDATE songs SET level = ?, xp = ?, status = ? WHERE songId = ?"
+    _execute_update(conn, sql, (level, xp, status, songId)) 
 
 def update_song_status(conn, songId, status):
-    cur = conn.cursor()
-    cur.execute("UPDATE songs SET status = ? WHERE songId = ?", (status, songId))
-    conn.commit() 
-    cur.close()
-    return 
+    sql = "UPDATE songs SET status = ? WHERE songId = ?"
+    _execute_update(conn, sql, (status, songId)) 
 
 def update_song_lastDecayDate(conn, songId, lastDecayDate):
-    cur = conn.cursor()
-    cur.execute("UPDATE songs SET lastDecayDate = ? WHERE songId = ?", (lastDecayDate, songId))
-    conn.commit() 
-    cur.close()
-    return 
+    sql = "UPDATE songs SET lastDecayDate = ? WHERE songId = ?"
+    _execute_update(conn, sql, (lastDecayDate, songId)) 
 
 def update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate):
-    cur = conn.cursor()
-    cur.execute("UPDATE songs SET status = ?, level = ?, xp = ?, songDuration = ?, highestLevelReached = ?, lastPracticeDate = ?, lastDecayDate = ? WHERE songId = ?", (status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, songId))
-    conn.commit() 
-    cur.close()
-    return 
+    sql = "UPDATE songs SET status = ?, level = ?, xp = ?, songDuration = ?, highestLevelReached = ?, lastPracticeDate = ?, lastDecayDate = ? WHERE songId = ?"
+    _execute_update(conn, sql, (status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, songId)) 
 
 
 #### SELECT #######

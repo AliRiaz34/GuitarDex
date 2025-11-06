@@ -1,37 +1,30 @@
 deviating a bit from roadmap. 
 
-i want to focus on setting up what html templates im going to use.
-
-
-
 ## IMPLEMENTATIONS TO REMEMBER
-fix, when do song go from learnt to stale and mastered
 
-consider having a decay table to keep track
+fix navbar ui
 
-# CURRENT TASK have sort menu in library
+MAKE EVERYTHING TO IPHONE SCALE
+- dark mode
+- library is scrollable
+
+### long term IDEAS
+# convert to SPA
+
 
 be able to pin song in library
 
-fix navbar ui
--make it so clicking on page icon youre on it dosent refetch page, just shows default
+animations
+- animation when js view changes
+- if theres been level up, and you revisit song page, then have animation
 
-library is scrollable
-
-PRACTICE PAGE!!!!
-
-MAKE EVERYTHING TO IPHONE SCALE
-
-### long term IDEAS
-question mark in searchbar blinks
-
-animation when js page changes
 
 have a main 10 song roster, team
-have playlists
-find api to find song cover, or give user option to upload
-have a settings page (gotta figure out what)
 
-if theres been level up, and you revisit song page, then have animation
+have playlists
+
+find api to find song cover, or give user option to upload
+
+have a settings page (gotta figure out what)
 
 add options menu in song view
