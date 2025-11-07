@@ -3,9 +3,13 @@ deviating a bit from roadmap.
 ## IMPLEMENTATIONS TO REMEMBER
 
 fix navbar ui
+
 MAKE EVERYTHING TO IPHONE SCALE
 - dark mode
 - library is scrollable
+
+have playlists
+
 
 ### long term IDEAS
 
@@ -21,7 +25,15 @@ animations
 
 have a main 10 song roster, team
 
-have playlists
+
+have multiuser playlists with a table to show each users level
+          User 1      User 2
+Song 1    Lv            Lv
+Song 2    Lv            Lv
+Song 3    Lv            Lv
+Song 4    Lv            Lv
+
+
 
 have a settings page (gotta figure out what)
 

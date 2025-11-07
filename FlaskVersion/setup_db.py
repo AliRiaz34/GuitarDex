@@ -41,6 +41,13 @@ sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
                                 FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
                             );"""
 
+sql_create_playlists_table = """CREATE TABLE IF NOT EXISTS playlists (
+                                playlistId INTEGER PRIMARY KEY,
+                                songId INTEGER,
+                                playlistName TEXT,
+                                averageLevel INTEGER,
+                                FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
+                            );"""
 
 def create_table(conn, create_table_sql):
     """ create a table from the create_table_sql statement
@@ -73,7 +80,6 @@ def init_song(conn):
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11])
 
-
 def add_practice(conn, practiceId, songId, minPlayed, xpGained, practiceDate):
     """
     Add a new song into the practices table
@@ -98,6 +104,31 @@ def init_practice(conn):
             ]
     for c in init:
         add_practice(conn, c[0], c[1], c[2], c[3], c[4])
+
+def add_playlist(conn, playlistId, songId, playlistName, averageLevel):
+    """
+    Add a new song into the practices table
+    :param conn:
+    :param playlistId:
+    :param songId:
+    :param playlistName:
+    :param averageLevel:
+    """
+    sql = ''' INSERT INTO practices(playlistId, songId, playlistName, averageLevel)
+              VALUES(?, ?, ?, ?) '''
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, (playlistId, songId, playlistName, averageLevel))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+def init_playlist(conn):
+    init = [(1, None, "at your best", 0),
+            (2, 1, "reverbing", 5)
+            ]
+    for c in init:
+        add_playlist(conn, c[0], c[1], c[2], c[3])
 
 #### DELETE #######
 def delete_song(conn, songId):
@@ -240,8 +271,10 @@ def setup():
     if conn is not None:
         create_table(conn, sql_create_songs_table)
         create_table(conn, sql_create_practices_table)
+        create_table(conn, sql_create_playlists_table)
         init_song(conn)
         init_practice(conn)
+        init_playlist(conn)
         conn.close()
 
 if __name__ == '__main__':

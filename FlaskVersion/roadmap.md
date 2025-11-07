@@ -1,28 +1,6 @@
-## DONT FOCUS ON LOOKS, PURE FUNCITIONALITY FOR NOW
 
 ### NEXT UP
 
-
-## 🎛️ PHASE 2 — Sorting, Filtering, and “Stale Songs”
-
-**Goal:** Turn it from a data log into a tool that helps you *practice smarter.*
-
-**Tasks:**
-
-1. Add filters & sorting on `/songs`:
-   - Sort by rating, last played, title
-   - Filter by tag or “needs refresh”
-2. Add computed property:
-   - `days_since_last_played`
-   - `staleness_score = days_since * (1 + (10 - rating)/10)`
-3. Create a new route `/refresh` showing:
-   - Top 10 “stale” songs (highest staleness score)
-   - “Add to Refresh Playlist” button next to each
-
-✅ **Deliverable:**
- Dashboard shows which songs to revisit soon — the first “smart” feature.
-
-------
 
 ## 🧩 PHASE 3 — Playlists
 
