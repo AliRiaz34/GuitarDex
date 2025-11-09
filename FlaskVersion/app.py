@@ -11,7 +11,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 # XP System Configuration
-XP_BASE_AMOUNT = 30  # Base XP required for level 1
+XP_BASE_AMOUNT = 50  # Base XP required for level 1
 XP_SCALING_EXPONENT = 1.4  # How quickly XP requirements increase per level
 XP_PRACTICE_BASE = 50  # Base XP earned per practice session
 
@@ -24,6 +24,7 @@ MASTERED_DECAY_GRACE_PERIOD_DAYS = 90
 DECAY_RATE_PER_DAY = 0.05  
 
 # Level Thresholds
+MAX_LEVEL_BEFORE_REFINED = 15  
 MAX_LEVEL_BEFORE_MASTERY = 25  
 
 # Difficulty Multipliers
@@ -38,14 +39,14 @@ def get_db_connection():
     return conn
 
 ### IMAGES ###
-@app.route('/static/images/<filename>', methods=['GET'])
+@app.route('/FlaskVersion/static/images/<filename>', methods=['GET'])
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 ### INDEX ###
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('library.html')
 
 @app.route("/songs", methods=['GET'])
 def songs_info():
@@ -56,6 +57,9 @@ def songs_info():
         apply_decay(song["songId"])
         if song["status"] != "seen":
             song["xpThreshold"] = xp_threshold(song["level"])
+            song["totalMinPlayed"] = setup_db.find_sum_minPlayed(conn, song["songId"])
+            song["totalSessions"] = setup_db.find_sum_practices(conn, song["songId"])
+
     return jsonify(songsInfo)
 
 @app.route("/library", methods=['GET'])
@@ -68,20 +72,27 @@ def songs_add(title):
     if request.method == 'GET':
         return render_template('addSong.html', title=title)
     elif request.method == 'POST':
-        title = request.form.get('title-input') 
-        artistName = request.form.get('artistName-input') 
-        difficulty = request.form.get('difficulty-input')
-        status = "seen"
-        seenDate = date.today()
-        
-        ## You havent learnt song, only "seen" it
-        songDuration = None
-        level = None
-        xp = None
-        highestLevelReached = None
-        lastDecayDate = None
-        lastPracticeDate = None
+        title = request.json['title']
+        artistName = request.json['artistName']
+        difficulty = request.json['difficulty']
+        status = request.json['status']
 
+        addDate = date.today()
+        songDuration = None
+
+        if status == "seen":
+            level = None
+            xp = None
+            highestLevelReached = None
+            lastDecayDate = None
+            lastPracticeDate = None
+        elif status == "mastered":
+            level = 25
+            xp = 0
+            highestLevelReached = level
+            lastDecayDate = date.today()
+            lastPracticeDate = date.today()
+            
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
             return render_template("addSong.html")
@@ -93,7 +104,7 @@ def songs_add(title):
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
 
-        setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate)
+        setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate)
         conn.close()
     return redirect(url_for('library'))
 
@@ -104,15 +115,19 @@ def song_info(songId):
         conn = get_db_connection()
         apply_decay(songId)
         songInfo = setup_db.find_song_info(conn, songId)
+       
         if songInfo["status"] != "seen":
             songInfo["xpThreshold"] = xp_threshold(songInfo["level"])
+            songInfo["totalMinPlayed"] = setup_db.find_sum_minPlayed(conn, songId)
+            songInfo["totalSessions"] = setup_db.find_sum_practices(conn, songInfo["songId"])
+
         return jsonify(songInfo)
     elif request.method == 'POST' and request.form.get('_method') == 'DELETE':
         conn = get_db_connection()
         setup_db.delete_song(conn, songId)
         conn.commit()
         conn.close()
-        return redirect(url_for('index'))
+        return redirect(url_for('library'))
 
 @app.route("/songs/<int:songId>/edit", methods=['GET', 'POST'])
 def song_edit(songId):
@@ -121,8 +136,8 @@ def song_edit(songId):
         songInfo = setup_db.find_song_info(conn, songId)
         return render_template('editSong.html', songId=songId, songInfo=songInfo)
     elif request.method == 'POST':
-        title = request.form.get('title-input') 
-        artistName = request.form.get('artistName-input') 
+        title = request.json['title']
+        artistName = request.json['artistName']
 
         if len(title) < 1:
             flash("Title has to be longer than 1.", 'error')
@@ -135,7 +150,7 @@ def song_edit(songId):
         conn = get_db_connection()
         setup_db.update_song_info(conn, songId, title, artistName)
         conn.close()
-    return redirect(url_for('index'))
+    return redirect(url_for('library'))
 
 ## PRACTICE
 @app.route("/practices", methods=['GET'])
@@ -150,14 +165,14 @@ def practices_add(songId):
         conn = get_db_connection()
         return render_template('addPractice.html', songId=songId)
     elif request.method == 'POST':
-        minPlayed = float(request.form.get('minPlayed-input'))
+        minPlayed = float(request.json['minPlayed'])
+        songDuration = float(request.json['songDuration'])
         lastPracticeDate = date.today() 
-        songDuration = float(request.form.get('songDuration-input'))
 
         conn = get_db_connection()
         songInfo = setup_db.find_song_info(conn, songId)
 
-        # if first practice, you have to initialize 
+        # if first practice on seen song, you have to initialize 
         if songInfo["status"] == "seen":
             status = 'learning'
             level = 1
@@ -166,13 +181,18 @@ def practices_add(songId):
             lastDecayDate = date.today()
             setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate)
 
+        # if first practice with mastered song
+        if (songInfo["status"] == "mastered") and (songInfo["songDuration"] == None):
+            setup_db.update_songDuration(conn, songId, songDuration)
+
         songInfo = setup_db.find_song_info(conn, songId)
         xpGain = xp_gain(songInfo, minPlayed)
 
         ## potential ui event to show xp gain or smt here:
 
+
         newLevel, adjustedXp, newStatus = level_up(songInfo, int(songInfo["xp"] + xpGain))
-        setup_db.update_song_level(conn, songId, newLevel, adjustedXp, newStatus)
+        setup_db.update_song_level(conn, songId, newLevel, adjustedXp, newStatus, lastPracticeDate)
 
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, minPlayed, xpGain, lastPracticeDate)
@@ -217,6 +237,8 @@ def level_up(songInfo, newXp):
 
     if currentLevel >= MAX_LEVEL_BEFORE_MASTERY:
         status = "mastered"
+    elif currentLevel >= MAX_LEVEL_BEFORE_REFINED:
+        status = "refined"
 
     return currentLevel, xp, status
     
@@ -234,7 +256,7 @@ def apply_decay(songId):
     if status == "mastered":
         if daysSinceSongPracticed <= MASTERED_DECAY_GRACE_PERIOD_DAYS:
             return
-        setup_db.update_song_status(conn, songId, "learning")
+        setup_db.update_song_status(conn, songId, "refined")
     else:
         if (daysSinceSongPracticed <= DECAY_GRACE_PERIOD_DAYS) or (daysSinceDecay <= 1):
             return
@@ -251,6 +273,8 @@ def apply_decay(songId):
 
     if (level == 1) and (songInfo["highestLevelReached"] > 1):
         status = "stale"
+    elif (level < MAX_LEVEL_BEFORE_REFINED):
+        status = "learning"
 
     setup_db.update_song_level(conn, songId, level, adjustedXp, status)
     setup_db.update_song_lastDecayDate(conn, songId, date.today())

@@ -1,0 +1,52 @@
+/* songs add */
+#title-input-div, #artistName-input-div,
+.difficulty-menu  {
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.buttons-menu button.selected {
+  margin-top: 50px;
+  color: rgb(15, 72, 230);
+}
+
+.save-div {
+    margin-top: 70px;
+    text-align: right;
+}
+
+#add-song-title {
+    font-size: 2em;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#add-input-div{
+    margin: auto;
+    text-align: center;
+}
+
+.song-input {
+    color: white;
+    text-align: center;
+    font-family: 'Pokemon-Classic';
+    font-size: 1.1em;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 40px;
+    box-sizing: border-box;
+    border: 0px;
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+}
+
+.form-label {
+    font-size: 1.1em;
+    margin: 0px;
+}
+
+.song-form {
+    width: 100%;
+}

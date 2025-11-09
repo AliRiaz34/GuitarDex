@@ -1,0 +1,65 @@
+/* practice add */
+#minPlayed-input-div, #duration-div{
+    margin-top: 50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.quick-select-button-div {
+    margin: auto;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+.between-button-line {
+    margin: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: default;
+}
+
+.practice-input {
+    text-align: center;
+    font-family: 'Pokemon-Classic';
+    font-size: 1.1em;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 30px;
+    box-sizing: border-box;
+    border: 0px solid;
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+}
+
+.quick-select-button:hover {
+    text-decoration: none;
+    color: rgb(15, 72, 230);
+}
+
+.save-div {
+    margin-top: 70px;
+    text-align: right;
+}
+
+.form-label {
+    font-size: 1.1em;
+    margin: 0px;
+}
+
+#song-practice-title {
+    text-align: center;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

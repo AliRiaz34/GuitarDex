@@ -11,6 +11,10 @@ MAKE EVERYTHING TO IPHONE SCALE
 have playlists
 
 
+
+MAKE ALBUM LIKE GYM, WHICH GYM BADGE!
+
+
 ### long term IDEAS
 
 # convert to SPA

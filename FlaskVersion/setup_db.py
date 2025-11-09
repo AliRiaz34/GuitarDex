@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3 import Error 
 from datetime import date
 
-database = r"./database.db"
+database = r"./FlaskVersion/database.db"
 
 def create_connection(db_file):
     conn = None
@@ -11,15 +11,14 @@ def create_connection(db_file):
         conn.execute("PRAGMA foreign_keys = ON;")
         return conn
     except Error as e:
-        print(e)
-
-    return conn
+        print(f"Database connection error: {e}")
+        raise
 
 ##### CREATE TABLES ######## 
 
 sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 songId INTEGER PRIMARY KEY,
-                                status TEXT CHECK(status IN ('seen', 'learning', 'mastered', 'stale')) DEFAULT 'seen',
+                                status TEXT CHECK(status IN ('seen', 'learning', 'refined', 'mastered', 'stale')) DEFAULT 'seen',
                                 title TEXT NOT NULL,
                                 artistName TEXT, 
                                 level INTEGER,
@@ -29,7 +28,7 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 highestLevelReached INTEGER,
                                 lastPracticeDate DATE,
                                 lastDecayDate DATE,
-                                seenDate DATE
+                                addDate DATE
                             );"""
 
 sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
@@ -41,10 +40,10 @@ sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
                                 FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
                             );"""
 
-sql_create_playlists_table = """CREATE TABLE IF NOT EXISTS playlists (
-                                playlistId INTEGER PRIMARY KEY,
+sql_create_teams_table = """CREATE TABLE IF NOT EXISTS teams (
+                                teamId INTEGER PRIMARY KEY,
                                 songId INTEGER,
-                                playlistName TEXT,
+                                teamName TEXT,
                                 averageLevel INTEGER,
                                 FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
                             );"""
@@ -63,19 +62,19 @@ def create_table(conn, create_table_sql):
 
 #### INSERT #########
 
-def add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate):
-    sql = ''' INSERT INTO songs(songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate)
+def add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate):
+    sql = ''' INSERT INTO songs(songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate)
               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate))
+        cur.execute(sql, (songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate))
         conn.commit()
     except Error as e:
         print(e)
 
 def init_song(conn):
     init = [(1, "mastered", "grace", "jeffy", 10, 45, "normal", 5, 12, "2025-11-05", "2025-11-05", "2024-11-05"), 
-            (2, "mastered", "anything", "adrienne lenker", 10, 21, "easy", 5, 11, "2025-11-05", "2025-11-05", "2023-11-05")
+            (2, "refined", "anything", "adrienne lenker", 10, 21, "easy", 5, 11, "2025-11-05", "2025-11-05", "2023-11-05")
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11])
@@ -105,30 +104,30 @@ def init_practice(conn):
     for c in init:
         add_practice(conn, c[0], c[1], c[2], c[3], c[4])
 
-def add_playlist(conn, playlistId, songId, playlistName, averageLevel):
+def add_team(conn, teamId, songId, teamName, averageLevel):
     """
     Add a new song into the practices table
     :param conn:
-    :param playlistId:
+    :param teamId:
     :param songId:
-    :param playlistName:
+    :param teamName:
     :param averageLevel:
     """
-    sql = ''' INSERT INTO practices(playlistId, songId, playlistName, averageLevel)
+    sql = ''' INSERT INTO teams(teamId, songId, teamName, averageLevel)
               VALUES(?, ?, ?, ?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (playlistId, songId, playlistName, averageLevel))
+        cur.execute(sql, (teamId, songId, teamName, averageLevel))
         conn.commit()
     except Error as e:
         print(e)
 
-def init_playlist(conn):
-    init = [(1, None, "at your best", 0),
+def init_team(conn):
+    init = [(1, 1, "at your best", 0),
             (2, 1, "reverbing", 5)
             ]
     for c in init:
-        add_playlist(conn, c[0], c[1], c[2], c[3])
+        add_team(conn, c[0], c[1], c[2], c[3])
 
 #### DELETE #######
 def delete_song(conn, songId):
@@ -150,9 +149,9 @@ def update_song_info(conn, songId, title, artistName):
     sql = "UPDATE songs SET title = ?, artistName = ? WHERE songId = ?"
     _execute_update(conn, sql, (title, artistName, songId)) 
 
-def update_song_level(conn, songId, level, xp, status):
-    sql = "UPDATE songs SET level = ?, xp = ?, status = ? WHERE songId = ?"
-    _execute_update(conn, sql, (level, xp, status, songId)) 
+def update_song_level(conn, songId, level, xp, status, lastPracticeDate):
+    sql = "UPDATE songs SET level = ?, xp = ?, status = ?, lastPracticeDate = ? WHERE songId = ?"
+    _execute_update(conn, sql, (level, xp, status, lastPracticeDate, songId)) 
 
 def update_song_status(conn, songId, status):
     sql = "UPDATE songs SET status = ? WHERE songId = ?"
@@ -166,15 +165,20 @@ def update_song(conn, songId, status, level, xp, songDuration, highestLevelReach
     sql = "UPDATE songs SET status = ?, level = ?, xp = ?, songDuration = ?, highestLevelReached = ?, lastPracticeDate = ?, lastDecayDate = ? WHERE songId = ?"
     _execute_update(conn, sql, (status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, songId)) 
 
+def update_songDuration(conn, songId, songDuration):
+    sql = "UPDATE songs SET songDuration = ? WHERE songId = ?"
+    _execute_update(conn, sql, (songDuration, songId)) 
+
+
 
 #### SELECT #######
 def find_songs_info(conn):
     cur = conn.cursor()
-    cur.execute("SELECT songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate FROM songs")
+    cur.execute("SELECT songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate FROM songs")
     songs = cur.fetchall()  
     
     songs_info = []
-    for (songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate) in songs:
+    for (songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate) in songs:
         songs_info.append({ 
             "songId": songId, 
             "status": status,
@@ -187,7 +191,7 @@ def find_songs_info(conn):
             "highestLevelReached": highestLevelReached,
             "lastPracticeDate": lastPracticeDate,
             "lastDecayDate": lastDecayDate,
-            "seenDate": seenDate
+            "addDate": addDate
         })
     return songs_info
 
@@ -213,10 +217,10 @@ def find_practices_info(conn):
 
 def find_song_info(conn, songId):
     cur = conn.cursor()
-    cur.execute("SELECT status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate FROM songs WHERE songId = ?", (songId,))
+    cur.execute("SELECT status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate FROM songs WHERE songId = ?", (songId,))
     song_row = cur.fetchone()  
     
-    status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, seenDate = song_row
+    status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate = song_row
 
     song_info = { 
         "songId": songId, 
@@ -230,7 +234,7 @@ def find_song_info(conn, songId):
         "highestLevelReached": highestLevelReached,
         "lastPracticeDate": lastPracticeDate,
         "lastDecayDate": lastDecayDate,
-        "seenDate": seenDate
+        "addDate": addDate
         }
     return song_info
  
@@ -246,6 +250,24 @@ def find_lastPracticeDate(conn, songId):
 def find_lastDecayDate(conn,  songId):
     cur = conn.cursor()
     cur.execute("SELECT lastDecayDate FROM songs WHERE songId = ? ", (songId,))
+    
+    result = cur.fetchone()[0]
+    if result is None:
+        return None  
+    return (result)  
+
+def find_sum_minPlayed(conn, songId):
+    cur = conn.cursor()
+    cur.execute("SELECT SUM(minPlayed) FROM practices WHERE songId = ? ", (songId,))
+    
+    result = cur.fetchone()[0]
+    if result is None:
+        return None  
+    return (result)  
+
+def find_sum_practices(conn, songId):
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(songId) FROM practices WHERE songId = ? ", (songId,))
     
     result = cur.fetchone()[0]
     if result is None:
@@ -271,10 +293,10 @@ def setup():
     if conn is not None:
         create_table(conn, sql_create_songs_table)
         create_table(conn, sql_create_practices_table)
-        create_table(conn, sql_create_playlists_table)
+        """ create_table(conn, sql_create_teams_table) """
         init_song(conn)
         init_practice(conn)
-        init_playlist(conn)
+        """ init_team(conn) """
         conn.close()
 
 if __name__ == '__main__':

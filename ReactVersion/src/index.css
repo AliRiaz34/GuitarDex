@@ -1,0 +1,138 @@
+@font-face {
+  font-family: 'Pokemon-Classic';
+  src: url('./fonts/PokemonClassic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Global text wrapping */
+body, p, span, div, h1, h2, h3, h4, h5, h6, a, li {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+body {
+  font-family: 'Pokemon-Classic', system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  min-height: 100vh;
+}
+
+/* Remove number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: rgb(15, 72, 230);
+}
+
+/* Buttons */
+button, .button {
+  font-family: 'Pokemon-Classic';
+  font-size: 1em;
+  font-weight: bold;
+  position: relative;
+  background: none;
+  border: none;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+button:hover {
+  color: rgb(15, 72, 230);
+}
+
+/* Tables */
+th {
+  text-align: left;
+}
+
+/* Header */
+header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: #ffffff 2px dashed;
+  padding-bottom: 20px;
+}
+
+header a {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: white;
+}
+
+header a:hover {
+  color: white;
+}
+
+#guitardex-heading {
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+  margin-top: 15px;
+  color: white;
+  text-decoration: none;
+  font-size: 1.5em;
+}
+
+#guitardex-icon, #menu-icon {
+  margin-top: 10px;
+  margin-right: 5px;
+  margin-left: 15px;
+}
+
+/* Navbar */
+#navbar {
+  margin: auto;
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  bottom: 0;
+  padding-bottom: 40px;
+  z-index: 1000;
+}
+
+/* Main content wrapper */
+main {
+  margin: 0px;
+  max-width: 700px;
+  padding: 20px;
+}
+
+/* Headings */
+h1 {
+  margin: 0;
+}
+
+h2 {
+  margin: 0;
+}
+
+h3 {
+  margin: 0;
+}
