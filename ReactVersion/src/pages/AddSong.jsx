@@ -47,7 +47,7 @@ function AddSong() {
       });
 
       if (response.ok) {
-        // Redirect to library after successful add (matching Flask behavior)
+        // Navigate back to library list view
         navigate('/library');
       } else {
         alert("Error adding song");

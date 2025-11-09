@@ -10,6 +10,7 @@ MAKE EVERYTHING TO IPHONE SCALE
 
 have playlists
 
+fix smt about new songs and recent
 
 
 MAKE ALBUM LIKE GYM, WHICH GYM BADGE!

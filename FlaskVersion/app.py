@@ -105,7 +105,20 @@ def songs_add(title):
         songId = int(setup_db.create_new_songId(conn))
 
         setup_db.add_song(conn, songId, status, title, artistName, level, xp, difficulty, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate, addDate)
+
+        # Fetch the newly created song to return to frontend
+        newSongInfo = setup_db.find_song_info(conn, songId)
+        if newSongInfo["status"] != "seen":
+            newSongInfo["xpThreshold"] = xp_threshold(newSongInfo["level"])
+            newSongInfo["totalMinPlayed"] = setup_db.find_sum_minPlayed(conn, songId)
+            newSongInfo["totalSessions"] = setup_db.find_sum_practices(conn, songId)
+
         conn.close()
+
+        return jsonify({
+            'success': True,
+            'newSong': newSongInfo
+        })
     return redirect(url_for('library'))
 
 # EDIT PAGE
@@ -166,6 +179,7 @@ def practices_add(songId):
         return render_template('addPractice.html', songId=songId)
     elif request.method == 'POST':
         minPlayed = float(request.json['minPlayed'])
+        print(request.json['songDuration'])
         songDuration = float(request.json['songDuration'])
         lastPracticeDate = date.today() 
 
@@ -190,15 +204,26 @@ def practices_add(songId):
 
         ## potential ui event to show xp gain or smt here:
 
-
         newLevel, adjustedXp, newStatus = level_up(songInfo, int(songInfo["xp"] + xpGain))
         setup_db.update_song_level(conn, songId, newLevel, adjustedXp, newStatus, lastPracticeDate)
 
         practiceId = setup_db.create_new_practiceId(conn)
         setup_db.add_practice(conn, practiceId, songId, minPlayed, xpGain, lastPracticeDate)
+
+        # Fetch updated song info to return to frontend
+        updatedSongInfo = setup_db.find_song_info(conn, songId)
+        updatedSongInfo["xpThreshold"] = xp_threshold(updatedSongInfo["level"])
+        updatedSongInfo["totalMinPlayed"] = setup_db.find_sum_minPlayed(conn, songId)
+        updatedSongInfo["totalSessions"] = setup_db.find_sum_practices(conn, songId)
+
         conn.close()
 
-    return redirect(url_for('library'))
+        return jsonify({
+            'success': True,
+            'xpGained': xpGain,
+            'newLevel': newLevel,
+            'updatedSong': updatedSongInfo
+        })
 
 ## leveling system
 def days_between(d1, d2):

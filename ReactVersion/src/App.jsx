@@ -4,7 +4,6 @@ import Header from './Header'
 import Navbar from './Nav'
 import Library from './pages/Library'
 import AddSong from './pages/AddSong'
-import AddPractice from './pages/AddPractice'
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
           <Route path="/" element={<Library />} />
           <Route path="/library" element={<Library />} />
           <Route path="/songs/add" element={<AddSong />} />
-          <Route path="/practices/add/:songId" element={<AddPractice />} />
         </Routes>
       </main>
       <Navbar />
