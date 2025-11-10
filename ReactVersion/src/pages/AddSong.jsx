@@ -111,7 +111,6 @@ function AddSong() {
               id="title-input"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="..."
               maxLength={45}
               autoCapitalize="off"
               autoComplete="off"
@@ -128,7 +127,6 @@ function AddSong() {
               id="artistName-input"
               value={artistName}
               onChange={(e) => setArtistName(e.target.value)}
-              placeholder="..."
               maxLength={45}
               autoCapitalize="off"
               autoComplete="off"

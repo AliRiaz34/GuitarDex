@@ -31,9 +31,14 @@ function LibraryListView({
             id="searchbar"
             className="input"
             type="text"
-            placeholder="Whatcha lookin for?"
+            placeholder="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={(e) => {
+              const val = e.target.value;
+              e.target.value = '';
+              e.target.value = val;
+            }}
           />
 
           <div id="sort-menu">

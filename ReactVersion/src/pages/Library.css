@@ -12,17 +12,19 @@
     color: white;
     display: block;
     text-align: center;
-    margin-top: 100px;
+    margin-top: 30px;
     font-size: 1.1em;
-    animation: fadeInOut 2s ease-in-out infinite;
+    animation: slideInFade 0.2s ease-out;
 }
 
-@keyframes fadeInOut {
-    0%, 100% {
-        opacity: 0.5;
+@keyframes slideInFade {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
     }
-    50% {
+    100% {
         opacity: 1;
+        transform: translateX(0);
     }
 }
 
