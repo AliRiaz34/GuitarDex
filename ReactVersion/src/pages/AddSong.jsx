@@ -77,7 +77,7 @@ function AddSong() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="..."
-              maxLength={60}
+              maxLength={45}
               required
             />
           </div>
@@ -90,7 +90,7 @@ function AddSong() {
               value={artistName}
               onChange={(e) => setArtistName(e.target.value)}
               placeholder="..."
-              maxLength={60}
+              maxLength={45}
               required
             />
           </div>
@@ -128,6 +128,14 @@ function AddSong() {
                 onClick={() => setStatus("seen")}
               >
                 Seen
+              </button>
+              <button
+                type="button"
+                value="refined"
+                className={status === "refined" ? "selected" : ""}
+                onClick={() => setStatus("refined")}
+              >
+                Refined
               </button>
               <button
                 type="button"

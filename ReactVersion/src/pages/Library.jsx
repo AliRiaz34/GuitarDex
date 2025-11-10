@@ -14,6 +14,7 @@ function Library() {
   const [sortState, setSortState] = useState('recent');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [sortReversed, setSortReversed] = useState(false);
+  const [entryDirection, setEntryDirection] = useState(null); // Track animation direction
 
   // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
@@ -36,7 +37,7 @@ function Library() {
       setSongs(prevSongs => [newSong, ...prevSongs]);
       setSelectedSong(newSong);
       setPracticeView(null);
-    } else if (location.pathname === '/library') {
+    } else if (location.pathname === '/library' || location.pathname === '/') {
       // Nav button clicked - reset to list view
       setPracticeView(null);
       setSelectedSong(null);
@@ -54,7 +55,16 @@ function Library() {
     let result = 0;
 
     if (sortState === 'recent') {
-      result = new Date(b.lastPracticeDate) - new Date(a.lastPracticeDate);
+      // Use the more recent date between addDate and lastPracticeDate
+      const aRecentDate = Math.max(
+        new Date(a.addDate).getTime(),
+        new Date(a.lastPracticeDate).getTime()
+      );
+      const bRecentDate = Math.max(
+        new Date(b.addDate).getTime(),
+        new Date(b.lastPracticeDate).getTime()
+      );
+      result = bRecentDate - aRecentDate;
     } else if (sortState === 'level') {
       const aSeen = a.status === 'seen';
       const bSeen = b.status === 'seen';
@@ -177,6 +187,10 @@ function Library() {
     const handleNavigateSong = (direction) => {
       const newIndex = currentIndex + direction;
       if (newIndex >= 0 && newIndex < sortedSongs.length) {
+        // Set entry direction based on swipe direction
+        // direction = 1 means next (swipe up), so animate from bottom ('up')
+        // direction = -1 means previous (swipe down), so animate from top ('down')
+        setEntryDirection(direction > 0 ? 'up' : 'down');
         setSelectedSong(sortedSongs[newIndex]);
       }
     };
@@ -192,6 +206,7 @@ function Library() {
           onNavigate={handleNavigateSong}
           hasPrevious={currentIndex > 0}
           hasNext={currentIndex < sortedSongs.length - 1}
+          entryDirection={entryDirection}
         />
       </AnimatePresence>
     );
@@ -209,7 +224,10 @@ function Library() {
       sortMenuOpen={sortMenuOpen}
       setSortMenuOpen={setSortMenuOpen}
       onSortSelect={handleSortSelect}
-      onSelectSong={setSelectedSong}
+      onSelectSong={(song) => {
+        setEntryDirection(null); // Reset direction when selecting from list
+        setSelectedSong(song);
+      }}
       onQuickPractice={openPracticeView}
     />
   );

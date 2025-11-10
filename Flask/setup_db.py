@@ -20,15 +20,15 @@ sql_create_songs_table = """CREATE TABLE IF NOT EXISTS songs (
                                 songId INTEGER PRIMARY KEY,
                                 status TEXT CHECK(status IN ('seen', 'learning', 'refined', 'mastered', 'stale')) DEFAULT 'seen',
                                 title TEXT NOT NULL,
-                                artistName TEXT, 
+                                artistName TEXT,
                                 level INTEGER,
                                 xp FLOAT,
                                 difficulty TEXT CHECK(difficulty IN ('easy', 'normal', 'hard')) DEFAULT 'normal',
                                 songDuration FLOAT,
                                 highestLevelReached INTEGER,
-                                lastPracticeDate DATE,
-                                lastDecayDate DATE,
-                                addDate DATE
+                                lastPracticeDate TEXT,
+                                lastDecayDate TEXT,
+                                addDate TEXT
                             );"""
 
 sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
@@ -36,7 +36,7 @@ sql_create_practices_table = """CREATE TABLE IF NOT EXISTS practices (
                                 songId INTEGER,
                                 minPlayed INTEGER,
                                 xpGained INTEGER,
-                                practiceDate DATE,
+                                practiceDate TEXT,
                                 FOREIGN KEY (songId) REFERENCES songs (songId) ON DELETE CASCADE
                             );"""
 
@@ -73,8 +73,8 @@ def add_song(conn, songId, status, title, artistName, level, xp, difficulty, son
         print(e)
 
 def init_song(conn):
-    init = [(1, "mastered", "grace", "jeffy", 10, 45, "normal", 5, 12, "2025-11-05", "2025-11-05", "2024-11-05"), 
-            (2, "refined", "anything", "adrienne lenker", 10, 21, "easy", 5, 11, "2025-11-05", "2025-11-05", "2023-11-05")
+    init = [(1, "mastered", "grace", "jeffy", 10, 45, "normal", 5, 12, "2025-11-05T14:30:00", "2025-11-05T14:30:00", "2024-11-05T10:00:00"),
+            (2, "refined", "anything", "adrienne lenker", 10, 21, "easy", 5, 11, "2025-11-05T16:45:00", "2025-11-05T16:45:00", "2023-11-05T09:15:00")
             ]
     for c in init:
         add_song(conn, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11])
@@ -98,8 +98,8 @@ def add_practice(conn, practiceId, songId, minPlayed, xpGained, practiceDate):
         print(e)
 
 def init_practice(conn):
-    init = [(1, 2, 50, 30, "2024-02-12"), 
-            (2, 1, 28, 20, "2023-01-24")
+    init = [(1, 2, 50, 30, "2024-02-12T18:20:00"),
+            (2, 1, 28, 20, "2023-01-24T11:45:00")
             ]
     for c in init:
         add_practice(conn, c[0], c[1], c[2], c[3], c[4])

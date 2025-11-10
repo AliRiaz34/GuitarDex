@@ -47,13 +47,13 @@
 
 .song-td-lv{
     padding: 0px;
-    width: 75px;
+    min-width: 75px;
     text-align: center;
     padding-bottom: 20px;
 }
 
 .song-title {
-    max-width: 15ch; /* 15 characters width */
+    max-width: 14ch; /* 14 characters width */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -63,6 +63,10 @@
     font-size: 0.7em;
     font-style: italic;
     margin-left: 20px;
+    max-width: 19ch; /* 19 characters width */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Sort menu */
@@ -115,7 +119,7 @@
 /* Song view */
 #song-view {
     padding: 15px;
-    min-height: 77vh;
+    min-height: 70vh;
 }
 
 #song-head-div-1 {
@@ -176,6 +180,12 @@
 
 #title {
     margin-bottom: 0px;
+    font-size: 1.3em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
 }
 
 #artistName {
@@ -184,8 +194,13 @@
     margin-bottom: 0px;
     height: min-content;
     font-weight: lighter;
-    font-size: 1em;
+    font-size: 0.9em;
     font-style: italic;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: calc(100% - 100px);
 }
 
 #duration {
@@ -193,6 +208,8 @@
     font-weight: lighter;
     font-style: italic;
     height: min-content;
+    min-width: 70px;
+    text-align: right;
 }
 
 #last-practice {
@@ -235,10 +252,12 @@
     vertical-align: top;
 }
 
-#song-bottom-buttons-div {
-    margin-top: 200px;
+#practice-button {
+    margin: auto;
+    margin-top: 30vw;
+    display: block;
     text-align: center;
-    font-size: 1.3em;
+    font-size: 1.2em;
 }
 
 #practice-button-link {
@@ -283,13 +302,16 @@
     gap: 20px 40px;
     font-weight: lighter;
     font-size: 0.9em;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .stat-item {
     gap: 10px;
     text-align: center;
-    min-width: 172px;
+    min-width: 0;
     font-size: 1.1em;
+    overflow: hidden;
 }
 
 .stat-date-item {

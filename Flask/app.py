@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session, jsonify
+from flask import Flask, request, send_from_directory, jsonify
 import setup_db, re
 import os
 from datetime import date, datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../ReactVersion/dist', static_url_path='')
 BASE_DIR = os.getcwd()
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/images')
 
@@ -24,7 +24,7 @@ MASTERED_DECAY_GRACE_PERIOD_DAYS = 90
 DECAY_RATE_PER_DAY = 0.05  
 
 # Level Thresholds
-MAX_LEVEL_BEFORE_REFINED = 15  
+MAX_LEVEL_BEFORE_REFINED = 10  
 MAX_LEVEL_BEFORE_MASTERY = 25  
 
 # Difficulty Multipliers
@@ -46,7 +46,8 @@ def serve_image(filename):
 ### INDEX ###
 @app.route("/")
 def index():
-    return render_template('library.html')
+    # Serve React app
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route("/songs", methods=['GET'])
 def songs_info():
@@ -62,22 +63,16 @@ def songs_info():
 
     return jsonify(songsInfo)
 
-@app.route("/library", methods=['GET'])
-def library():
-    return render_template('library.html')
-
-@app.route("/songs/add", defaults={'title': None}, methods=['GET', 'POST'])
-@app.route("/songs/add/<string:title>", methods=['GET', 'POST'])
+@app.route("/songs/add", defaults={'title': None}, methods=['POST'])
+@app.route("/songs/add/<string:title>", methods=['POST'])
 def songs_add(title):
-    if request.method == 'GET':
-        return render_template('addSong.html', title=title)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         title = request.json['title']
         artistName = request.json['artistName']
         difficulty = request.json['difficulty']
         status = request.json['status']
 
-        addDate = date.today()
+        addDate = datetime.now().isoformat()
         songDuration = None
 
         if status == "seen":
@@ -87,19 +82,23 @@ def songs_add(title):
             lastDecayDate = None
             lastPracticeDate = None
         elif status == "mastered":
-            level = 25
+            level = MAX_LEVEL_BEFORE_MASTERY
             xp = 0
             highestLevelReached = level
-            lastDecayDate = date.today()
-            lastPracticeDate = date.today()
+            lastDecayDate = datetime.now().isoformat()
+            lastPracticeDate = datetime.now().isoformat()
+        elif status == "refined":
+            level = MAX_LEVEL_BEFORE_REFINED
+            xp = 0
+            highestLevelReached = level
+            lastDecayDate = datetime.now().isoformat()
+            lastPracticeDate = datetime.now().isoformat()
             
         if len(title) < 1:
-            flash("Title has to be longer than 1.", 'error')
-            return render_template("addSong.html")
-        
+            return jsonify({'success': False, 'error': 'Title has to be longer than 1.'}), 400
+
         if len(artistName) < 1:
-            flash("Artist name has to be longer than 1.", 'error')
-            return render_template("addSong.html")
+            return jsonify({'success': False, 'error': 'Artist name has to be longer than 1.'}), 400
 
         conn = get_db_connection()
         songId = int(setup_db.create_new_songId(conn))
@@ -119,7 +118,6 @@ def songs_add(title):
             'success': True,
             'newSong': newSongInfo
         })
-    return redirect(url_for('library'))
 
 # EDIT PAGE
 @app.route("/songs/<int:songId>/info", methods=['GET', 'POST'])
@@ -140,30 +138,24 @@ def song_info(songId):
         setup_db.delete_song(conn, songId)
         conn.commit()
         conn.close()
-        return redirect(url_for('library'))
+        return jsonify({'success': True})
 
-@app.route("/songs/<int:songId>/edit", methods=['GET', 'POST'])
+@app.route("/songs/<int:songId>/edit", methods=['POST'])
 def song_edit(songId):
-    if request.method == 'GET':
-        conn = get_db_connection()
-        songInfo = setup_db.find_song_info(conn, songId)
-        return render_template('editSong.html', songId=songId, songInfo=songInfo)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         title = request.json['title']
         artistName = request.json['artistName']
 
         if len(title) < 1:
-            flash("Title has to be longer than 1.", 'error')
-            return render_template("addSong.html")
-        
+            return jsonify({'success': False, 'error': 'Title has to be longer than 1.'}), 400
+
         if len(artistName) < 1:
-            flash("Artist name has to be longer than 1.", 'error')
-            return render_template("signup.html")
+            return jsonify({'success': False, 'error': 'Artist name has to be longer than 1.'}), 400
 
         conn = get_db_connection()
         setup_db.update_song_info(conn, songId, title, artistName)
         conn.close()
-    return redirect(url_for('library'))
+        return jsonify({'success': True})
 
 ## PRACTICE
 @app.route("/practices", methods=['GET'])
@@ -172,31 +164,31 @@ def practices_info():
     practicesInfo = setup_db.find_practices_info(conn)
     return jsonify(practicesInfo)
 
-@app.route("/practices/add/<int:songId>", methods=['GET', 'POST'])
+@app.route("/practices/add/<int:songId>", methods=['POST'])
 def practices_add(songId):
-    if request.method == 'GET':
-        conn = get_db_connection()
-        return render_template('addPractice.html', songId=songId)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         minPlayed = float(request.json['minPlayed'])
         print(request.json['songDuration'])
         songDuration = float(request.json['songDuration'])
-        lastPracticeDate = date.today() 
+        lastPracticeDate = datetime.now().isoformat()
 
         conn = get_db_connection()
         songInfo = setup_db.find_song_info(conn, songId)
 
-        # if first practice on seen song, you have to initialize 
+        # if first practice on seen song, you have to initialize
         if songInfo["status"] == "seen":
             status = 'learning'
             level = 1
             xp = 0
             highestLevelReached = level
-            lastDecayDate = date.today()
+            lastDecayDate = datetime.now().isoformat()
             setup_db.update_song(conn, songId, status, level, xp, songDuration, highestLevelReached, lastPracticeDate, lastDecayDate)
 
-        # if first practice with mastered song
+        # if first practice with mastered or refined song
         if (songInfo["status"] == "mastered") and (songInfo["songDuration"] == None):
+            setup_db.update_songDuration(conn, songId, songDuration)
+        
+        if (songInfo["status"] == "refined") and (songInfo["songDuration"] == None):
             setup_db.update_songDuration(conn, songId, songDuration)
 
         songInfo = setup_db.find_song_info(conn, songId)
@@ -227,6 +219,13 @@ def practices_add(songId):
 
 ## leveling system
 def days_between(d1, d2):
+    # Handle both ISO datetime strings (YYYY-MM-DDTHH:MM:SS) and date strings (YYYY-MM-DD)
+    # Extract just the date portion if it's a datetime string
+    if isinstance(d1, str):
+        d1 = d1.split('T')[0]
+    if isinstance(d2, str):
+        d2 = d2.split('T')[0]
+
     d1 = datetime.strptime(d1, "%Y-%m-%d")
     d2 = datetime.strptime(d2, "%Y-%m-%d")
     return abs((d2 - d1).days)
@@ -235,7 +234,8 @@ def xp_threshold(level):
     return int(XP_BASE_AMOUNT * (level ** XP_SCALING_EXPONENT))
 
 def xp_gain(songInfo, minPlayed):
-    daysSinceSongPracticed = days_between(str(date.today()), songInfo["lastPracticeDate"])
+    today = datetime.now().date().isoformat()
+    daysSinceSongPracticed = days_between(today, songInfo["lastPracticeDate"])
     difficulty = songInfo["difficulty"]
     songDuration = songInfo["songDuration"]
     highestLevelReached = songInfo["highestLevelReached"]
@@ -275,8 +275,9 @@ def apply_decay(songId):
     if status == "seen":
         return
 
-    daysSinceSongPracticed = days_between(str(date.today()), setup_db.find_lastPracticeDate(conn, songId))
-    daysSinceDecay = days_between(str(date.today()), setup_db.find_lastDecayDate(conn, songId))
+    today = datetime.now().date().isoformat()
+    daysSinceSongPracticed = days_between(today, setup_db.find_lastPracticeDate(conn, songId))
+    daysSinceDecay = days_between(today, setup_db.find_lastDecayDate(conn, songId))
 
     if status == "mastered":
         if daysSinceSongPracticed <= MASTERED_DECAY_GRACE_PERIOD_DAYS:
@@ -310,7 +311,7 @@ def apply_decay(songId):
         status = "learning"
 
     setup_db.update_song_level(conn, songId, level, adjustedXp, status)
-    setup_db.update_song_lastDecayDate(conn, songId, date.today())
+    setup_db.update_song_lastDecayDate(conn, songId, datetime.now().isoformat())
     return
     
    

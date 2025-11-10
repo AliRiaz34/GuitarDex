@@ -69,7 +69,7 @@ function PracticeView({ song, onSubmit, onBack }) {
   return (
     <motion.div
       id="practice-view"
-      style={{ minHeight: '77vh', padding: '15px' }}
+      style={{ minHeight: '60vh', padding: '15px' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={getExitAnimation()}
@@ -84,7 +84,7 @@ function PracticeView({ song, onSubmit, onBack }) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: song.songDuration === null ? 'space-between' : 'center',
-          minHeight: '70vh'
+          minHeight: '60vh'
         }}
       >
         <h1 id="song-practice-title">{song.title}</h1>

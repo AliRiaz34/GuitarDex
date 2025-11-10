@@ -15,14 +15,12 @@ body, p, span, div, h1, h2, h3, h4, h5, h6, a, li {
 body {
   font-family: 'Pokemon-Classic', system-ui, sans-serif;
   max-width: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   margin: 0;
   padding: 0;
   color: rgba(255, 255, 255, 0.87);
   background-color: #0e0e13;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Remove number input spinners */
@@ -106,15 +104,14 @@ header::after {
 
 /* Navbar */
 #navbar {
-  width: 90%;
   padding-top: 10px;
   display: flex;
   justify-content: space-between;
   position: fixed;
   padding-bottom: 15px;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0%;
+  right: 0%;
   z-index: 1000;
   border-width: 20px;
   border-style: solid;
@@ -153,6 +150,8 @@ header::after {
 /* Main content wrapper */
 main {
   margin: 0px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Headings */

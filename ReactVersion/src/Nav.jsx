@@ -6,7 +6,7 @@ function Navbar() {
       <NavLink id='navlink-1' to="/songs/add" className={({isActive}) => isActive ? 'active' : ''}>
         SPOT
       </NavLink>
-      <NavLink id='navlink-2' to="/library" className={({isActive}) => isActive ? 'active' : ''}>
+      <NavLink id='navlink-2' to="/" className={({isActive}) => isActive ? 'active' : ''}>
         LIBRARY
       </NavLink>
     </nav>

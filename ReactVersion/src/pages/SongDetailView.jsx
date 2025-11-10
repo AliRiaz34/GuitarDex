@@ -201,143 +201,142 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
   };
 
   return (
-    <motion.div
-      key={song.songId}
-      id="song-view"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={getExitAnimation()}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      <div id="song-top-div">
-        <div id="song-head-div-1">
-          <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
-          <div id="song-menu-container" ref={menuRef}>
-            <img
-              id="song-menu-icon"
-              src='public/images/menu.png'
-              onClick={() => setMenuOpen(!menuOpen)}
-              alt="menu"
-            />
-            {menuOpen && (
-              <div id="song-menu-dropdown">
-                <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
-              </div>
+    <>
+      <motion.div
+        key={song.songId}
+        id="song-view"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={getExitAnimation()}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <div id="song-top-div">
+          <div id="song-head-div-1">
+            <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
+            <div id="song-menu-container" ref={menuRef}>
+              <img
+                id="song-menu-icon"
+                src='public/images/menu.png'
+                onClick={() => setMenuOpen(!menuOpen)}
+                alt="menu"
+              />
+              {menuOpen && (
+                <div id="song-menu-dropdown">
+                  <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <h2 id="title">{song.title}</h2>
+          <div id="song-head-div-2">
+            <h3 id="artistName">{song.artistName}</h3>
+            {song.songDuration != null && (
+              <p id="duration">{song.songDuration} min</p>
             )}
           </div>
-        </div>
-        <h2 id="title">{song.title}</h2>
-        <div id="song-head-div-2">
-          <h3 id="artistName">{song.artistName}</h3>
-          {song.songDuration != null && (
-            <p id="duration">{song.songDuration} min</p>
+          {song.level == null && (
+            <p id="empty-info-p">learn the song already!</p>
           )}
         </div>
-        {song.level == null && (
-          <p id="empty-info-p">learn the song already!</p>
-        )}
-      </div>
 
-      {song.level != null && (
-        <>
-          <div id="song-xp-div" style={{ position: 'relative' }}>
-            <p id="level">
-              Lv {Math.floor(displayLevel)}
-              {showLevelUp && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 0, 1, 0, 1, 0] }}
-                  transition={{ duration: 2, times: [0, 0.14, 0.28, 0.42, 0.56, 0.70, 1] }}
-                >
-                  +
-                </motion.span>
-              )}
-            </p>
-            <div id="xp-container">
-              <div
-                id="xp-bar"
-                style={{
-                  width: `${xpPercent}%`,
-                  transition: 'width 1s ease-out'
-                }}
-              ></div>
-            </div>
-            <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
-
-            {/* XP Gain Indicator */}
-            <AnimatePresence>
-              {xpGain && (
-                <motion.div
-                  initial={{ opacity: 0, y: 0 }}
-                  animate={{ opacity: 1, y: -30 }}
-                  exit={{ opacity: 0, y: -50 }}
-                  transition={{ duration: 0.5 }}
+        {song.level != null && (
+          <>
+            <div id="song-xp-div" style={{ position: 'relative' }}>
+              <p id="level">
+                Lv {Math.floor(displayLevel)}
+                {showLevelUp && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 0, 1, 0, 1, 0] }}
+                    transition={{ duration: 2, times: [0, 0.14, 0.28, 0.42, 0.56, 0.70, 1] }}
+                  >
+                    +
+                  </motion.span>
+                )}
+              </p>
+              <div id="xp-container">
+                <div
+                  id="xp-bar"
                   style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    color: '#ffffffff',
-                    pointerEvents: 'none',
-                    fontSize: '0.8em'
+                    width: `${xpPercent}%`,
+                    transition: 'width 1s ease-out'
                   }}
-                >
-                  +{xpGain} XP
-                </motion.div>
-              )}
-            </AnimatePresence>
+                ></div>
+              </div>
+              <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
 
+              {/* XP Gain Indicator */}
+              <AnimatePresence>
+                {xpGain && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: -30 }}
+                    exit={{ opacity: 0, y: -50 }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      color: '#ffffffff',
+                      pointerEvents: 'none',
+                      fontSize: '0.8em'
+                    }}
+                  >
+                    +{xpGain} XP
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+            </div>
+
+            <div className="song-stats-grid">
+              <div className="stat-item">
+                <span className="stat-label"></span>
+                <span className="stat-value">{song.status.toUpperCase()}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label"></span>
+                <span className="stat-value">{song.difficulty.toUpperCase()}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-value">
+                  {song.totalSessions}
+                </span>
+                <span className="stat-label"> {song.totalSessions === 1 ? 'session' : 'sessions'}</span>
+              </div>
+              <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
+                <span className="stat-value">
+                  {showHours
+                    ? ((song.totalMinPlayed != null ? song.totalMinPlayed : 0) / 60).toFixed(1)
+                    : (song.totalMinPlayed != null ? song.totalMinPlayed : 0)}
+                </span>
+                <span className="stat-label"> {showHours ? 'hr' : 'min'}</span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {showDeleteConfirm && (
+          <div id="delete-confirm-overlay">
+            <div id="delete-confirm-widget">
+              <p id="delete-confirm-text">Delete {song.title}?</p>
+              <div id="delete-confirm-buttons">
+                <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
+                  cancel
+                </button>
+                <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
+                  confirm
+                </button>
+              </div>
+            </div>
           </div>
-
-          <div className="song-stats-grid">
-            <div className="stat-item">
-              <span className="stat-label"></span>
-              <span className="stat-value">{song.status.toUpperCase()}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label"></span>
-              <span className="stat-value">{song.difficulty.toUpperCase()}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">
-                {song.totalSessions}
-              </span>
-              <span className="stat-label"> {song.totalSessions === 1 ? 'session' : 'sessions'}</span>
-            </div>
-            <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
-              <span className="stat-value">
-                {showHours
-                  ? ((song.totalMinPlayed != null ? song.totalMinPlayed : 0) / 60).toFixed(1)
-                  : (song.totalMinPlayed != null ? song.totalMinPlayed : 0)}
-              </span>
-              <span className="stat-label"> {showHours ? 'hr' : 'min'}</span>
-            </div>
-          </div>
-        </>
-      )}
-
-      <div id="song-bottom-buttons-div">
-        <button onClick={onPractice}>PRACTICE</button>
-      </div>
-
-      {showDeleteConfirm && (
-        <div id="delete-confirm-overlay">
-          <div id="delete-confirm-widget">
-            <p id="delete-confirm-text">Delete {song.title}?</p>
-            <div id="delete-confirm-buttons">
-              <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
-                cancel
-              </button>
-              <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
-                confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </motion.div>
+        )}
+        <button id="practice-button" onClick={onPractice}>PRACTICE</button>
+      </motion.div>
+    </>
   );
 }
 

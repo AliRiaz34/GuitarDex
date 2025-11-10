@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import './Library.css';
 
 function LibraryListView({
@@ -41,20 +41,33 @@ function LibraryListView({
               <p className="sort-p">↓↑</p>
             </div>
 
-            {sortMenuOpen && (
-              <div id="sort-menu-text-div">
-                <p className="sort-menu-p-state" onClick={() => onSortSelect('recent')}>recent</p>
-                <p className="sort-menu-p-state" onClick={() => onSortSelect('level')}>level</p>
-                <p className="sort-menu-p-state" onClick={() => onSortSelect('status')}>status</p>
-                <p className="sort-menu-p-state" onClick={() => onSortSelect('difficulty')}>difficulty</p>
-              </div>
-            )}
-
-            {!sortMenuOpen && (
-              <p className="sort-p-state" onClick={() => onSortSelect(sortState)}>
-                {sortState} {sortReversed ? '↑' : '↓'}
-              </p>
-            )}
+            <AnimatePresence mode="wait">
+              {sortMenuOpen ? (
+                <motion.div
+                  id="sort-menu-text-div"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                >
+                  <p className="sort-menu-p-state" onClick={() => onSortSelect('recent')}>recent</p>
+                  <p className="sort-menu-p-state" onClick={() => onSortSelect('level')}>level</p>
+                  <p className="sort-menu-p-state" onClick={() => onSortSelect('status')}>status</p>
+                  <p className="sort-menu-p-state" onClick={() => onSortSelect('difficulty')}>difficulty</p>
+                </motion.div>
+              ) : (
+                <motion.p
+                  className="sort-p-state"
+                  onClick={() => onSortSelect(sortState)}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                >
+                  {sortState} {sortReversed ? '↑' : '↓'}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </>
       )}
