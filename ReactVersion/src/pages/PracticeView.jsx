@@ -104,7 +104,7 @@ function PracticeView({ song, onSubmit, onBack }) {
             id="minPlayed-input"
             value={minPlayed}
             onChange={(e) => setMinPlayed(e.target.value)}
-            placeholder="..."
+            inputMode="numeric" 
             min="1"
             max="999"
             required
@@ -126,7 +126,7 @@ function PracticeView({ song, onSubmit, onBack }) {
               id="songDuration-input"
               value={songDuration}
               onChange={(e) => setSongDuration(e.target.value)}
-              placeholder="..."
+              inputMode="numeric" 
               min="0"
               max="30"
               required

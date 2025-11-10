@@ -24,6 +24,8 @@ improve page change animations
 
 ### long term IDEA
 
+fix low battery mode making animations choppy
+
 fix guitardex.vercel.app css for desktop too
 
 timer in practice page
