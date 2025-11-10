@@ -136,9 +136,9 @@
 #song-menu-icon {
     margin: 0px;
     padding-top: 2px;
+    cursor: pointer;
     width: 40px;
     height: 30px;
-    cursor: pointer;
 }
 
 #song-menu-dropdown {
@@ -307,18 +307,10 @@
 }
 
 .stat-item {
-    gap: 10px;
+    gap: 5px;
     text-align: center;
-    min-width: 0;
     font-size: 1.1em;
     overflow: hidden;
-}
-
-.stat-date-item {
-    display: flex;
-    gap: 10px;
-    grid-column: 1 / -1;
-    margin-top: 10px;
 }
 
 .stat-label {
@@ -326,6 +318,7 @@
 }
 
 .stat-value {
+    min-width: 40px;
     font-style: italic;
     color: #b0b0b0;
 }

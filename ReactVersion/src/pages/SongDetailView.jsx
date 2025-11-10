@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { deleteSong } from '../utils/db';
 import './Library.css';
 
 function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPrevious, hasNext }) {
@@ -165,20 +166,9 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
   const handleDeleteConfirm = async () => {
     try {
-      const response = await fetch(`/songs/${song.songId}/info`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: '_method=DELETE'
-      });
-
-      if (response.ok) {
-        setShowDeleteConfirm(false);
-        onDelete(song.songId);
-      } else {
-        alert('Error deleting song');
-      }
+      await deleteSong(song.songId);
+      setShowDeleteConfirm(false);
+      onDelete(song.songId);
     } catch (error) {
       console.error('Error:', error);
       alert('Error deleting song');
@@ -219,10 +209,10 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
             <div id="song-menu-container" ref={menuRef}>
               <img
                 id="song-menu-icon"
-                src='public/images/menu.png'
                 onClick={() => setMenuOpen(!menuOpen)}
-                alt="menu"
-              />
+                src='/images/menu.png'
+              >
+              </img>
               {menuOpen && (
                 <div id="song-menu-dropdown">
                   <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
@@ -305,7 +295,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
                 <span className="stat-value">
                   {song.totalSessions}
                 </span>
-                <span className="stat-label"> {song.totalSessions === 1 ? 'session' : 'sessions'}</span>
+                <span className="stat-label"> {song.totalSessions === 1 ? 'drill' : 'drills'}</span>
               </div>
               <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
                 <span className="stat-value">

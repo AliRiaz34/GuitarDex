@@ -39,10 +39,6 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  color: rgb(15, 72, 230);
-}
-
 input {
     color: rgb(145, 143, 143);
 }
@@ -144,7 +140,35 @@ header::after {
 
 #navlink-1, #navlink-2:visited {
   text-decoration: none;
-  color: rgb(231, 226, 226)
+  color: rgb(114, 114, 114);
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+/* Active navigation state */
+#navbar .active {
+  color: rgb(255, 255, 255);
+  font-weight: bold;
+}
+
+#navbar .active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* Main content wrapper */

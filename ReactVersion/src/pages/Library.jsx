@@ -4,6 +4,8 @@ import { AnimatePresence } from 'framer-motion';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
+import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong } from '../utils/db';
+import { xpThreshold, applyDecay, updateSongWithPractice } from '../utils/levelingSystem';
 import './Library.css';
 
 function Library() {
@@ -19,14 +21,45 @@ function Library() {
   // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
-  // Fetch songs
+  // Fetch songs from IndexedDB
   useEffect(() => {
-    fetch('/songs')
-      .then(response => response.json())
-      .then(songsInfo => {
-        setSongs(songsInfo);
-      })
-      .catch(error => console.error('Error fetching songs:', error));
+    async function loadSongs() {
+      try {
+        const songsInfo = await getAllSongs();
+
+        // Apply decay and calculate additional fields for each song
+        const processedSongs = await Promise.all(
+          songsInfo.map(async (song) => {
+            // Apply decay
+            const decayedSong = applyDecay(song);
+
+            // Update song in DB if decay changed anything
+            if (
+              decayedSong.xp !== song.xp ||
+              decayedSong.level !== song.level ||
+              decayedSong.status !== song.status
+            ) {
+              await updateSong(decayedSong);
+            }
+
+            // Add calculated fields for non-seen songs
+            if (decayedSong.status !== "seen") {
+              decayedSong.xpThreshold = xpThreshold(decayedSong.level);
+              decayedSong.totalMinPlayed = await getTotalMinutesPlayed(decayedSong.songId);
+              decayedSong.totalSessions = await getTotalPracticeSessions(decayedSong.songId);
+            }
+
+            return decayedSong;
+          })
+        );
+
+        setSongs(processedSongs);
+      } catch (error) {
+        console.error('Error loading songs:', error);
+      }
+    }
+
+    loadSongs();
   }, []);
 
   // Handle navigation state (new song from AddSong, or reset from nav button)
@@ -116,35 +149,42 @@ function Library() {
     const song = practiceView.song;
 
     try {
-      const response = await fetch(`/practices/add/${song.songId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          minPlayed: minPlayed,
-          songDuration: songDuration,
-        })
+      // Update song with practice using leveling system
+      const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
+
+      // Save practice to IndexedDB
+      const practiceId = await getNextPracticeId();
+      await addPractice({
+        practiceId,
+        songId: song.songId,
+        minPlayed: parseFloat(minPlayed),
+        xpGain,
+        practiceDate: new Date().toISOString()
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Update the song in our songs list
-        setSongs(prevSongs => prevSongs.map(s =>
-          s.songId === song.songId ? data.updatedSong : s
-        ));
-        // Close practice view and show updated song detail if from song view
-        setPracticeView(null);
-        if (practiceView.fromSongView) {
-          // Pass both old and new song data for animation
-          setSelectedSong({
-            ...data.updatedSong,
-            _previousXp: song.xp,
-            _previousLevel: song.level
-          });
-        }
-      } else {
-        alert("Error adding practice");
+      // Update song in IndexedDB
+      await updateSong(updatedSong);
+
+      // Calculate additional fields for updated song
+      updatedSong.xpThreshold = xpThreshold(updatedSong.level);
+      updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
+      updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
+
+      // Update the song in our songs list
+      setSongs(prevSongs => prevSongs.map(s =>
+        s.songId === song.songId ? updatedSong : s
+      ));
+
+      // Close practice view and show updated song detail if from song view
+      setPracticeView(null);
+      if (practiceView.fromSongView) {
+        // Pass both old and new song data for animation
+        // For first practice of a seen song, default to xp:0 and level:1
+        setSelectedSong({
+          ...updatedSong,
+          _previousXp: song.xp ?? 0,
+          _previousLevel: song.level ?? 1
+        });
       }
     } catch (error) {
       console.error("Error:", error);

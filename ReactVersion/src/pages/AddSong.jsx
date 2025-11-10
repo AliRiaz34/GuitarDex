@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../utils/db';
+import { xpThreshold } from '../utils/levelingSystem';
 import './AddSong.css';
 
 function AddSong() {
@@ -34,25 +36,58 @@ function AddSong() {
     }
 
     try {
-      const response = await fetch(`/songs/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: title,
-          artistName: artistName,
-          difficulty: difficulty,
-          status
-        })
-      });
+      const songId = await getNextSongId();
+      const addDate = new Date().toISOString();
+      const songDuration = null;
 
-      if (response.ok) {
-        // Navigate back to library list view
-        navigate('/library');
-      } else {
-        alert("Error adding song");
+      let level, xp, highestLevelReached, lastDecayDate, lastPracticeDate;
+
+      if (status === "seen") {
+        level = null;
+        xp = null;
+        highestLevelReached = null;
+        lastDecayDate = null;
+        lastPracticeDate = null;
+      } else if (status === "mastered") {
+        level = 25; // MAX_LEVEL_BEFORE_MASTERY
+        xp = 0;
+        highestLevelReached = level;
+        lastDecayDate = addDate;
+        lastPracticeDate = addDate;
+      } else if (status === "refined") {
+        level = 10; // MAX_LEVEL_BEFORE_REFINED
+        xp = 0;
+        highestLevelReached = level;
+        lastDecayDate = addDate;
+        lastPracticeDate = addDate;
       }
+
+      const newSong = {
+        songId,
+        status,
+        title,
+        artistName,
+        level,
+        xp,
+        difficulty,
+        songDuration,
+        highestLevelReached,
+        lastPracticeDate,
+        lastDecayDate,
+        addDate
+      };
+
+      await addSong(newSong);
+
+      // Add calculated fields for non-seen songs
+      if (status !== "seen") {
+        newSong.xpThreshold = xpThreshold(newSong.level);
+        newSong.totalMinPlayed = await getTotalMinutesPlayed(songId);
+        newSong.totalSessions = await getTotalPracticeSessions(songId);
+      }
+
+      // Navigate back to library with the new song
+      navigate('/library', { state: { newSong } });
     } catch (error) {
       console.error("Error:", error);
       alert("Error adding song");
