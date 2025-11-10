@@ -95,8 +95,12 @@ function LibraryListView({
             </tbody>
           </table>
         ) : (
-          <Link id="seen-a-new-song" to={`/songs/add?title=${encodeURIComponent(searchQuery)}`}>
-            Seen a new song?
+          <Link
+            id="seen-a-new-song"
+            className={allSongs.length === 0 ? "empty-library" : ""}
+            to={`/songs/add?title=${encodeURIComponent(searchQuery)}`}
+          >
+            {allSongs.length === 0 ? "You dont have any songs" : "Seen a new song?"}
           </Link>
         )}
       </div>

@@ -22,6 +22,11 @@
     -webkit-font-smoothing: antialiased;
 }
 
+#seen-a-new-song.empty-library {
+    margin-top: 35vh;
+    font-size: 1.2em;
+}
+
 @keyframes slideInFade {
     0% {
         opacity: 0;

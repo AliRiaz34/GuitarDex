@@ -104,7 +104,7 @@ function AddSong() {
       <form id="song-form" onSubmit={handleSubmit}>
         <div id="add-input-div">
           <div id="title-input-div">
-            <label htmlFor="title-input" className="form-label">Whats the song called?</label>
+            <label htmlFor="title-input" className="form-label">whats the song called?</label>
             <input
               type="text"
               className="song-input"
@@ -120,7 +120,7 @@ function AddSong() {
             />
           </div>
           <div id="artistName-input-div">
-            <label htmlFor="artistName-input" className="form-label">Who played it?</label>
+            <label htmlFor="artistName-input" className="form-label">who played it?</label>
             <input
               type="text"
               className="song-input"

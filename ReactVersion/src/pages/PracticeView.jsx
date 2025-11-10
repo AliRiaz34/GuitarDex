@@ -88,7 +88,7 @@ function PracticeView({ song, onSubmit, onBack }) {
         <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
         <h1 id="song-practice-title">{song.title}</h1>
         <div id="minPlayed-input-div">
-          <label className="form-label">How long did you play? </label>
+          <label className="form-label">how long did you play? </label>
           <div className="quick-select-button-div">
             <button onClick={() => setMinPlayed(15)} type="button" className="quick-select-button">15</button>
             <p className="between-button-line">|</p>
@@ -112,7 +112,7 @@ function PracticeView({ song, onSubmit, onBack }) {
         </div>
         {song.songDuration === null && (
           <div id="duration-div">
-            <label className="form-label">How long is the song?</label>
+            <label className="form-label">how long is the song?</label>
             <div className="quick-select-button-div">
               <button onClick={() => setSongDuration(3)} type="button" className="quick-select-button">3</button>
               <p className="between-button-line"> |</p>

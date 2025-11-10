@@ -235,7 +235,9 @@ function Library() {
         // direction = 1 means next (swipe up), so animate from top ('up')
         // direction = -1 means previous (swipe down), so animate from bottom ('down')
         setEntryDirection(direction > 0 ? 'up' : 'down');
-        setSelectedSong(sortedSongs[newIndex]);
+        // Remove any previous animation properties when navigating
+        const { _previousXp, _previousLevel, _fromPractice, ...cleanSong } = sortedSongs[newIndex];
+        setSelectedSong(cleanSong);
       }
     };
 
@@ -270,7 +272,9 @@ function Library() {
       onSortSelect={handleSortSelect}
       onSelectSong={(song) => {
         setEntryDirection(null); // Reset direction when selecting from list
-        setSelectedSong(song);
+        // Ensure we don't have leftover animation properties
+        const { _previousXp, _previousLevel, _fromPractice, ...cleanSong } = song;
+        setSelectedSong(cleanSong);
       }}
       onQuickPractice={openPracticeView}
     />

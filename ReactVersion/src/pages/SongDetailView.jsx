@@ -33,6 +33,10 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
   // XP animation effect
   useEffect(() => {
+    // Reset animation states first
+    setXpGain(null);
+    setShowLevelUp(false);
+
     // Check if we have previous XP data (meaning we just came back from practice)
     if (song._previousXp != null && song._previousXp !== song.xp && song.xp != null) {
       const xpDiff = song.xp - song._previousXp;

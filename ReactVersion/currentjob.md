@@ -2,25 +2,6 @@
 
 # phone transfer debugs!
 
-seen any new songs should be animated
-
-have similar inputs to practice, start cursor at end!
-- library, song add
-
-improve page change animations
-- delay
-- direction
-
-
-
-
-
-
-
-
-
-
-
 
 ### long term IDEA
 
@@ -33,7 +14,6 @@ timer in practice page
 MAKE ALBUM LIKE GYM, WHICH GYM BADGE!
 
 validate name and artist being empty
-
 
 be able to pin song in library
 
