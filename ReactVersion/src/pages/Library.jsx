@@ -8,7 +8,7 @@ import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPracti
 import { xpThreshold, applyDecay, updateSongWithPractice } from '../utils/levelingSystem';
 import './Library.css';
 
-function Library({ onSongsChange }) {
+function Library() {
   const location = useLocation();
   const [songs, setSongs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,31 +54,20 @@ function Library({ onSongsChange }) {
         );
 
         setSongs(processedSongs);
-        // Notify parent about songs count change
-        if (onSongsChange) {
-          onSongsChange(processedSongs.length > 0);
-        }
       } catch (error) {
         console.error('Error loading songs:', error);
       }
     }
 
     loadSongs();
-  }, [onSongsChange]);
+  }, []);
 
   // Handle navigation state (new song from AddSong, or reset from nav button)
   useEffect(() => {
     if (location.state?.newSong) {
       // New song added - add to list and show detail view
       const newSong = location.state.newSong;
-      setSongs(prevSongs => {
-        const updatedSongs = [newSong, ...prevSongs];
-        // Notify parent that we now have songs
-        if (onSongsChange) {
-          onSongsChange(true);
-        }
-        return updatedSongs;
-      });
+      setSongs(prevSongs => [newSong, ...prevSongs]);
       setSelectedSong(newSong);
       setPracticeView(null);
     } else if (location.pathname === '/library' || location.pathname === '/') {
@@ -86,7 +75,7 @@ function Library({ onSongsChange }) {
       setPracticeView(null);
       setSelectedSong(null);
     }
-  }, [location, onSongsChange]);
+  }, [location]);
 
   // Filter songs based on search
   const filteredSongs = songs.filter(song =>
@@ -214,14 +203,7 @@ function Library({ onSongsChange }) {
 
   const handleSongDelete = (songId) => {
     // Remove song from the list
-    setSongs(prevSongs => {
-      const updatedSongs = prevSongs.filter(s => s.songId !== songId);
-      // Notify parent about songs count change
-      if (onSongsChange) {
-        onSongsChange(updatedSongs.length > 0);
-      }
-      return updatedSongs;
-    });
+    setSongs(prevSongs => prevSongs.filter(s => s.songId !== songId));
     // Close the song detail view
     setSelectedSong(null);
   };

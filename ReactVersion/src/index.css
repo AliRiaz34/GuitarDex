@@ -21,6 +21,7 @@ body {
   background-color: #0e0e13;
   min-height: 100vh;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 /* Remove number input spinners */
@@ -69,9 +70,9 @@ th {
   justify-content: space-between;
   position: fixed;
   padding-bottom: 15px;
-  bottom: 0;
-  left: 0%;
-  right: 0%;
+  bottom: 2%;
+  left: 5%;
+  right: 5%;
   z-index: 1000;
   border-width: 20px;
   border-style: solid;

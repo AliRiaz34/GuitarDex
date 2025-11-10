@@ -22,7 +22,7 @@ initDB().then(() => {
         loadingScreen.remove();
       }, 300);
     }
-  }, 1500);
+  }, 800);
 }).catch(error => {
   console.error('Failed to initialize database:', error);
   alert('Failed to initialize database. Please try refreshing the page.');
