@@ -71,12 +71,11 @@ th {
 
 /* Navbar */
 #navbar {
-  padding-top: 10px;
+  padding-top: 5px;
   display: flex;
   justify-content: space-between;
   position: fixed;
-  padding-bottom: 15px;
-  bottom: 2%;
+  bottom: 5%;
   left: 5%;
   right: 5%;
   z-index: 1000;

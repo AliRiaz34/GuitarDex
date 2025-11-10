@@ -113,6 +113,7 @@ function AddSong() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="..."
               maxLength={45}
+              autoCapitalize="off"
               required
             />
           </div>
@@ -126,6 +127,7 @@ function AddSong() {
               onChange={(e) => setArtistName(e.target.value)}
               placeholder="..."
               maxLength={45}
+              autoCapitalize="off"
               required
             />
           </div>
