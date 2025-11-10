@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 import './App.css'
 import Navbar from './Nav'
 import Library from './pages/Library'
@@ -7,6 +8,12 @@ import AddSong from './pages/AddSong'
 
 function AnimatedRoutes() {
   const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Replace current route to prevent swipe-back navigation
+    navigate(window.location.pathname, { replace: true })
+  }, [navigate])
 
   return (
     <AnimatePresence mode="wait">
