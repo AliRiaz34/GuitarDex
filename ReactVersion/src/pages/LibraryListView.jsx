@@ -32,7 +32,7 @@ function LibraryListView({
             className="input"
             type="text"
             max={45}
-            placeholder="Whatcha lookin for?"
+            placeholder="whatcha lookin for?"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoCapitalize="off"
