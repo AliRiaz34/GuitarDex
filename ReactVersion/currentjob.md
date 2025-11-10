@@ -7,6 +7,10 @@ seen any new songs should be animated
 have similar inputs to practice, start cursor at end!
 - library, song add
 
+improve page change animations
+- delay
+- direction
+
 
 
 
