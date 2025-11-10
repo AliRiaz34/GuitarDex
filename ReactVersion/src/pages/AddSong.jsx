@@ -87,7 +87,7 @@ function AddSong() {
       }
 
       // Navigate back to library with the new song
-      navigate('/library', { state: { newSong } });
+      navigate('/', { state: { newSong } });
     } catch (error) {
       console.error("Error:", error);
       alert("Error adding song");
