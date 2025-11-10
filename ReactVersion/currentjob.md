@@ -1,3 +1,23 @@
+
+
+# phone transfer debugs!
+
+seen any new songs should be animated
+
+have similar inputs to practice, start cursor at end!
+- library, song add
+
+
+
+
+
+
+
+
+
+
+
+
 ### long term IDEA
 
 

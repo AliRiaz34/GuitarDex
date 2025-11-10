@@ -228,7 +228,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
             )}
           </div>
           {song.level == null && (
-            <p id="empty-info-p">learn the song already!</p>
+            <p id="empty-info-p">learn the song buddy</p>
           )}
         </div>
 

@@ -114,6 +114,9 @@ function AddSong() {
               placeholder="..."
               maxLength={45}
               autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
               required
             />
           </div>
@@ -128,6 +131,9 @@ function AddSong() {
               placeholder="..."
               maxLength={45}
               autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
               required
             />
           </div>
