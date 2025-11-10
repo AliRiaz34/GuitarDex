@@ -8,7 +8,7 @@ import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPracti
 import { xpThreshold, applyDecay, updateSongWithPractice } from '../utils/levelingSystem';
 import './Library.css';
 
-function Library() {
+function Library({ onSongsChange }) {
   const location = useLocation();
   const [songs, setSongs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,20 +54,31 @@ function Library() {
         );
 
         setSongs(processedSongs);
+        // Notify parent about songs count change
+        if (onSongsChange) {
+          onSongsChange(processedSongs.length > 0);
+        }
       } catch (error) {
         console.error('Error loading songs:', error);
       }
     }
 
     loadSongs();
-  }, []);
+  }, [onSongsChange]);
 
   // Handle navigation state (new song from AddSong, or reset from nav button)
   useEffect(() => {
     if (location.state?.newSong) {
       // New song added - add to list and show detail view
       const newSong = location.state.newSong;
-      setSongs(prevSongs => [newSong, ...prevSongs]);
+      setSongs(prevSongs => {
+        const updatedSongs = [newSong, ...prevSongs];
+        // Notify parent that we now have songs
+        if (onSongsChange) {
+          onSongsChange(true);
+        }
+        return updatedSongs;
+      });
       setSelectedSong(newSong);
       setPracticeView(null);
     } else if (location.pathname === '/library' || location.pathname === '/') {
@@ -75,7 +86,7 @@ function Library() {
       setPracticeView(null);
       setSelectedSong(null);
     }
-  }, [location]);
+  }, [location, onSongsChange]);
 
   // Filter songs based on search
   const filteredSongs = songs.filter(song =>
@@ -203,7 +214,14 @@ function Library() {
 
   const handleSongDelete = (songId) => {
     // Remove song from the list
-    setSongs(prevSongs => prevSongs.filter(s => s.songId !== songId));
+    setSongs(prevSongs => {
+      const updatedSongs = prevSongs.filter(s => s.songId !== songId);
+      // Notify parent about songs count change
+      if (onSongsChange) {
+        onSongsChange(updatedSongs.length > 0);
+      }
+      return updatedSongs;
+    });
     // Close the song detail view
     setSelectedSong(null);
   };

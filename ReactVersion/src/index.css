@@ -62,42 +62,6 @@ th {
   text-align: left;
 }
 
-/* Header */
-header {
-  display: flex;
-  flex-direction: row;
-  padding-bottom: 30px;
-  cursor: default;
-  position: relative;
-  overflow: hidden;
-  width: 100vw;
-}
-
-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  border-bottom: 18px solid transparent;
-  border-left: 18px solid transparent;
-  border-right: 18px solid transparent;
-  border-image: url('/images/frame-bottom.png') 42 round;
-  pointer-events: none;
-}
-
-#guitardex-heading {
-  text-align: center;
-  padding: 0px;
-  margin: auto;
-  margin-top: 15px;
-  color: white;
-  text-decoration: none;
-  font-size: 1.6em;
-}
-
-
 /* Navbar */
 #navbar {
   padding-top: 10px;
