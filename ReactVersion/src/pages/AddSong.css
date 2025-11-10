@@ -21,6 +21,10 @@
   font-size: 0.9em;
 }
 
+.buttons-menu button {
+  transition: all 0.3s ease;
+}
+
 .status-button  {
   font-size: 1em;
 }

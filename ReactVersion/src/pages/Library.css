@@ -33,6 +33,7 @@
     padding: 15px;
     padding-top: 0px;
     width: 100%;
+    font-size: 1.1em;
 }
 
 .song-td {
@@ -42,7 +43,7 @@
 
 .song-td-lv{
     padding: 0px;
-    min-width: 75px;
+    width: 85px;
     text-align: center;
     padding-bottom: 20px;
 }
