@@ -11,6 +11,18 @@ initDB().then(() => {
       <App />
     </StrictMode>,
   )
+
+  // Hide loading screen after app renders
+  setTimeout(() => {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.style.opacity = '0';
+      loadingScreen.style.transition = 'opacity 0.3s ease-out';
+      setTimeout(() => {
+        loadingScreen.remove();
+      }, 300);
+    }
+  }, 100);
 }).catch(error => {
   console.error('Failed to initialize database:', error);
   alert('Failed to initialize database. Please try refreshing the page.');
