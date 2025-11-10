@@ -277,15 +277,15 @@ def find_sum_practices(conn, songId):
 
 def create_new_songId(conn):
     cur = conn.cursor()
-    cur.execute("SELECT MAX(songId) FROM songs") 
+    cur.execute("SELECT MAX(songId) FROM songs")
     result = cur.fetchone()[0]
-    return result+1
+    return 1 if result is None else result + 1
 
 def create_new_practiceId(conn):
     cur = conn.cursor()
-    cur.execute("SELECT MAX(practiceId) FROM practices") 
+    cur.execute("SELECT MAX(practiceId) FROM practices")
     result = cur.fetchone()[0]
-    return result+1
+    return 1 if result is None else result + 1
 
 #### SETUP ####
 def setup():

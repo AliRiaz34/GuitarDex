@@ -1,17 +1,38 @@
 /* Library */
 #library-view {
-    width: 100%;
+    max-width: 100vw;
+    height: 77vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+ 
+#seen-a-new-song {
+    text-decoration: none;
+    color: white;
+    display: block;
+    text-align: center;
+    margin-top: 100px;
+    font-size: 1.1em;
 }
 
 #searchbar {
+    width: 100%;
+    text-align: center;
     margin-top: 30px;
-    margin-bottom: 15px;
-    margin-left: 150px;
+    margin-bottom: 17px;
+}
+
+#library-table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #library-table {
+    padding: 15px;
+    padding-top: 0px;
     width: 100%;
-    padding: 0px;
 }
 
 .song-tr:hover {
@@ -26,16 +47,16 @@
 
 .song-td-lv{
     padding: 0px;
-    width: 80px;
+    width: 75px;
     text-align: center;
     padding-bottom: 20px;
 }
 
-.song-td-qprac {
-    padding: 0px;
-    width: 20px;
-    text-align: center;
-    padding-bottom: 17px;
+.song-title {
+    max-width: 15ch; /* 15 characters width */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .song-artist {
@@ -48,14 +69,15 @@
 #sort-menu {
     display: flex;
     flex-direction: row;
-    margin-left: 10px;
+    padding-right: 10px;
     font-weight: normal;
     font-size: 0.9em;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 #sort-icon {
     cursor: pointer;
+    padding-left: 15px;
     display: flex;
     flex-direction: row;
 }
@@ -67,7 +89,7 @@
 .sort-p-state {
     margin: 0px;
     padding-top: 1px;
-    margin-left: 10px;
+    padding-left: 10px;
     font-size: 0.9em;
     cursor: default;
 }
@@ -78,11 +100,11 @@
     font-size: 0.9em;
     font-style: italic;
     cursor: pointer;
-    color: rgb(165, 165, 165);
+    color: rgb(145, 143, 143);
 }
 
 .sort-menu-p-state:hover {
-    color: rgb(255, 255, 255);
+    color: white;
 }
 
 #sort-menu-text-div {
@@ -92,14 +114,65 @@
 
 /* Song view */
 #song-view {
-    width: 500px;
+    padding: 15px;
+    min-height: 77vh;
+}
+
+#song-head-div-1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+#song-menu-container {
+    position: relative;
+}
+
+#song-menu-icon {
+    margin: 0px;
+    padding-top: 2px;
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+}
+
+#song-menu-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #0e0e13;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 5px 0;
+    min-width: 120px;
+    z-index: 100;
+}
+
+.song-menu-option {
+    margin: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-style: italic;
+    color: rgb(145, 143, 143);
+    text-align: center;
+}
+
+.song-menu-option:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.song-back-icon {
+    margin: 0px;
+    font-size: 1.1em;
+    cursor: pointer;
 }
 
 #empty-info-p {
     text-align: center;
     margin-top: 100px;
 }
-
 
 #title {
     margin-bottom: 0px;
@@ -111,6 +184,7 @@
     margin-bottom: 0px;
     height: min-content;
     font-weight: lighter;
+    font-size: 1em;
     font-style: italic;
 }
 
@@ -136,7 +210,7 @@
 }
 
 #song-xp-div {
-    margin-top: 30px;
+    margin-top: 40px;
 }
 
 #level {
@@ -151,16 +225,7 @@
     font-style: italic;
     font-weight: lighter;
     font-size: 0.7em;
-}
-
-#song-mid-div {
-    margin: 0px;
-    margin-top: 50px;
-    font-weight: lighter;
-    font-size: 0.9em;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    color: rgb(114, 114, 114);
 }
 
 #song-xp-text-div {
@@ -171,10 +236,9 @@
 }
 
 #song-bottom-buttons-div {
-    margin-top: 100px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    margin-top: 200px;
+    text-align: center;
+    font-size: 1.3em;
 }
 
 #practice-button-link {
@@ -186,7 +250,7 @@
     height: 100%;
     width: 0%;
     border-radius: 0px;
-    background-color: #4dff88;
+    background-color: white;
 }
 
 #xp-container {
@@ -213,7 +277,7 @@
 
 /* Song Stats Grid */
 .song-stats-grid {
-    margin-top: 40px;
+    margin-top: 50px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 40px;
@@ -222,8 +286,10 @@
 }
 
 .stat-item {
-    display: flex;
     gap: 10px;
+    text-align: center;
+    min-width: 172px;
+    font-size: 1.1em;
 }
 
 .stat-date-item {
@@ -240,4 +306,61 @@
 .stat-value {
     font-style: italic;
     color: #b0b0b0;
+}
+
+/* Delete Confirmation Widget */
+#delete-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#delete-confirm-widget {
+    background-color: #0e0e13;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 30px 25px;
+    max-width: 300px;
+    width: 80%;
+    text-align: center;
+}
+
+#delete-confirm-text {
+    margin: 0 0 25px 0;
+    font-size: 1em;
+    color: white;
+}
+
+#delete-confirm-buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.delete-confirm-btn {
+    flex: 1;
+    padding: 10px 20px;
+    font-size: 0.9em;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: transparent;
+    color: rgb(145, 143, 143);
+    font-style: italic;
+    text-transform: lowercase;
+}
+
+.delete-confirm-btn:hover {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.confirm-btn:hover {
+    background-color: rgba(230, 72, 15, 0.2);
+    border-color: rgba(230, 72, 15, 0.5);
 }

@@ -13,7 +13,7 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 # XP System Configuration
 XP_BASE_AMOUNT = 50  # Base XP required for level 1
 XP_SCALING_EXPONENT = 1.4  # How quickly XP requirements increase per level
-XP_PRACTICE_BASE = 50  # Base XP earned per practice session
+XP_PRACTICE_BASE = 40  # Base XP earned per practice session
 
 # Streak Bonus Configuration (index = days since last practice)
 STREAK_BONUS_VALUES = [0, 0.1, 0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0]  # 0=today, 1=yesterday, etc.
@@ -246,7 +246,7 @@ def xp_gain(songInfo, minPlayed):
         streakBonus = STREAK_BONUS_VALUES[-1]
 
     return (XP_PRACTICE_BASE *
-            (1 / DIFFICULTY_MULTIPLIERS[difficulty]) *
+            (1 / DIFFICULTY_MULTIPLIERS[songInfo["difficulty"]]) *
             (minPlayed / songDuration) *
             (1 + 0.1 * highestLevelReached) *
             (1 + streakBonus))
@@ -290,7 +290,15 @@ def apply_decay(songId):
     level = songInfo["level"]
 
     decayDays = daysSinceSongPracticed - DECAY_GRACE_PERIOD_DAYS
-    decayFactor = (1 - DECAY_RATE_PER_DAY) ** decayDays
+
+    # Difficulty modifier: harder songs decay faster
+    # easy: 1.0x, normal: 1.15x, hard: 1.3x decay rate
+    difficultyDecayModifier = 1 + (0.15 * (DIFFICULTY_MULTIPLIERS[songInfo["difficulty"]] - 1))
+
+    # Apply decay: base decay rate is multiplied by difficulty modifier
+    effectiveDecayRate = DECAY_RATE_PER_DAY * difficultyDecayModifier
+    decayFactor = (1 - effectiveDecayRate) ** decayDays
+
     adjustedXp = int(xp * decayFactor)
 
     while level > 1 and adjustedXp < xp_threshold(level - 1):

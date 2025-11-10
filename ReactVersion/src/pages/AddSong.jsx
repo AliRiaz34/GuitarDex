@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import './AddSong.css';
 
 function AddSong() {
@@ -59,9 +60,13 @@ function AddSong() {
   }
 
   return (
-    <div>
-      <h1 id="add-song-title">spot a song</h1>
-      <form className="song-form" onSubmit={handleSubmit}>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
+      <form id="song-form" onSubmit={handleSubmit}>
         <div id="add-input-div">
           <div id="title-input-div">
             <label htmlFor="title-input" className="form-label">Whats the song called?</label>
@@ -134,13 +139,11 @@ function AddSong() {
               </button>
           </div>
         </div>
-        <div className="save-div">
-          <button type="submit" className="form__button">
-            Save
-          </button>
-        </div>
+        <button id="song-add-save" type="submit" className="form__button">
+          Save
+        </button>
       </form>
-    </div>
+    </motion.div>
   )
 }
 

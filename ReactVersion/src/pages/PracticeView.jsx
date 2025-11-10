@@ -1,9 +1,42 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import './AddPractice.css';
 
 function PracticeView({ song, onSubmit, onBack }) {
-  const [minPlayed, setMinPlayed] = useState("");
+  const [minPlayed, setMinPlayed] = useState(song.songDuration || "");
   const [songDuration, setSongDuration] = useState("");
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [exitDirection, setExitDirection] = useState(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleBack = () => {
+    setExitDirection('right');
+    setTimeout(() => {
+      onBack();
+    }, 300);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isRightSwipe) {
+      handleBack();
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,12 +59,37 @@ function PracticeView({ song, onSubmit, onBack }) {
     onSubmit({ minPlayed, songDuration: finalSongDuration });
   };
 
+  const getExitAnimation = () => {
+    if (exitDirection === 'right') {
+      return { opacity: 0, x: '100%' };
+    }
+    return { opacity: 0, y: 20 };
+  };
+
   return (
-    <div>
-      <h1 id="song-practice-title">{song.title}</h1>
-      <form onSubmit={handleSubmit}>
+    <motion.div
+      id="practice-view"
+      style={{ minHeight: '77vh', padding: '15px' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={getExitAnimation()}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: song.songDuration === null ? 'space-between' : 'center',
+          minHeight: '70vh'
+        }}
+      >
+        <h1 id="song-practice-title">{song.title}</h1>
         <div id="minPlayed-input-div">
-          <label className="form-label">How many minutes did you play? </label>
+          <label className="form-label">How long did you play? </label>
           <div className="quick-select-button-div">
             <button onClick={() => setMinPlayed(15)} type="button" className="quick-select-button">15</button>
             <p className="between-button-line">|</p>
@@ -55,7 +113,7 @@ function PracticeView({ song, onSubmit, onBack }) {
         </div>
         {song.songDuration === null && (
           <div id="duration-div">
-            <label className="form-label">How many minutes is the song?</label>
+            <label className="form-label">How long is the song?</label>
             <div className="quick-select-button-div">
               <button onClick={() => setSongDuration(3)} type="button" className="quick-select-button">3</button>
               <p className="between-button-line"> |</p>
@@ -77,15 +135,12 @@ function PracticeView({ song, onSubmit, onBack }) {
           </div>
         )}
         <div className="save-div">
-          <button type="button" onClick={onBack}>
-            BACK
-          </button>
           <button type="submit" className="form__button">
             Save
           </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }
 

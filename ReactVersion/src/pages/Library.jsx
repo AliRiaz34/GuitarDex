@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
@@ -12,6 +13,7 @@ function Library() {
   const [selectedSong, setSelectedSong] = useState(null);
   const [sortState, setSortState] = useState('recent');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [sortReversed, setSortReversed] = useState(false);
 
   // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
@@ -49,14 +51,16 @@ function Library() {
 
   // Sort songs
   const sortedSongs = [...filteredSongs].sort((a, b) => {
+    let result = 0;
+
     if (sortState === 'recent') {
-      return new Date(b.lastPracticeDate) - new Date(a.lastPracticeDate);
+      result = new Date(b.lastPracticeDate) - new Date(a.lastPracticeDate);
     } else if (sortState === 'level') {
       const aSeen = a.status === 'seen';
       const bSeen = b.status === 'seen';
-      if (aSeen && !bSeen) return 1;
-      if (!aSeen && bSeen) return -1;
-      return b.level - a.level;
+      if (aSeen && !bSeen) result = 1;
+      else if (!aSeen && bSeen) result = -1;
+      else result = a.level - b.level;
     } else if (sortState === 'status') {
       // Status priority: seen -> learning -> stale -> mastered
       const statusOrder = { seen: 0, learning: 1, stale: 2, mastered: 3 };
@@ -64,26 +68,33 @@ function Library() {
       const bOrder = statusOrder[b.status] ?? 99;
 
       if (aOrder !== bOrder) {
-        return aOrder - bOrder;
+        result = aOrder - bOrder;
+      } else {
+        // If same status, sort by addDate for seen, or level for others
+        if (a.status === 'seen' && b.status === 'seen') {
+          result = new Date(a.addDate) - new Date(b.addDate);
+        } else {
+          result = a.level - b.level;
+        }
       }
-
-      // If same status, sort by addDate for seen, or level for others
-      if (a.status === 'seen' && b.status === 'seen') {
-        return new Date(a.addDate) - new Date(b.addDate);
-      }
-      return a.level - b.level;
-    } else if (sortState === 'easy') {
+    } else if (sortState === 'difficulty') {
       const difficultyConv = { easy: 1, normal: 2, hard: 3 };
-      return difficultyConv[a.difficulty] - difficultyConv[b.difficulty];
-    } else if (sortState === 'hard') {
-      const difficultyConv = { easy: 1, normal: 2, hard: 3 };
-      return difficultyConv[b.difficulty] - difficultyConv[a.difficulty];
+      result = difficultyConv[a.difficulty] - difficultyConv[b.difficulty];
     }
-    return 0;
+
+    // Apply reverse if needed
+    return sortReversed ? -result : result;
   });
 
   const handleSortSelect = (newSort) => {
-    setSortState(newSort);
+    if (newSort === sortState) {
+      // Toggle reverse if clicking the same sort
+      setSortReversed(!sortReversed);
+    } else {
+      // New sort selected, reset to not reversed
+      setSortState(newSort);
+      setSortReversed(false);
+    }
     setSortMenuOpen(false);
   };
 
@@ -115,7 +126,12 @@ function Library() {
         // Close practice view and show updated song detail if from song view
         setPracticeView(null);
         if (practiceView.fromSongView) {
-          setSelectedSong(data.updatedSong);
+          // Pass both old and new song data for animation
+          setSelectedSong({
+            ...data.updatedSong,
+            _previousXp: song.xp,
+            _previousLevel: song.level
+          });
         }
       } else {
         alert("Error adding practice");
@@ -135,6 +151,13 @@ function Library() {
     setPracticeView(null);
   };
 
+  const handleSongDelete = (songId) => {
+    // Remove song from the list
+    setSongs(prevSongs => prevSongs.filter(s => s.songId !== songId));
+    // Close the song detail view
+    setSelectedSong(null);
+  };
+
   // Add Practice View
   if (practiceView) {
     return (
@@ -148,12 +171,29 @@ function Library() {
 
   // Song Detail View
   if (selectedSong) {
+    // Find current song index in sortedSongs
+    const currentIndex = sortedSongs.findIndex(s => s.songId === selectedSong.songId);
+
+    const handleNavigateSong = (direction) => {
+      const newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < sortedSongs.length) {
+        setSelectedSong(sortedSongs[newIndex]);
+      }
+    };
+
     return (
-      <SongDetailView
-        song={selectedSong}
-        onBack={() => setSelectedSong(null)}
-        onPractice={() => openPracticeView(selectedSong, true)}
-      />
+      <AnimatePresence mode="wait">
+        <SongDetailView
+          key={selectedSong.songId}
+          song={selectedSong}
+          onBack={() => setSelectedSong(null)}
+          onPractice={() => openPracticeView(selectedSong, true)}
+          onDelete={handleSongDelete}
+          onNavigate={handleNavigateSong}
+          hasPrevious={currentIndex > 0}
+          hasNext={currentIndex < sortedSongs.length - 1}
+        />
+      </AnimatePresence>
     );
   }
 
@@ -161,9 +201,11 @@ function Library() {
   return (
     <LibraryListView
       songs={sortedSongs}
+      allSongs={songs}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       sortState={sortState}
+      sortReversed={sortReversed}
       sortMenuOpen={sortMenuOpen}
       setSortMenuOpen={setSortMenuOpen}
       onSortSelect={handleSortSelect}

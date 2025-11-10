@@ -14,13 +14,14 @@ body, p, span, div, h1, h2, h3, h4, h5, h6, a, li {
 
 body {
   font-family: 'Pokemon-Classic', system-ui, sans-serif;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0;
   padding: 0;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #0e0e13;
   min-height: 100vh;
 }
 
@@ -38,11 +39,14 @@ input[type=number] {
 /* Links */
 a {
   text-decoration: none;
-  color: inherit;
 }
 
 a:hover {
   color: rgb(15, 72, 230);
+}
+
+input {
+    color: rgb(145, 143, 143);
 }
 
 /* Buttons */
@@ -56,11 +60,7 @@ button, .button {
   text-transform: uppercase;
   text-align: left;
   cursor: pointer;
-  color: inherit;
-}
-
-button:hover {
-  color: rgb(15, 72, 230);
+  color: white;
 }
 
 /* Tables */
@@ -70,58 +70,89 @@ th {
 
 /* Header */
 header {
-  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  border-bottom: #ffffff 2px dashed;
-  padding-bottom: 20px;
+  padding-bottom: 30px;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
 }
 
-header a {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  color: white;
-}
-
-header a:hover {
-  color: white;
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  border-bottom: 18px solid transparent;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-image: url('/images/frame-bottom.png') 42 round;
+  pointer-events: none;
 }
 
 #guitardex-heading {
   text-align: center;
   padding: 0px;
-  margin: 0px;
+  margin: auto;
   margin-top: 15px;
   color: white;
   text-decoration: none;
-  font-size: 1.5em;
+  font-size: 1.6em;
 }
 
-#guitardex-icon, #menu-icon {
-  margin-top: 10px;
-  margin-right: 5px;
-  margin-left: 15px;
-}
 
 /* Navbar */
 #navbar {
-  margin: auto;
-  width: 50%;
+  width: 90%;
+  padding-top: 10px;
   display: flex;
   justify-content: space-between;
   position: fixed;
+  padding-bottom: 15px;
   bottom: 0;
-  padding-bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
+  border-width: 20px;
+  border-style: solid;
+  border-image: url('/images/frame-hd.png') 42 round;
+  border-color: white;
+  background-color: #0e0e13;
+  font-size: 1.1em;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+#navbar::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border: 20px solid transparent;
+  border-image: url('/images/frame-hd.png') 42 round;
+  filter: invert(1) brightness(1);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#navlink-1 {
+  padding-left: 50px;
+}
+
+#navlink-2 {
+  padding-right: 30px;
+}
+
+#navlink-1, #navlink-2:visited {
+  text-decoration: none;
+  color: rgb(231, 226, 226)
 }
 
 /* Main content wrapper */
 main {
   margin: 0px;
-  max-width: 700px;
-  padding: 20px;
 }
 
 /* Headings */
