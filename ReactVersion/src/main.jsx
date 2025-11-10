@@ -4,6 +4,32 @@ import './index.css'
 import App from './App.jsx'
 import { initDB } from './utils/db'
 
+// Prevent swipe-back navigation gesture
+let touchStartX = 0;
+let touchStartY = 0;
+
+window.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+
+  // Prevent gesture if starting from the very edge
+  if (touchStartX < 10 || touchStartX > window.innerWidth - 10) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+window.addEventListener('touchmove', (e) => {
+  const touchMoveX = e.touches[0].clientX;
+  const touchMoveY = e.touches[0].clientY;
+  const deltaX = Math.abs(touchMoveX - touchStartX);
+  const deltaY = Math.abs(touchMoveY - touchStartY);
+
+  // Prevent horizontal swipe navigation from edges
+  if (deltaX > deltaY && (touchStartX < 20 || touchStartX > window.innerWidth - 20)) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 // Initialize IndexedDB before rendering the app
 initDB().then(() => {
   createRoot(document.getElementById('root')).render(
