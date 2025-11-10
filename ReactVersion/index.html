@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background-color: #0e0e13;">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -15,6 +15,13 @@
 
     <title>GuitarDex</title>
     <style>
+      /* Immediate background color to prevent flash */
+      html, body {
+        background-color: #0e0e13;
+        margin: 0;
+        padding: 0;
+      }
+
       /* Loading screen styles */
       #loading-screen {
         position: fixed;
@@ -36,7 +43,7 @@
       }
     </style>
   </head>
-  <body>
+  <body style="background-color: #0e0e13; margin: 0; padding: 0;">
     <!-- Loading screen -->
     <div id="loading-screen">
       <img id="loading-logo" src="/pwa-192x192.png" alt="GuitarDex">
