@@ -39,7 +39,7 @@ def get_db_connection():
     return conn
 
 ### IMAGES ###
-@app.route('/FlaskVersion/static/images/<filename>', methods=['GET'])
+@app.route('/Flask/static/images/<filename>', methods=['GET'])
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 

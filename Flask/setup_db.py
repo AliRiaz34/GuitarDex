@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3 import Error 
 from datetime import date
 
-database = r"./FlaskVersion/database.db"
+database = r"./Flask/database.db"
 
 def create_connection(db_file):
     conn = None
