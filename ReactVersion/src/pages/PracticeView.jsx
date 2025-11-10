@@ -85,7 +85,7 @@ function PracticeView({ song, onSubmit, onBack }) {
           minHeight: '60vh'
         }}
       >
-        <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
+        <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
         <h1 id="song-practice-title">{song.title}</h1>
         <div id="minPlayed-input-div">
           <label className="form-label">How long did you play? </label>

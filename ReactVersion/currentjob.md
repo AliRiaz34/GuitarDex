@@ -24,6 +24,7 @@ improve page change animations
 
 ### long term IDEA
 
+fix guitardex.vercel.app css for desktop too
 
 timer in practice page
 

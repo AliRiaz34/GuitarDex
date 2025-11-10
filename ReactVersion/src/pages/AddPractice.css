@@ -54,6 +54,13 @@
     text-align: center;
 }
 
+#practice-back-icon {
+    margin: 0px;
+    margin-bottom: 90px;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
 #song-practice-title {
     text-align: center;
     font-size: 1.6em;

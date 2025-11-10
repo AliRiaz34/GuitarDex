@@ -25,7 +25,7 @@ window.addEventListener('touchmove', (e) => {
   const deltaY = Math.abs(touchMoveY - touchStartY);
 
   // Prevent horizontal swipe navigation from edges
-  if (deltaX > deltaY && (touchStartX < 20 || touchStartX > window.innerWidth - 20)) {
+  if (deltaX > deltaY && (touchStartX < 30 || touchStartX > window.innerWidth - 30)) {
     e.preventDefault();
   }
 }, { passive: false });
