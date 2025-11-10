@@ -31,7 +31,8 @@ function LibraryListView({
             id="searchbar"
             className="input"
             type="text"
-            placeholder="search"
+            max={45}
+            placeholder="Whatcha lookin for?"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={(e) => {

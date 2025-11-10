@@ -208,7 +208,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
         initial={getInitialAnimation()}
         animate={{ opacity: 1, x: 0, y: 0 }}
         exit={getExitAnimation()}
-        transition={{ duration: 0.15, ease: 'easeOut' }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -238,7 +238,10 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
             )}
           </div>
           {song.level == null && (
-            <p id="empty-info-p">learn the song buddy</p>
+            <>
+              <p id="empty-info-p">learn the song to get stats</p>
+              <p id="empty-info-arrow">↓</p>
+            </>
           )}
         </div>
 

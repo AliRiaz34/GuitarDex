@@ -12,7 +12,8 @@ function AnimatedRoutes() {
 
   useEffect(() => {
     // Replace current route to prevent swipe-back navigation
-    navigate(window.location.pathname, { replace: true })
+    const path = window.location.pathname + (window.location.search || '')
+    navigate(path, { replace: true })
   }, [navigate])
 
   return (
