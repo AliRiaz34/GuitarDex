@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { deleteSong } from '../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPrevious, hasNext }) {
+function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPrevious, hasNext, entryDirection }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -145,16 +145,12 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
       if (isUpSwipe && hasNext && onNavigate) {
         setExitDirection('up');
-        setTimeout(() => {
-          onNavigate(1); // Next song
-          setExitDirection(null);
-        }, 300);
+        onNavigate(1); // Next song
+        setExitDirection(null);
       } else if (isDownSwipe && hasPrevious && onNavigate) {
         setExitDirection('down');
-        setTimeout(() => {
-          onNavigate(-1); // Previous song
-          setExitDirection(null);
-        }, 300);
+        onNavigate(-1); // Previous song
+        setExitDirection(null);
       }
     }
   };
@@ -181,13 +177,22 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
   const getExitAnimation = () => {
     if (exitDirection === 'up') {
-      return { opacity: 0, y: '-100%' };
+      return { opacity: 0, y: '-100%' }; // Swipe up = current exits up
     } else if (exitDirection === 'down') {
-      return { opacity: 0, y: '100%' };
+      return { opacity: 0, y: '100%' }; // Swipe down = current exits down
     } else if (exitDirection === 'right') {
       return { opacity: 0, x: '100%' };
     }
     return { opacity: 0, y: 20 };
+  };
+
+  const getInitialAnimation = () => {
+    if (entryDirection === 'up') {
+      return { opacity: 0, y: '100%' }; // Swipe up = new enters from bottom
+    } else if (entryDirection === 'down') {
+      return { opacity: 0, y: '-100%' }; // Swipe down = new enters from top
+    }
+    return { opacity: 0, y: 20 }; // Default animation
   };
 
   return (
@@ -195,7 +200,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
       <motion.div
         key={song.songId}
         id="song-view"
-        initial={{ opacity: 0, y: 20 }}
+        initial={getInitialAnimation()}
         animate={{ opacity: 1, y: 0 }}
         exit={getExitAnimation()}
         transition={{ duration: 0.3, ease: 'easeOut' }}

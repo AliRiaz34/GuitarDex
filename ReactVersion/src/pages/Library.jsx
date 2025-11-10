@@ -228,8 +228,8 @@ function Library() {
       const newIndex = currentIndex + direction;
       if (newIndex >= 0 && newIndex < sortedSongs.length) {
         // Set entry direction based on swipe direction
-        // direction = 1 means next (swipe up), so animate from bottom ('up')
-        // direction = -1 means previous (swipe down), so animate from top ('down')
+        // direction = 1 means next (swipe up), so animate from top ('up')
+        // direction = -1 means previous (swipe down), so animate from bottom ('down')
         setEntryDirection(direction > 0 ? 'up' : 'down');
         setSelectedSong(sortedSongs[newIndex]);
       }
