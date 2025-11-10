@@ -183,7 +183,8 @@ function Library() {
         setSelectedSong({
           ...updatedSong,
           _previousXp: song.xp ?? 0,
-          _previousLevel: song.level ?? 1
+          _previousLevel: song.level ?? 1,
+          _fromPractice: true
         });
       }
     } catch (error) {
@@ -194,8 +195,11 @@ function Library() {
 
   const handlePracticeBack = () => {
     if (practiceView.fromSongView) {
-      // Return to song detail view
-      setSelectedSong(practiceView.song);
+      // Return to song detail view - add flag to skip animation
+      setSelectedSong({
+        ...practiceView.song,
+        _fromPractice: true
+      });
     }
     // Close practice view
     setPracticeView(null);

@@ -26,6 +26,11 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
     ? Math.min((displayXp / song.xpThreshold) * 100, 100)
     : 0;
 
+  // Reset exit direction when song changes
+  useEffect(() => {
+    setExitDirection(null);
+  }, [song.songId]);
+
   // XP animation effect
   useEffect(() => {
     // Check if we have previous XP data (meaning we just came back from practice)
@@ -118,9 +123,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
   const handleBack = () => {
     setExitDirection('right');
-    setTimeout(() => {
-      onBack();
-    }, 300);
+    onBack();
   };
 
   const onTouchEnd = () => {
@@ -146,11 +149,9 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
       if (isUpSwipe && hasNext && onNavigate) {
         setExitDirection('up');
         onNavigate(1); // Next song
-        setExitDirection(null);
       } else if (isDownSwipe && hasPrevious && onNavigate) {
         setExitDirection('down');
         onNavigate(-1); // Previous song
-        setExitDirection(null);
       }
     }
   };
@@ -187,6 +188,10 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
   };
 
   const getInitialAnimation = () => {
+    // Use library animation if coming from practice view
+    if (song._fromPractice) {
+      return { opacity: 0, x: -20 }; // Same as library view
+    }
     if (entryDirection === 'up') {
       return { opacity: 0, y: '100%' }; // Swipe up = new enters from bottom
     } else if (entryDirection === 'down') {
@@ -201,7 +206,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
         key={song.songId}
         id="song-view"
         initial={getInitialAnimation()}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
         exit={getExitAnimation()}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         onTouchStart={onTouchStart}
