@@ -35,11 +35,10 @@ function LibraryListView({
             placeholder="Whatcha lookin for?"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={(e) => {
-              const val = e.target.value;
-              e.target.value = '';
-              e.target.value = val;
-            }}
+            autoCapitalize="off"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
           />
 
           <div id="sort-menu">
