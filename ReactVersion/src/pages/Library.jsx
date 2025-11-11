@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
+import EditView from './EditView';
 import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong } from '../utils/db';
 import { xpThreshold, applyDecay, updateSongWithPractice } from '../utils/levelingSystem';
 import './Library.css';
@@ -22,6 +23,9 @@ function Library() {
   // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
+  // Add Edit view state
+  const [editView, setEditView] = useState(null); // song to edit
+
   // Swipe gesture detection
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -29,8 +33,8 @@ function Library() {
   const touchEndY = useRef(0);
 
   useEffect(() => {
-    // Only enable swipe on list view (not on song detail or practice view)
-    if (selectedSong || practiceView) return;
+    // Only enable swipe on list view (not on song detail, practice view, or edit view)
+    if (selectedSong || practiceView || editView) return;
 
     const handleTouchStart = (e) => {
       touchStartX.current = e.touches[0].clientX;
@@ -85,7 +89,7 @@ function Library() {
               decayedSong.level !== song.level ||
               decayedSong.status !== song.status
             ) {
-              await updateSong(decayedSong);
+              await updateSong(decayedSong.songId, decayedSong);
             }
 
             // Add calculated fields for non-seen songs
@@ -116,10 +120,12 @@ function Library() {
       setSongs(prevSongs => [newSong, ...prevSongs]);
       setSelectedSong(newSong);
       setPracticeView(null);
+      setEditView(null);
     } else if (location.pathname === '/library' || location.pathname === '/') {
       // Nav button clicked - reset to list view
       setPracticeView(null);
       setSelectedSong(null);
+      setEditView(null);
     }
   }, [location]);
 
@@ -209,7 +215,7 @@ function Library() {
       });
 
       // Update song in IndexedDB
-      await updateSong(updatedSong);
+      await updateSong(updatedSong.songId, updatedSong);
 
       // Calculate additional fields for updated song
       updatedSong.xpThreshold = xpThreshold(updatedSong.level);
@@ -242,11 +248,9 @@ function Library() {
 
   const handlePracticeBack = () => {
     if (practiceView.fromSongView) {
-      // Return to song detail view - add flag to skip animation
-      setSelectedSong({
-        ...practiceView.song,
-        _fromPractice: true
-      });
+      // Return to song detail view - remove animation properties to prevent repeated indicators
+      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = practiceView.song;
+      setSelectedSong(cleanSong);
     }
     // Close practice view
     setPracticeView(null);
@@ -259,14 +263,71 @@ function Library() {
     setSelectedSong(null);
   };
 
+  const openEditView = (song) => {
+    setEditView(song);
+  };
+
+  const handleEditSubmit = async (updatedData) => {
+    try {
+      // Update song in database
+      const updatedSong = await updateSong(editView.songId, updatedData);
+
+      // Recalculate fields if song has been practiced
+      if (updatedSong.status !== "seen") {
+        updatedSong.xpThreshold = xpThreshold(updatedSong.level);
+        updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
+        updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
+      }
+
+      // Update the song in our songs list
+      setSongs(prevSongs => prevSongs.map(s =>
+        s.songId === editView.songId ? updatedSong : s
+      ));
+
+      // Close edit view and return to song detail view with updated song
+      // Remove any animation properties to prevent repeated indicators
+      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = updatedSong;
+      setEditView(null);
+      setSelectedSong(cleanSong);
+    } catch (error) {
+      console.error("Error updating song:", error);
+      alert("Error updating song");
+    }
+  };
+
+  const handleEditBack = () => {
+    // Return to song detail view without saving
+    // Remove any animation properties to prevent repeated indicators
+    const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = editView;
+    setEditView(null);
+    setSelectedSong(cleanSong);
+  };
+
+  // Edit View
+  if (editView) {
+    return (
+      <AnimatePresence mode="wait">
+        <EditView
+          key={editView.songId}
+          song={editView}
+          onSubmit={handleEditSubmit}
+          onBack={handleEditBack}
+        />
+      </AnimatePresence>
+    );
+  }
+
   // Add Practice View
   if (practiceView) {
     return (
-      <PracticeView
-        song={practiceView.song}
-        onSubmit={handlePracticeSubmit}
-        onBack={handlePracticeBack}
-      />
+      <AnimatePresence mode="wait">
+        <PracticeView
+          key={practiceView.song.songId}
+          song={practiceView.song}
+          onSubmit={handlePracticeSubmit}
+          onBack={handlePracticeBack}
+        />
+      </AnimatePresence>
     );
   }
 
@@ -295,6 +356,7 @@ function Library() {
           song={selectedSong}
           onBack={() => setSelectedSong(null)}
           onPractice={() => openPracticeView(selectedSong, true)}
+          onEdit={() => openEditView(selectedSong)}
           onDelete={handleSongDelete}
           onNavigate={handleNavigateSong}
           hasPrevious={currentIndex > 0}

@@ -106,19 +106,40 @@ export async function addSong(songData) {
 }
 
 // Update a song
-export async function updateSong(songData) {
+export async function updateSong(songId, updates) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([SONGS_STORE], 'readwrite');
     const store = transaction.objectStore(SONGS_STORE);
-    const request = store.put(songData);
-
-    request.onsuccess = () => {
-      resolve(songData);
+    
+    // First, get the existing song
+    const getRequest = store.get(songId);
+    
+    getRequest.onsuccess = () => {
+      const existingSong = getRequest.result;
+      
+      if (!existingSong) {
+        reject(new Error('Song not found'));
+        return;
+      }
+      
+      // Merge updates with existing data
+      const updatedSong = { ...existingSong, ...updates };
+      
+      // Now put the merged object
+      const putRequest = store.put(updatedSong);
+      
+      putRequest.onsuccess = () => {
+        resolve(updatedSong);
+      };
+      
+      putRequest.onerror = () => {
+        reject(new Error('Failed to update song'));
+      };
     };
-
-    request.onerror = () => {
-      reject(new Error('Failed to update song'));
+    
+    getRequest.onerror = () => {
+      reject(new Error('Failed to get existing song'));
     };
   });
 }

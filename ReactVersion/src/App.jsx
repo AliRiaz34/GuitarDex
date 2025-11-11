@@ -6,6 +6,7 @@ import Navbar from './Nav'
 import Library from './pages/Library'
 import AddSong from './pages/AddSong'
 
+
 function AnimatedRoutes() {
   const location = useLocation()
   const navigate = useNavigate()

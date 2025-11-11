@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { deleteSong } from '../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPrevious, hasNext, entryDirection }) {
+function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -165,7 +165,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
 
   const handleEditClick = () => {
     setMenuOpen(false);
-    setShowEdit(true);
+    onEdit();
   };
 
   const handleDeleteConfirm = async () => {

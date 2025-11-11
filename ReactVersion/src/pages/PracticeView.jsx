@@ -7,7 +7,6 @@ function PracticeView({ song, onSubmit, onBack }) {
   const [songDuration, setSongDuration] = useState("");
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const [exitDirection, setExitDirection] = useState(null);
   const [selectedMinButton, setSelectedMinButton] = useState(null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
@@ -24,7 +23,6 @@ function PracticeView({ song, onSubmit, onBack }) {
   };
 
   const handleBack = () => {
-    setExitDirection('right');
     onBack();
   };
 
@@ -49,7 +47,6 @@ function PracticeView({ song, onSubmit, onBack }) {
 
     const finalSongDuration = song.songDuration !== null ? song.songDuration : songDuration;
 
-
     if (song.status === "seen" && (songDuration > 999 || songDuration < 1)) {
       alert("Invalid song duration G.");
       return;
@@ -58,20 +55,13 @@ function PracticeView({ song, onSubmit, onBack }) {
     onSubmit({ minPlayed, songDuration: finalSongDuration });
   };
 
-  const getExitAnimation = () => {
-    if (exitDirection === 'right') {
-      return { opacity: 0, x: '100%' };
-    }
-    return { opacity: 0, y: 20 };
-  };
-
   return (
     <motion.div
       id="practice-view"
       style={{ minHeight: '60vh', padding: '15px' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={getExitAnimation()}
+      exit={{ opacity: 0, x: '100%' }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
