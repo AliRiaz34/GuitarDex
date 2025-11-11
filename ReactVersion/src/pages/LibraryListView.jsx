@@ -27,19 +27,26 @@ function LibraryListView({
     >
       {hasAnySongs && (
         <>
-          <input
-            id="searchbar"
-            className="input"
-            type="text"
-            max={45}
-            placeholder="whatcha lookin for?"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoCapitalize="off"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck="false"
-          />
+          <div className="searchbar-container">
+            <input
+              id="searchbar"
+              className="input"
+              type="text"
+              max={45}
+              placeholder="whatcha lookin for?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+            />
+            {!searchQuery && (
+              <div className="custom-placeholder">
+                whatcha lookin for<span className="blinking-question">?</span>
+              </div>
+            )}
+          </div>
 
           <div id="sort-menu">
             <div id="sort-icon" onClick={() => setSortMenuOpen(!sortMenuOpen)}>

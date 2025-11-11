@@ -38,12 +38,45 @@
     }
 }
 
-#searchbar {
+.searchbar-container {
+    position: relative;
     width: 70%;
-    display: block;
     margin: auto;
     margin-top: 50px;
     margin-bottom: 25px;
+}
+
+#searchbar {
+    width: 100%;
+    display: block;
+}
+
+#searchbar::placeholder {
+    opacity: 0;
+}
+
+.custom-placeholder {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Pokemon-Classic';
+    font-size: 1.1em;
+}
+
+.blinking-question {
+    animation: blink-question 1s infinite;
+}
+
+@keyframes blink-question {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0;
+    }
 }
 
 #library-table-container {

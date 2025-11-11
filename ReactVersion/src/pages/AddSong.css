@@ -68,11 +68,10 @@ button.selected {
     background-color: transparent;
     width: 85%;
     max-width: 100%;
-    caret-color: white;
 }
 
 #add-song-h1 {
-  font-size: 1.4em;
+  font-size: 1.6em;
   text-align: center;
   margin-top: 50px;
 }
