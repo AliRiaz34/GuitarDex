@@ -89,11 +89,13 @@ th {
 }
 
 #navlink-1 {
-  padding-left: 50px;
+  padding-left: 40px;
+  min-width: 70px;
 }
 
 #navlink-2 {
-  padding-right: 30px;
+  padding-right: 20px;
+  min-width: 140px;
 }
 
 #navlink-1, #navlink-2:visited {
