@@ -142,7 +142,7 @@ function AddSong() {
               />
             </div>
           </div>
-          <div className="buttons-menu">
+          <div id="buttons-menu">
               <button
                 type="button"
                 value="easy"
@@ -168,7 +168,7 @@ function AddSong() {
                 Hard
               </button>
           </div>
-          <div className="buttons-menu-2">
+          <div id="buttons-menu-2">
             <button
               type="button"
               value="seen"
