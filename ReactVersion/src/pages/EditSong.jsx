@@ -5,12 +5,11 @@ import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions
 import { xpThreshold } from '../utils/levelingSystem';
 import './EditSong.css';
 
-function AddSong() {
-  const [searchParams] = useSearchParams();
-  const [title, setTitle] = useState("");
-  const [artistName, setArtistName] = useState("");
-  const [difficulty, setDifficulty] = useState("normal");
-  const [status, setStatus] = useState("seen");
+function EditSong() {
+  const [songId] = useSearchParams();
+  const [title, setTitle] = useSearchParams();
+  const [artistName, setArtistName] = useSearchParams();
+  const [difficulty, setDifficulty] = useSearchParams();
   const navigate = useNavigate();
 
   // Swipe gesture detection
@@ -263,4 +262,4 @@ function AddSong() {
   )
 }
 
-export default AddSong;
+export default EditSong;
