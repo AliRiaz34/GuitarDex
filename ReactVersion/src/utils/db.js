@@ -144,19 +144,39 @@ export async function updateSong(songId, updates) {
   });
 }
 
-// Delete a song
+// Delete a song and all associated practices (cascade delete)
 export async function deleteSong(songId) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([SONGS_STORE], 'readwrite');
-    const store = transaction.objectStore(SONGS_STORE);
-    const request = store.delete(songId);
+    // Transaction needs access to both stores for cascade delete
+    const transaction = db.transaction([SONGS_STORE, PRACTICES_STORE], 'readwrite');
 
-    request.onsuccess = () => {
+    // First, delete all practices associated with this song
+    const practicesStore = transaction.objectStore(PRACTICES_STORE);
+    const practicesIndex = practicesStore.index('songId');
+    const practicesRequest = practicesIndex.openCursor(IDBKeyRange.only(songId));
+
+    practicesRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        // All practices deleted, now delete the song
+        const songsStore = transaction.objectStore(SONGS_STORE);
+        songsStore.delete(songId);
+      }
+    };
+
+    practicesRequest.onerror = () => {
+      reject(new Error('Failed to delete associated practices'));
+    };
+
+    transaction.oncomplete = () => {
       resolve();
     };
 
-    request.onerror = () => {
+    transaction.onerror = () => {
       reject(new Error('Failed to delete song'));
     };
   });

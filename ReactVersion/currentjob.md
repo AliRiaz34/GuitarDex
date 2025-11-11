@@ -1,7 +1,6 @@
 ### FUTURE IMPLEMENTATIONS
 timer in practice page            (i just dont see the vision, prefer manual)
 
-be able to edit 
 
 subparts for a song, user defined
 
