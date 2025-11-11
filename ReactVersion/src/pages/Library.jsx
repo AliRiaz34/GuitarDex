@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
@@ -10,6 +10,7 @@ import './Library.css';
 
 function Library() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [songs, setSongs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState(null);
@@ -20,6 +21,51 @@ function Library() {
 
   // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
+
+  // Swipe gesture detection
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+
+  useEffect(() => {
+    // Only enable swipe on list view (not on song detail or practice view)
+    if (selectedSong || practiceView) return;
+
+    const handleTouchStart = (e) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      touchEndX.current = e.touches[0].clientX;
+      touchEndY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = () => {
+      const deltaX = touchStartX.current - touchEndX.current;
+      const deltaY = touchStartY.current - touchEndY.current;
+      const minSwipeDistance = 50;
+
+      // Check if horizontal swipe is dominant
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+        // Swipe right - navigate to AddSong
+        if (deltaX < 0) {
+          navigate('/songs/add');
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [selectedSong, practiceView, navigate]);
 
   // Fetch songs from IndexedDB
   useEffect(() => {
@@ -184,6 +230,7 @@ function Library() {
           ...updatedSong,
           _previousXp: song.xp ?? 0,
           _previousLevel: song.level ?? 1,
+          _xpGain: xpGain,
           _fromPractice: true
         });
       }
@@ -236,7 +283,7 @@ function Library() {
         // direction = -1 means previous (swipe down), so animate from bottom ('down')
         setEntryDirection(direction > 0 ? 'up' : 'down');
         // Remove any previous animation properties when navigating
-        const { _previousXp, _previousLevel, _fromPractice, ...cleanSong } = sortedSongs[newIndex];
+        const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = sortedSongs[newIndex];
         setSelectedSong(cleanSong);
       }
     };
@@ -273,7 +320,7 @@ function Library() {
       onSelectSong={(song) => {
         setEntryDirection(null); // Reset direction when selecting from list
         // Ensure we don't have leftover animation properties
-        const { _previousXp, _previousLevel, _fromPractice, ...cleanSong } = song;
+        const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
         setSelectedSong(cleanSong);
       }}
       onQuickPractice={openPracticeView}

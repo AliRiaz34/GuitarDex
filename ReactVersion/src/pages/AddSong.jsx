@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../utils/db';
@@ -12,6 +12,65 @@ function AddSong() {
   const [difficulty, setDifficulty] = useState("normal");
   const [status, setStatus] = useState("seen");
   const navigate = useNavigate();
+
+  // Swipe gesture detection
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isSwiping = useRef(false);
+
+  // Swipe gesture handlers
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      // Ignore touches on interactive elements (inputs, buttons, etc.)
+      const target = e.target;
+      if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' ||
+          target.closest('button') || target.closest('input')) {
+        isSwiping.current = false;
+        return;
+      }
+
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      isSwiping.current = true;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isSwiping.current) return;
+
+      touchEndX.current = e.touches[0].clientX;
+      touchEndY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = () => {
+      if (!isSwiping.current) return;
+
+      const deltaX = touchStartX.current - touchEndX.current;
+      const deltaY = touchStartY.current - touchEndY.current;
+      const minSwipeDistance = 50;
+
+      // Check if horizontal swipe is dominant
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+        // Swipe left - navigate back to Library
+        if (deltaX > 0) {
+          navigate('/');
+        }
+      }
+
+      isSwiping.current = false;
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [navigate]);
 
   // Pre-fill title from query parameter
   useEffect(() => {
@@ -96,16 +155,15 @@ function AddSong() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
+      exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <form id="song-form" onSubmit={handleSubmit}>
-        <h1 id="add-song-h1">spot a new song</h1>
         <div id="add-input-div">
           <div id="title-input-div">
-            <label htmlFor="title-input" className="form-label">whats the song called?</label>
+            <label htmlFor="title-input" className="form-label">the song's name</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -124,7 +182,7 @@ function AddSong() {
             </div>
           </div>
           <div id="artistName-input-div">
-            <label htmlFor="artistName-input" className="form-label">who played it?</label>
+            <label htmlFor="artistName-input" className="form-label">the artist</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -142,7 +200,8 @@ function AddSong() {
               />
             </div>
           </div>
-          <div id="buttons-menu">
+          <label id="buttons-menu-1-label" className="form-label">select difficulty</label>
+          <div id="buttons-menu-1">
               <button
                 type="button"
                 value="easy"
@@ -168,19 +227,20 @@ function AddSong() {
                 Hard
               </button>
           </div>
+          <label id="buttons-menu-1-label" className="form-label">select current status</label>
           <div id="buttons-menu-2">
             <button
               type="button"
-              value="seen"
-              className={status === "seen" ? "selected" : ""}
+              value="new"
+              className={status === "seen" ? "selected" : "status-button"}
               onClick={() => setStatus("seen")}
             >
-              Seen
+              New
             </button>
             <button
               type="button"
               value="refined"
-              className={status === "refined" ? "selected" : ""}
+              className={status === "refined" ? "selected" : "status-button"}
               onClick={() => setStatus("refined")}
             >
               Refined
@@ -188,7 +248,7 @@ function AddSong() {
             <button
               type="button"
               value="mastered"
-              className={status === "mastered" ? "selected" : ""}
+              className={status === "mastered" ? "selected" : "status-button"}
               onClick={() => setStatus("mastered")}
             >
               Mastered

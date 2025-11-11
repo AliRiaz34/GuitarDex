@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import './Library.css';
 
 function LibraryListView({
@@ -16,13 +17,14 @@ function LibraryListView({
   onQuickPractice
 }) {
   const hasAnySongs = allSongs.length > 0;
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   return (
     <motion.div
       id="library-view"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       {hasAnySongs && (
@@ -36,12 +38,14 @@ function LibraryListView({
               placeholder="whatcha lookin for?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               autoCapitalize="off"
               autoComplete="off"
               autoCorrect="off"
               spellCheck="false"
             />
-            {!searchQuery && (
+            {!searchQuery && !isSearchFocused && (
               <div className="custom-placeholder">
                 whatcha lookin for<span className="blinking-question">?</span>
               </div>

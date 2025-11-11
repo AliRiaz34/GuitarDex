@@ -8,6 +8,8 @@ function PracticeView({ song, onSubmit, onBack }) {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [exitDirection, setExitDirection] = useState(null);
+  const [selectedMinButton, setSelectedMinButton] = useState(null);
+  const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
@@ -88,49 +90,134 @@ function PracticeView({ song, onSubmit, onBack }) {
         <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
         <h1 id="song-practice-title">{song.title}</h1>
         <div id="minPlayed-input-div">
-          <label className="form-label">how long did you play? </label>
+          <label className="form-label"> your practice duration</label>
           <div className="quick-select-button-div">
-            <button onClick={() => setMinPlayed(15)} type="button" className="quick-select-button">15</button>
+            <button
+              onClick={() => {
+                setMinPlayed(15);
+                setSelectedMinButton(15);
+              }}
+              type="button"
+              className={`quick-select-button ${selectedMinButton === 15 ? 'selected-quick' : ''}`}
+            >
+              15
+            </button>
             <p className="between-button-line">|</p>
-            <button onClick={() => setMinPlayed(30)} type="button" className="quick-select-button">30</button>
+            <button
+              onClick={() => {
+                setMinPlayed(30);
+                setSelectedMinButton(30);
+              }}
+              type="button"
+              className={`quick-select-button ${selectedMinButton === 30 ? 'selected-quick' : ''}`}
+            >
+              30
+            </button>
             <p className="between-button-line">|</p>
-            <button onClick={() => setMinPlayed(45)} type="button" className="quick-select-button">45</button>
+            <button
+              onClick={() => {
+                setMinPlayed(45);
+                setSelectedMinButton(45);
+              }}
+              type="button"
+              className={`quick-select-button ${selectedMinButton === 45 ? 'selected-quick' : ''}`}
+            >
+              45
+            </button>
             <p className="between-button-line">|</p>
-            <button onClick={() => setMinPlayed(60)} type="button" className="quick-select-button">60</button>
+            <button
+              onClick={() => {
+                setMinPlayed(60);
+                setSelectedMinButton(60);
+              }}
+              type="button"
+              className={`quick-select-button ${selectedMinButton === 60 ? 'selected-quick' : ''}`}
+            >
+              60
+            </button>
           </div>
-          <input
-            type="number"
-            className="practice-input"
-            id="minPlayed-input"
-            value={minPlayed}
-            onChange={(e) => setMinPlayed(e.target.value)}
-            inputMode="numeric" 
-            min="1"
-            max="999"
-            required
-          />
+          <div className="practice-input-group">
+              <p className="input-arrow">{'> '}</p>
+              <input
+                type="number"
+                className="practice-input"
+                id="minPlayed-input"
+                value={minPlayed}
+                onChange={(e) => {
+                  setMinPlayed(e.target.value);
+                  setSelectedMinButton(null);
+                }}
+                min="1"
+                max="360"
+                inputMode="numeric"
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                required
+              />
+              <label className="min-label">min</label>
+            </div>
         </div>
         {song.songDuration === null && (
           <div id="duration-div">
-            <label className="form-label">how long is the song?</label>
+            <label className="form-label">the song's duration</label>
             <div className="quick-select-button-div">
-              <button onClick={() => setSongDuration(3)} type="button" className="quick-select-button">3</button>
+              <button
+                onClick={() => {
+                  setSongDuration(3);
+                  setSelectedDurationButton(3);
+                }}
+                type="button"
+                className={`quick-select-button ${selectedDurationButton === 3 ? 'selected-quick' : ''}`}
+              >
+                3
+              </button>
               <p className="between-button-line"> |</p>
-              <button onClick={() => setSongDuration(4)} type="button" className="quick-select-button">4</button>
+              <button
+                onClick={() => {
+                  setSongDuration(4);
+                  setSelectedDurationButton(4);
+                }}
+                type="button"
+                className={`quick-select-button ${selectedDurationButton === 4 ? 'selected-quick' : ''}`}
+              >
+                4
+              </button>
               <p className="between-button-line">|</p>
-              <button onClick={() => setSongDuration(5)} type="button" className="quick-select-button">5</button>
+              <button
+                onClick={() => {
+                  setSongDuration(5);
+                  setSelectedDurationButton(5);
+                }}
+                type="button"
+                className={`quick-select-button ${selectedDurationButton === 5 ? 'selected-quick' : ''}`}
+              >
+                5
+              </button>
             </div>
-            <input
-              type="number"
-              className="practice-input"
-              id="songDuration-input"
-              value={songDuration}
-              onChange={(e) => setSongDuration(e.target.value)}
-              inputMode="numeric" 
-              min="0"
-              max="30"
-              required
-            />
+            <div className="practice-input-group">
+              <p className="input-arrow">{'> '}</p>
+              <input
+                type="number"
+                className="practice-input"
+                id="songDuration-input"
+                value={songDuration}
+                onChange={(e) => {
+                  setSongDuration(e.target.value);
+                  setSelectedDurationButton(null);
+                }}
+                inputMode="numeric"
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                min="0"
+                max="30"
+                required
+              />
+              <label className="min-label">min</label>
+            </div>
           </div>
         )}
         <div className="save-div">

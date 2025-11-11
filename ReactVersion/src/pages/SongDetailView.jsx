@@ -46,11 +46,17 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
         previousXp: song._previousXp,
         newXp: song.xp,
         xpDiff,
-        levelChanged
+        levelChanged,
+        xpGainFromPractice: song._xpGain
       });
 
       // Show XP gain indicator
-      if (xpDiff > 0) {
+      // If we have the actual XP gain from practice, use that (especially important for level ups)
+      // Otherwise fall back to the XP diff if it's positive
+      if (song._xpGain != null) {
+        setXpGain(Math.floor(song._xpGain));
+        setTimeout(() => setXpGain(null), 2000);
+      } else if (xpDiff > 0) {
         setXpGain(Math.floor(xpDiff));
         setTimeout(() => setXpGain(null), 2000);
       }
@@ -89,7 +95,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
       setDisplayXp(song.xp);
       setDisplayLevel(song.level);
     }
-  }, [song.songId, song.xp, song.level, song._previousXp, song._previousLevel]);
+  }, [song.songId, song.xp, song.level, song._previousXp, song._previousLevel, song._xpGain]);
 
   // Close menu when clicking outside
   useEffect(() => {

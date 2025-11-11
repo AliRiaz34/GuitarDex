@@ -7,7 +7,7 @@
 }
 
 #title-input-div {
-  margin-top: 30px;
+  margin-top: 50px;
 }
 
 #song-form {
@@ -17,12 +17,17 @@
     margin-bottom: 120px;
 }
 
-#buttons-menu  {
-  margin-top: 70px;
+#buttons-menu-1-label {
+  margin-top: 50px;
+  display: block;
+}
+
+#buttons-menu-1  {
   display: flex;
+  margin-top: 10px;
   justify-content: space-around;
   max-width: 100%;
-  font-size: 1em;
+  font-size: 0.9em;
 }
 
 #buttons-menu-2  {
@@ -30,17 +35,13 @@
   display: flex;
   justify-content: space-around;
   max-width: 100%;
-  font-size: 1em;
+  font-size: 0.9em;
 }
 
-.buttons-menu button {
-  transition: all 0.3s ease;
+#buttons-menu-1 button,
+#buttons-menu-2 button {
+  transition: color 0.3s ease;
 }
-
-.status-button  {
-  font-size: 1em;
-}
-
 
 button.selected {
     color: rgb(45, 152, 240);
@@ -62,23 +63,21 @@ button.selected {
     box-sizing: border-box;
     border: 0px;
     padding-bottom: 4px;
-    border-bottom: 3px solid rgb(145, 143, 143);
+    padding-left: 5px;
+    border-bottom: 3px solid rgba(45, 152, 240, 0.555);
     border-radius: 0px;
     outline: none;
     background-color: transparent;
-    width: 87%;
+    width: 85%;
     max-width: 100%;
 }
 
-#add-song-h1 {
-  font-size: 1.6em;
-  text-align: center;
-  margin-top: 50px;
-  color: rgb(45, 152, 240);
+.status-button {
+  min-width: ;
 }
 
 .input-group {
-  margin-top: 20px;
+  margin-top: 10px;
   margin-left: 15px;
   display: flex;
   max-width: 100%;
@@ -89,14 +88,15 @@ button.selected {
   margin: 0px;
   padding-top: 3px;
   padding-right: 8px;
-  color: rgb(145, 143, 143);
+  color: rgb(45, 152, 240);
   font-weight: bolder;
 }
 
 #song-add-save {
     margin: auto;
     display: block;
-    margin-top: 90px;
+    margin-top: 60px;
     text-align: center;
     font-size: 1.4em;
+    margin-bottom: 250px;
 }

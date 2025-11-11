@@ -26,3 +26,12 @@ Song 4    Lv            Lv
 have a settings page (gotta figure out what)
 
 - be able to edit 
+
+
+
+
+# adivce and ideas from showing knut and dad
+
+mapper av sang goated idea
+
+descirption box, add overview of progress, 
