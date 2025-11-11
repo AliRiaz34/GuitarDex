@@ -47,7 +47,7 @@ function PracticeView({ song, onSubmit, onBack }) {
 
     const finalSongDuration = song.songDuration !== null ? song.songDuration : songDuration;
 
-    if (song.status === "seen" && (songDuration > 999 || songDuration < 1)) {
+    if (song.status === "seen" && song.songDuration === null && (songDuration > 999 || songDuration < 1)) {
       alert("Invalid song duration G.");
       return;
     }
