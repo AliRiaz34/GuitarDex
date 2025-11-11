@@ -61,6 +61,7 @@ button.selected {
     margin: 0px;
     box-sizing: border-box;
     border: 0px;
+    padding-bottom: 4px;
     border-bottom: 3px solid rgb(145, 143, 143);
     border-radius: 0px;
     outline: none;
