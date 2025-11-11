@@ -55,7 +55,6 @@ function PracticeView({ song, onSubmit, onBack }) {
       return;
     }
 
-    console.log(finalSongDuration);
     onSubmit({ minPlayed, songDuration: finalSongDuration });
   };
 

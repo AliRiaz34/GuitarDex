@@ -1,16 +1,17 @@
+### FUTURE IMPLEMENTATIONS
+timer in practice page            (i just dont see the vision, prefer manual)
 
-### long term IDEA
+be able to edit 
 
-fix low battery mode making animations choppy
+subparts for a song, user defined
 
-fix guitardex.vercel.app css for desktop too
+descirption box, add overview of progress, 
 
-timer in practice page
 
 MAKE ALBUM LIKE GYM, WHICH GYM BADGE!
 
-be able to pin song in library
 
+be able to pin song in library
 
 have a main 10 song roster, team
 have playlists
@@ -21,17 +22,8 @@ Song 2    Lv            Lv
 Song 3    Lv            Lv
 Song 4    Lv            Lv
 
+### ISSUES
 
+fix low battery mode making animations choppy
 
-have a settings page (gotta figure out what)
-
-- be able to edit 
-
-
-
-
-# adivce and ideas from showing knut and dad
-
-mapper av sang goated idea
-
-descirption box, add overview of progress, 
+pwa swipe gesutre

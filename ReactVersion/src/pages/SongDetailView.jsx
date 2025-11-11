@@ -42,14 +42,6 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
       const xpDiff = song.xp - song._previousXp;
       const levelChanged = song._previousLevel !== song.level;
 
-      console.log('XP ANIMATION TRIGGERED!', {
-        previousXp: song._previousXp,
-        newXp: song.xp,
-        xpDiff,
-        levelChanged,
-        xpGainFromPractice: song._xpGain
-      });
-
       // Show XP gain indicator
       // If we have the actual XP gain from practice, use that (especially important for level ups)
       // Otherwise fall back to the XP diff if it's positive
@@ -171,13 +163,17 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
     setShowDeleteConfirm(true);
   };
 
+  const handleEditClick = () => {
+    setMenuOpen(false);
+    setShowEdit(true);
+  };
+
   const handleDeleteConfirm = async () => {
     try {
       await deleteSong(song.songId);
       setShowDeleteConfirm(false);
       onDelete(song.songId);
     } catch (error) {
-      console.error('Error:', error);
       alert('Error deleting song');
     }
   };
@@ -235,6 +231,7 @@ function SongDetailView({ song, onBack, onPractice, onDelete, onNavigate, hasPre
               </img>
               {menuOpen && (
                 <div id="song-menu-dropdown">
+                  <p className="song-menu-option" onClick={handleEditClick}>edit</p>
                   <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
                 </div>
               )}

@@ -77,11 +77,11 @@
 .min-label {
     padding-bottom: 2px;
     padding-left: 6px;
+    min-width: 34;
     font-size: 1em;
     margin: 0px;
     text-align: center;
     color: rgb(145, 143, 143);
-
 }
 
 #practice-back-icon {
