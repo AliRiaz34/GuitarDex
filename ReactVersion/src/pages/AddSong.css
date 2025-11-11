@@ -43,7 +43,7 @@
 
 
 button.selected {
-    color: rgb(33, 100, 245);
+    color: rgb(45, 152, 240);
 }
 
 #add-input-div{
@@ -74,6 +74,7 @@ button.selected {
   font-size: 1.6em;
   text-align: center;
   margin-top: 50px;
+  color: rgb(45, 152, 240);
 }
 
 .input-group {
@@ -97,11 +98,5 @@ button.selected {
     display: block;
     margin-top: 90px;
     text-align: center;
-    font-size: 1.2em;
-    padding: 3px 30px 5px ;
-    border-width: 13px;
-    border-style: solid;
-    border-image: url('/images/white-fram-hd.png') 42 round;
-    background-color: #0e0e13;
-    position: relative;
+    font-size: 1.4em;
 }
