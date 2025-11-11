@@ -195,6 +195,7 @@
     margin: 0px;
     font-size: 1.1em;
     cursor: pointer;
+    font-weight: bolder;
 }
 
 #empty-info-p {

@@ -1,8 +1,4 @@
 
-
-# phone transfer debugs!
-
-
 ### long term IDEA
 
 fix low battery mode making animations choppy
@@ -12,8 +8,6 @@ fix guitardex.vercel.app css for desktop too
 timer in practice page
 
 MAKE ALBUM LIKE GYM, WHICH GYM BADGE!
-
-validate name and artist being empty
 
 be able to pin song in library
 

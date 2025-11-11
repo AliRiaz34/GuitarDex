@@ -7,18 +7,26 @@
 }
 
 #title-input-div {
-  margin-top: 100px;
+  margin-top: 30px;
 }
 
 #song-form {
     width: 100%;
     margin: auto;
     overflow-x: hidden;
-    padding-bottom: 120px;
+    margin-bottom: 120px;
 }
 
 .buttons-menu  {
-  margin-top: 50px;
+  margin-top: 70px;
+  display: flex;
+  justify-content: space-around;
+  max-width: 100%;
+  font-size: 1em;
+}
+
+.buttons-menu-2  {
+  margin-top: 20px;
   display: flex;
   justify-content: space-around;
   max-width: 100%;
@@ -47,22 +55,52 @@ button.selected {
 
 .song-input {
     color: white;
-    text-align: center;
     font-family: 'Pokemon-Classic';
     font-size: 1.1em;
     padding: 0px;
     margin: 0px;
-    margin-top: 20px;
     box-sizing: border-box;
     border: 0px;
+    border-bottom: 3px solid rgb(145, 143, 143);
     border-radius: 0px;
     outline: none;
     background-color: transparent;
+    width: 85%;
+    max-width: 100%;
+}
+
+#add-song-h1 {
+  font-size: 1.4em;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.input-group {
+  margin-top: 20px;
+  margin-left: 15px;
+  display: flex;
+  max-width: 100%;
+  flex-direction: row;
+}
+
+.input-arrow {
+  margin: 0px;
+  padding-top: 3px;
+  padding-right: 8px;
+  color: rgb(145, 143, 143);
+  font-weight: bolder;
 }
 
 #song-add-save {
-    margin-top: 60px;
-    width: 100%;
+    margin: auto;
+    display: block;
+    margin-top: 90px;
     text-align: center;
-    font-size: 1.3em;
+    font-size: 1.2em;
+    padding: 3px 30px 5px ;
+    border-width: 13px;
+    border-style: solid;
+    border-image: url('/images/white-fram-hd.png') 42 round;
+    background-color: #0e0e13;
+    position: relative;
 }

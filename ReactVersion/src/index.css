@@ -77,25 +77,14 @@ th {
   left: 5%;
   right: 5%;
   z-index: 1000;
-  border-width: 20px;
+  border-width: 16px;
   border-style: solid;
-  border-image: url('/images/frame-hd.png') 42 round;
+  border-image: url('/images/white-fram-hd.png') 42 round;
   border-color: white;
   background-color: #0e0e13;
   font-size: 1.1em;
   will-change: transform;
   backface-visibility: hidden;
-}
-
-#navbar::after {
-  content: '';
-  position: absolute;
-  inset: -20px;
-  border: 20px solid transparent;
-  border-image: url('/images/frame-hd.png') 42 round;
-  filter: invert(1) brightness(1);
-  pointer-events: none;
-  z-index: -1;
 }
 
 #navlink-1 {

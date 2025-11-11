@@ -102,38 +102,45 @@ function AddSong() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <form id="song-form" onSubmit={handleSubmit}>
+        <h1 id="add-song-h1">spot a new song</h1>
         <div id="add-input-div">
           <div id="title-input-div">
             <label htmlFor="title-input" className="form-label">whats the song called?</label>
-            <input
-              type="text"
-              className="song-input"
-              id="title-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={45}
-              autoCapitalize="off"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
-              required
-            />
+            <div className="input-group">
+              <p className="input-arrow">{'> '}</p>
+              <input
+                type="text"
+                className="song-input"
+                id="title-input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={45}
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                required
+              />
+            </div>
           </div>
           <div id="artistName-input-div">
             <label htmlFor="artistName-input" className="form-label">who played it?</label>
-            <input
-              type="text"
-              className="song-input"
-              id="artistName-input"
-              value={artistName}
-              onChange={(e) => setArtistName(e.target.value)}
-              maxLength={45}
-              autoCapitalize="off"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
-              required
-            />
+            <div className="input-group">
+              <p className="input-arrow">{'> '}</p>
+              <input
+                type="text"
+                className="song-input"
+                id="artistName-input"
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
+                maxLength={45}
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                required
+              />
+            </div>
           </div>
           <div className="buttons-menu">
               <button
@@ -161,31 +168,31 @@ function AddSong() {
                 Hard
               </button>
           </div>
-            <div className="buttons-menu">
-              <button
-                type="button"
-                value="seen"
-                className={status === "seen" ? "selected" : ""}
-                onClick={() => setStatus("seen")}
-              >
-                Seen
-              </button>
-              <button
-                type="button"
-                value="refined"
-                className={status === "refined" ? "selected" : ""}
-                onClick={() => setStatus("refined")}
-              >
-                Refined
-              </button>
-              <button
-                type="button"
-                value="mastered"
-                className={status === "mastered" ? "selected" : ""}
-                onClick={() => setStatus("mastered")}
-              >
-                Mastered
-              </button>
+          <div className="buttons-menu-2">
+            <button
+              type="button"
+              value="seen"
+              className={status === "seen" ? "selected" : ""}
+              onClick={() => setStatus("seen")}
+            >
+              Seen
+            </button>
+            <button
+              type="button"
+              value="refined"
+              className={status === "refined" ? "selected" : ""}
+              onClick={() => setStatus("refined")}
+            >
+              Refined
+            </button>
+            <button
+              type="button"
+              value="mastered"
+              className={status === "mastered" ? "selected" : ""}
+              onClick={() => setStatus("mastered")}
+            >
+              Mastered
+            </button>
           </div>
         </div>
         <button id="song-add-save" type="submit" className="form__button">
