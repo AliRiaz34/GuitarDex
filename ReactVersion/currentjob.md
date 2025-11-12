@@ -10,7 +10,7 @@ descirption box, add overview of progress,
 
 MAKE ALBUM LIKE GYM, WHICH GYM BADGE!
 
-
+add back button to edit
 be able to pin song in library
 
 have a main 10 song roster, team

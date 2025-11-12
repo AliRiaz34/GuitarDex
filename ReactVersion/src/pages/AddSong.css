@@ -41,10 +41,12 @@
 #buttons-menu-1 button,
 #buttons-menu-2 button {
   transition: color 0.3s ease;
+  padding: 0px;
 }
 
 button.selected {
     color: rgb(45, 152, 240);
+    padding: 0px;
 }
 
 #add-input-div{
@@ -64,7 +66,7 @@ button.selected {
     border: 0px;
     padding-bottom: 4px;
     padding-left: 5px;
-    border-bottom: 3px solid rgba(45, 152, 240, 0.555);
+    border-bottom: 2px solid rgba(240, 172, 45, 0.822);
     border-radius: 0px;
     outline: none;
     background-color: transparent;
@@ -73,7 +75,7 @@ button.selected {
 }
 
 .status-button {
-  min-width: ;
+  min-width: fit-content;
 }
 
 .input-group {
@@ -87,9 +89,19 @@ button.selected {
 .input-arrow {
   margin: 0px;
   padding-top: 3px;
-  padding-right: 8px;
-  color: rgb(45, 152, 240);
+  padding-right: 5px;
+  color: rgb(240, 172, 45);
   font-weight: bolder;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
 }
 
 #song-add-save {
