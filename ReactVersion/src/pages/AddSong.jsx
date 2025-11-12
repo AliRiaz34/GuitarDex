@@ -11,6 +11,7 @@ function AddSong() {
   const [artistName, setArtistName] = useState("");
   const [difficulty, setDifficulty] = useState("normal");
   const [status, setStatus] = useState("seen");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Swipe gesture detection
@@ -83,14 +84,20 @@ function AddSong() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Prevent double submission
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     // Validation (matching Flask version)
     if (title.length < 1) {
       alert("Title has to be longer than 1.");
+      setIsSubmitting(false);
       return;
     }
 
     if (artistName.length < 1) {
       alert("Artist name has to be longer than 1.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -150,6 +157,7 @@ function AddSong() {
     } catch (error) {
       console.error("Error:", error);
       alert("Error adding song");
+      setIsSubmitting(false);
     }
   }
 
@@ -255,8 +263,8 @@ function AddSong() {
             </button>
           </div>
         </div>
-        <button id="song-add-save" type="submit" className="form__button">
-          Save
+        <button id="song-add-save" type="submit" className="form__button" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </form>
     </motion.div>
