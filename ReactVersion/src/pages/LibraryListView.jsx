@@ -51,7 +51,11 @@ function LibraryListView({
               </div>
             )}
           </div>
+        </>
+      )}
 
+      <div id="library-table-container">
+        {hasAnySongs && (
           <div id="sort-menu">
             <div id="sort-icon" onClick={() => setSortMenuOpen(!sortMenuOpen)}>
               <p className="sort-p">↓↑</p>
@@ -85,10 +89,8 @@ function LibraryListView({
               )}
             </AnimatePresence>
           </div>
-        </>
-      )}
+        )}
 
-      <div id="library-table-container">
         {songs.length > 0 ? (
           <table id="library-table">
             <tbody>
