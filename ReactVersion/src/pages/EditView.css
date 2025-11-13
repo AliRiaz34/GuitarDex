@@ -4,3 +4,13 @@
     overflow-x: hidden;
     margin-bottom: 150px;
 }
+
+#edit-back-icon {
+    margin: 0px;
+    font-size: 1.1em;
+    padding-left: 15px;
+    position: fixed;
+    padding-top: 15px;
+    cursor: pointer;
+    font-weight: bolder;
+}

@@ -1,8 +1,6 @@
 ### FUTURE IMPLEMENTATIONS
 timer in practice page            (i just dont see the vision, prefer manual)
 
-add stale as option, add also that stale songs level up to refined faster
-
 subparts for a song, user defined
 
 descirption box, add overview of progress, 

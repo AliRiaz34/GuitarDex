@@ -40,7 +40,7 @@ function EditView({ song, onSubmit, onBack }) {
 
     // Swipe right to go back
     if (deltaX < -minSwipeDistance) {
-      onBack();
+      handleBack();
     }
 
     isSwiping.current = false;
@@ -69,6 +69,10 @@ function EditView({ song, onSubmit, onBack }) {
     });
   }
 
+  const handleBack = () => {
+    onBack();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -83,6 +87,7 @@ function EditView({ song, onSubmit, onBack }) {
         id="edit-song-form"
         onSubmit={handleFormSubmit}
       >
+        <p id="edit-back-icon" onClick={handleBack}>{'<'}</p>
         <div id="add-input-div">
           <div id="title-input-div">
             <label htmlFor="title-input" className="form-label">current song name</label>
