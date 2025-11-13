@@ -126,6 +126,13 @@ function AddSong() {
         highestLevelReached = level;
         lastDecayDate = addDate;
         lastPracticeDate = addDate;
+      } else if (status === "stale") {
+        level = 1;
+        xp = 0;
+        // stale songs are assumed to have been refined before initially
+        highestLevelReached =  10; // MAX_LEVEL_BEFORE_REFINED
+        lastDecayDate = addDate;
+        lastPracticeDate = addDate;
       }
 
       const newSong = {
@@ -245,6 +252,16 @@ function AddSong() {
             >
               New
             </button>
+            <button
+              type="button"
+              value="stale"
+              className={status === "stale" ? "selected" : "status-button"}
+              onClick={() => setStatus("stale")}
+            >
+              Stale
+            </button>
+          </div>
+          <div id="buttons-menu-3">
             <button
               type="button"
               value="refined"

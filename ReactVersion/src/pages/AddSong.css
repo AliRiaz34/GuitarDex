@@ -38,8 +38,17 @@
   font-size: 0.9em;
 }
 
+#buttons-menu-3  {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+  max-width: 100%;
+  font-size: 0.9em;
+}
+
 #buttons-menu-1 button,
-#buttons-menu-2 button {
+#buttons-menu-2 button,
+#buttons-menu-3 button {
   transition: color 0.3s ease;
   padding: 0px;
 }
