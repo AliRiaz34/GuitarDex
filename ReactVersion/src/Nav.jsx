@@ -9,6 +9,9 @@ function Navbar() {
       <NavLink id='navlink-2' to="/" className={({isActive}) => isActive ? 'active' : ''}>
         LIBRARY
       </NavLink>
+      <NavLink id='navlink-3' to="/playlists" className={({isActive}) => isActive ? 'active' : ''}>
+        DECK
+      </NavLink>
     </nav>
   )
 }

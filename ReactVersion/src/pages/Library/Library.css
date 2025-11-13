@@ -340,6 +340,15 @@
     color: white;
 }
 
+.practice-input-arrow {
+  margin: 0px;
+  padding-right: 3px;
+  color: rgb(240, 172, 45);
+  padding-bottom: 2px;
+  font-weight: bolder;
+  animation: bounce 2s ease-in-out infinite;
+}
+
 /* XP Bar */
 #xp-bar {
     height: 100%;
@@ -446,7 +455,135 @@
     text-transform: lowercase;
 }
 
-.delete-confirm-btn:hover {
+
+/* edit page */
+#edit-song-form {
+    width: 100%;
+    margin: auto;
+    overflow-x: hidden;
+    margin-bottom: 150px;
+}
+
+#edit-back-icon {
+    margin: 0px;
+    font-size: 1.1em;
+    padding-left: 15px;
+    position: fixed;
+    padding-top: 15px;
+    cursor: pointer;
+    font-weight: bolder;
+}
+
+/* practice add */
+
+#minPlayed-input-div, #duration-div{
+    margin-top: 60px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.quick-select-button-div {
+    margin: auto;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+.between-button-line {
+    margin: 0px;
+    cursor: default;
+    color: rgb(145, 143, 143);
+}
+
+.practice-input {
     color: white;
-    border-color: rgba(255, 255, 255, 0.4);
+    font-family: 'Pokemon-Classic';
+    font-size: 1.1em;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    border: 0px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid rgba(240, 172, 45, 0.822);
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+    width: 70px;
+}
+
+.quick-select-button {
+    font-size: 0.85em;
+    padding-left: 12px;
+    padding-right: 12px;
+    transition: color 0.3s ease;
+}
+
+.quick-select-button.selected-quick {
+    color: rgb(45, 152, 240);
+}
+
+.practice-input-group {
+  margin: auto;
+  padding-left: 25px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.save-div {
+    margin-top: 100px;
+    padding-bottom: 400px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.form-label {
+    font-size: 1em;
+    margin: 0px;
+    text-align: center;
+    color: rgb(145, 143, 143);
+}
+
+.min-label {
+    padding-bottom: 2px;
+    padding-left: 6px;
+    min-width: 34px;
+    font-size: 1em;
+    margin: 0px;
+    text-align: center;
+    color: rgb(145, 143, 143);
+}
+
+#practice-back-icon {
+    margin: 0px;
+    font-size: 1.1em;
+    position: fixed;
+    padding-top: 10px;
+    top: 5px;
+    cursor: pointer;
+    font-weight: bolder;
+}
+
+#song-practice-title {
+    text-align: center;
+    font-size: 1.6em;
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 0px;
+    margin-top: 80px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
 }

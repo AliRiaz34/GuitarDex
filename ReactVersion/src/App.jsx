@@ -5,7 +5,7 @@ import './App.css'
 import Navbar from './Nav'
 import Library from './pages/Library'
 import AddSong from './pages/AddSong'
-
+import Playlist from './pages/Playlist'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -23,6 +23,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Library />} />
         <Route path="/library" element={<Library />} />
         <Route path="/songs/add" element={<AddSong />} />
+        <Route path="/playlists" element={<Playlist />} />
       </Routes>
     </AnimatePresence>
   )

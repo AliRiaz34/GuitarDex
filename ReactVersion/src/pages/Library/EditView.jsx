@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import './EditView.css';
+import './Library.css';
 
 function EditView({ song, onSubmit, onBack }) {
   const [title, setTitle] = useState(song?.title || '');
@@ -191,7 +191,7 @@ function EditView({ song, onSubmit, onBack }) {
               </button>
             </div>
             <div className="practice-input-group">
-              <p className="input-arrow">{'> '}</p>
+              <p className="practice-input-arrow">{'> '}</p>
               <input
                 type="number"
                 className="practice-input"

@@ -1,8 +1,10 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Incremented to add playlists stores
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
+const PLAYLISTS_STORE = 'playlists';
+const PLAYLIST_SONGS_STORE = 'playlist_songs';
 
 let dbInstance = null;
 
@@ -36,6 +38,22 @@ export function initDB() {
         const practicesStore = db.createObjectStore(PRACTICES_STORE, { keyPath: 'practiceId' });
         practicesStore.createIndex('songId', 'songId', { unique: false });
         practicesStore.createIndex('practiceDate', 'practiceDate', { unique: false });
+      }
+
+      // Create playlists store (metadata)
+      if (!db.objectStoreNames.contains(PLAYLISTS_STORE)) {
+        const playlistsStore = db.createObjectStore(PLAYLISTS_STORE, { keyPath: 'playlistId' });
+        playlistsStore.createIndex('createdDate', 'createdDate', { unique: false });
+        playlistsStore.createIndex('title', 'title', { unique: false });
+      }
+
+      // Create playlist_songs store (junction table for many-to-many relationship)
+      if (!db.objectStoreNames.contains(PLAYLIST_SONGS_STORE)) {
+        const playlistSongsStore = db.createObjectStore(PLAYLIST_SONGS_STORE, { keyPath: 'id', autoIncrement: true });
+        playlistSongsStore.createIndex('playlistId', 'playlistId', { unique: false });
+        playlistSongsStore.createIndex('songId', 'songId', { unique: false });
+        playlistSongsStore.createIndex('playlistSong', ['playlistId', 'songId'], { unique: true }); // Prevent duplicate song in same playlist
+        playlistSongsStore.createIndex('order', 'order', { unique: false });
       }
     };
   });
@@ -265,4 +283,268 @@ export async function getTotalMinutesPlayed(songId) {
 export async function getTotalPracticeSessions(songId) {
   const practices = await getPracticesBySongId(songId);
   return practices.length;
+}
+
+// PLAYLISTS OPERATIONS
+
+// Get all playlists
+export async function getAllPlaylists() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLISTS_STORE], 'readonly');
+    const store = transaction.objectStore(PLAYLISTS_STORE);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to get playlists'));
+    };
+  });
+}
+
+// Get a single playlist by ID
+export async function getPlaylistById(playlistId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLISTS_STORE], 'readonly');
+    const store = transaction.objectStore(PLAYLISTS_STORE);
+    const request = store.get(playlistId);
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to get playlist'));
+    };
+  });
+}
+
+// Add a new playlist
+export async function addPlaylist(playlistData) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLISTS_STORE], 'readwrite');
+    const store = transaction.objectStore(PLAYLISTS_STORE);
+    const request = store.add(playlistData);
+
+    request.onsuccess = () => {
+      resolve(playlistData);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to add playlist'));
+    };
+  });
+}
+
+// Update a playlist
+export async function updatePlaylist(playlistId, updates) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLISTS_STORE], 'readwrite');
+    const store = transaction.objectStore(PLAYLISTS_STORE);
+
+    const getRequest = store.get(playlistId);
+
+    getRequest.onsuccess = () => {
+      const existingPlaylist = getRequest.result;
+
+      if (!existingPlaylist) {
+        reject(new Error('Playlist not found'));
+        return;
+      }
+
+      const updatedPlaylist = { ...existingPlaylist, ...updates };
+      const putRequest = store.put(updatedPlaylist);
+
+      putRequest.onsuccess = () => {
+        resolve(updatedPlaylist);
+      };
+
+      putRequest.onerror = () => {
+        reject(new Error('Failed to update playlist'));
+      };
+    };
+
+    getRequest.onerror = () => {
+      reject(new Error('Failed to get existing playlist'));
+    };
+  });
+}
+
+// Delete a playlist and all associated playlist-song relationships
+export async function deletePlaylist(playlistId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLISTS_STORE, PLAYLIST_SONGS_STORE], 'readwrite');
+
+    // First, delete all playlist-song entries
+    const playlistSongsStore = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const playlistSongsIndex = playlistSongsStore.index('playlistId');
+    const playlistSongsRequest = playlistSongsIndex.openCursor(IDBKeyRange.only(playlistId));
+
+    playlistSongsRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        // All playlist-song entries deleted, now delete the playlist
+        const playlistsStore = transaction.objectStore(PLAYLISTS_STORE);
+        playlistsStore.delete(playlistId);
+      }
+    };
+
+    playlistSongsRequest.onerror = () => {
+      reject(new Error('Failed to delete playlist songs'));
+    };
+
+    transaction.oncomplete = () => {
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(new Error('Failed to delete playlist'));
+    };
+  });
+}
+
+// Get next available playlist ID
+export async function getNextPlaylistId() {
+  const playlists = await getAllPlaylists();
+  if (playlists.length === 0) return 1;
+  const maxId = Math.max(...playlists.map(p => p.playlistId));
+  return maxId + 1;
+}
+
+// PLAYLIST-SONG RELATIONSHIP OPERATIONS
+
+// Add a song to a playlist
+export async function addSongToPlaylist(playlistId, songId, order) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+
+    const playlistSongData = {
+      playlistId,
+      songId,
+      order: order || Date.now(), // Use timestamp as default order
+      addedDate: new Date().toISOString()
+    };
+
+    const request = store.add(playlistSongData);
+
+    request.onsuccess = () => {
+      resolve(playlistSongData);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to add song to playlist (may already exist)'));
+    };
+  });
+}
+
+// Remove a song from a playlist
+export async function removeSongFromPlaylist(playlistId, songId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const index = store.index('playlistSong');
+    const request = index.getKey([playlistId, songId]);
+
+    request.onsuccess = () => {
+      const key = request.result;
+      if (key) {
+        const deleteRequest = store.delete(key);
+        deleteRequest.onsuccess = () => resolve();
+        deleteRequest.onerror = () => reject(new Error('Failed to remove song from playlist'));
+      } else {
+        reject(new Error('Song not found in playlist'));
+      }
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to find song in playlist'));
+    };
+  });
+}
+
+// Get all songs in a playlist (returns array of songIds in order)
+export async function getSongsInPlaylist(playlistId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const index = store.index('playlistId');
+    const request = index.getAll(playlistId);
+
+    request.onsuccess = () => {
+      // Sort by order field
+      const results = request.result.sort((a, b) => a.order - b.order);
+      resolve(results);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to get songs in playlist'));
+    };
+  });
+}
+
+// Get all playlists containing a specific song
+export async function getPlaylistsContainingSong(songId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const index = store.index('songId');
+    const request = index.getAll(songId);
+
+    request.onsuccess = () => {
+      // Return unique playlist IDs
+      const playlistIds = [...new Set(request.result.map(ps => ps.playlistId))];
+      resolve(playlistIds);
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to get playlists for song'));
+    };
+  });
+}
+
+// Update the order of songs in a playlist
+export async function updatePlaylistSongOrder(playlistId, songOrderArray) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const index = store.index('playlistId');
+    const request = index.getAll(playlistId);
+
+    request.onsuccess = () => {
+      const playlistSongs = request.result;
+
+      // Update order for each song
+      songOrderArray.forEach((songId, index) => {
+        const playlistSong = playlistSongs.find(ps => ps.songId === songId);
+        if (playlistSong) {
+          playlistSong.order = index;
+          store.put(playlistSong);
+        }
+      });
+    };
+
+    transaction.oncomplete = () => {
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(new Error('Failed to update playlist song order'));
+    };
+  });
 }

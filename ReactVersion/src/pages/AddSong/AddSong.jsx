@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../utils/db';
-import { xpThreshold } from '../utils/levelingSystem';
+import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../../utils/db';
+import { xpThreshold } from '../../utils/levelingSystem';
 import './AddSong.css';
 
 function AddSong() {

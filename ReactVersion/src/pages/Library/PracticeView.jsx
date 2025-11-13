@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import './AddPractice.css';
+import './Library.css';
 
 function PracticeView({ song, onSubmit, onBack }) {
   const [minPlayed, setMinPlayed] = useState(song.songDuration || "");

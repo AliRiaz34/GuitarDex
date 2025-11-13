@@ -75,30 +75,36 @@ th {
   justify-content: space-between;
   position: fixed;
   bottom: 5%;
-  left: 5%;
-  right: 5%;
+  left: 3%;
+  right: 3%;
   z-index: 1000;
-  border-width: 16px;
+  border-width: 15px;
   border-style: solid;
   border-image: url('/images/white-fram-hd.png') 42 round;
   border-color: white;
   background-color: #0e0e13;
-  font-size: 1.1em;
+  font-size: 1em;
   will-change: transform;
   backface-visibility: hidden;
+  text-align: center;
 }
 
 #navlink-1 {
-  padding-left: 40px;
-  min-width: 70px;
+  min-width: 73px;
+  padding-left: 5px;
 }
 
 #navlink-2 {
-  padding-right: 20px;
-  min-width: 140px;
+  min-width: 128px;
 }
 
-#navlink-1, #navlink-2:visited {
+#navlink-3 {
+  min-width: 72px;
+  padding-right: 5px;
+
+}
+
+#navlink-1, #navlink-2, #navlink-3,:visited {
   text-decoration: none;
   color: rgb(114, 114, 114);
   transition: all 0.3s ease;

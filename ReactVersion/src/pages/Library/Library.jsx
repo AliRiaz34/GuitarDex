@@ -5,8 +5,8 @@ import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
 import EditView from './EditView';
-import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong } from '../utils/db';
-import { xpThreshold, applyDecay, updateSongWithPractice } from '../utils/levelingSystem';
+import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong } from '../../utils/db';
+import { xpThreshold, applyDecay, updateSongWithPractice } from '../../utils/levelingSystem';
 import './Library.css';
 
 function Library() {

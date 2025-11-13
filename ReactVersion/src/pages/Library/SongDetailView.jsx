@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteSong } from '../utils/db';
+import { deleteSong } from '../../utils/db';
 import './Library.css';
 
 function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection }) {
@@ -226,7 +226,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
               <img
                 id="song-menu-icon"
                 onClick={() => setMenuOpen(!menuOpen)}
-                src='/images/menu.png'
+                src='./images/menu.png'
               >
               </img>
               {menuOpen && (
