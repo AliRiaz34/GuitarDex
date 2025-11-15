@@ -45,14 +45,14 @@ function PracticeView({ song, onSubmit, onBack }) {
       return;
     }
 
-    const finalSongDuration = song.songDuration !== null ? song.songDuration : songDuration;
+    const finalSongDuration = song.songDuration !== null ? Number(song.songDuration) : Number(songDuration);
 
     if (song.status === "seen" && song.songDuration === null && (songDuration > 999 || songDuration < 1)) {
       alert("Invalid song duration G.");
       return;
     }
 
-    onSubmit({ minPlayed, songDuration: finalSongDuration });
+    onSubmit({ minPlayed: Number(minPlayed), songDuration: finalSongDuration });
   };
 
   return (

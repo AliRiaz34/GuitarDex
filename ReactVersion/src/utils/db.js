@@ -608,7 +608,7 @@ export async function updateDeckLevel(deckId) {
 
   // Calculate total duration (sum of all song durations)
   const totalDuration = songs.reduce((sum, song) => {
-    return sum + (song && song.songDuration ? song.songDuration : 0);
+    return sum + (song && song.songDuration ? Number(song.songDuration) : 0);
   }, 0);
 
   // Filter out songs with null levels (seen songs) and calculate average level

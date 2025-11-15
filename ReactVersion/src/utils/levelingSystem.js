@@ -50,7 +50,7 @@ export function calculateXpGain(songInfo, minPlayed) {
   const today = new Date().toISOString().split('T')[0];
   const daysSinceSongPracticed = daysBetween(today, songInfo.lastPracticeDate);
   const difficulty = songInfo.difficulty;
-  const songDuration = songInfo.songDuration;
+  const songDuration = Number(songInfo.songDuration);
   const highestLevelReached = songInfo.highestLevelReached;
 
   let streakBonus;
@@ -63,7 +63,7 @@ export function calculateXpGain(songInfo, minPlayed) {
   return (
     XP_PRACTICE_BASE *
     (1 / DIFFICULTY_MULTIPLIERS[difficulty]) *
-    (minPlayed / songDuration) *
+    (Number(minPlayed) / songDuration) *
     (1 + 0.1 * highestLevelReached) *
     (1 + streakBonus)
   );
