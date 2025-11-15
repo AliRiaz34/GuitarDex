@@ -208,7 +208,6 @@ function EditView({ song, onSubmit, onBack }) {
                 spellCheck="false"
                 min="0"
                 max="30"
-                required
               />
               <label className="min-label">min</label>
             </div>

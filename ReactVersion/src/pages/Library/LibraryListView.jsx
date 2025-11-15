@@ -14,7 +14,8 @@ function LibraryListView({
   setSortMenuOpen,
   onSortSelect,
   onSelectSong,
-  onQuickPractice
+  onQuickPractice,
+  onRandomSelect
 }) {
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -88,6 +89,11 @@ function LibraryListView({
                 </motion.p>
               )}
             </AnimatePresence>
+            {!sortMenuOpen && (
+              <div id="random-button" onClick={onRandomSelect}>
+                random
+              </div>
+            )}
           </div>
         )}
 
@@ -113,10 +119,11 @@ function LibraryListView({
             className={allSongs.length === 0 ? "empty-library" : ""}
             to={`/songs/add?title=${encodeURIComponent(searchQuery)}`}
           >
-            {allSongs.length === 0 ? "You dont have any songs" : "Seen a new song?"}
+            {allSongs.length === 0 ? "spot some songs buddy" : "seen a new song?"}
           </Link>
         )}
       </div>
+
     </motion.div>
   );
 }

@@ -1,11 +1,10 @@
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import './Playlist.css';
+import './Deck.css';
 
-function PlaylistListView({
-  playlists,
-  allPlaylists,
+function DeckListView({
+  decks,
+  allDecks,
   searchQuery,
   setSearchQuery,
   sortState,
@@ -13,28 +12,29 @@ function PlaylistListView({
   sortMenuOpen,
   setSortMenuOpen,
   onSortSelect,
-  onSelectPlaylist,
+  onSelectDeck,
+  onCreateDeck,
 }) {
-  const hasAnyPlaylists = allPlaylists.length > 0;
+  const hasAnyDecks = allDecks.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   return (
     <motion.div
-      id="playlist-list-view"
+      id="deck-list-view"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {hasAnyPlaylists && (
+      {hasAnyDecks && (
         <>
-          <div className="searchbar-container">
+          <div id="deck-searchbar-container">
             <input
               id="searchbar"
               className="input"
               type="text"
               max={45}
-              placeholder="whatcha lookin for?"
+              placeholder="lookin for a deck?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
@@ -46,15 +46,15 @@ function PlaylistListView({
             />
             {!searchQuery && !isSearchFocused && (
               <div className="custom-placeholder">
-                whatcha lookin for<span className="blinking-question">?</span>
+               lookin for a deck<span className="blinking-question">?</span>
               </div>
             )}
           </div>
         </>
       )}
 
-      <div id="library-table-container">
-        {hasAnyPlaylists && (
+      <div id="deck-table-container">
+        {hasAnyDecks && (
           <div id="sort-menu">
             <div id="sort-icon" onClick={() => setSortMenuOpen(!sortMenuOpen)}>
               <p className="sort-p">↓↑</p>
@@ -71,8 +71,7 @@ function PlaylistListView({
                 >
                   <p className="sort-menu-p-state" onClick={() => onSortSelect('recent')}>recent</p>
                   <p className="sort-menu-p-state" onClick={() => onSortSelect('level')}>level</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('status')}>status</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('difficulty')}>difficulty</p>
+                  <p className="sort-menu-p-state" onClick={() => onSortSelect('duration')}>duration</p>
                 </motion.div>
               ) : (
                 <motion.p
@@ -87,37 +86,42 @@ function PlaylistListView({
                 </motion.p>
               )}
             </AnimatePresence>
+            <div id="create-deck-button" onClick={() => onCreateDeck(searchQuery)}>
+              +
+            </div>
+
           </div>
         )}
 
-        {songs.length > 0 ? (
-          <table id="library-table">
+        {decks.length > 0 && (
+          <table id="deck-table">
             <tbody>
-              {songs.map(song => (
-                <tr key={song.songId} className="song-tr">
-                  <td className="song-td" onClick={() => onSelectSong(song)}>
-                    <div className="song-title">{song.title}</div>
-                    <div className="song-artist">{song.artistName}</div>
+              {decks.map(deck => (
+                <tr key={deck.deckId} className="deck-tr">
+                  <td className="deck-td" onClick={() => onSelectDeck(deck)}>
+                    <div className="deck-title">{deck.title}</div>
                   </td>
-                  <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
-                    {song.level != null ? `Lv ${song.level}` : '???'}
+                  <td className="deck-td-lv">
+                    {deck.level != null ? `Lv ${deck.level}` : '???'}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
-          <Link
-            id="seen-a-new-song"
-            className={allSongs.length === 0 ? "empty-library" : ""}
-            to={`/songs/add?title=${encodeURIComponent(searchQuery)}`}
-          >
-            {allSongs.length === 0 ? "You dont have any songs" : "Seen a new song?"}
-          </Link>
         )}
       </div>
+
+      {decks.length === 0 && (
+        <div
+          id={allDecks.length === 0 ? "create-a-new-deck" : "just-make-it"}
+          onClick={() => onCreateDeck(searchQuery)}
+          style={{ cursor: 'pointer' }}
+        >
+          {allDecks.length === 0 ? "make a deck dummy" : "just make it"}
+        </div>
+      )}
     </motion.div>
   );
 }
 
-export default PlaylistListView;
+export default DeckListView;

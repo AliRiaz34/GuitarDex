@@ -5,7 +5,7 @@ import './App.css'
 import Navbar from './Nav'
 import Library from './pages/Library'
 import AddSong from './pages/AddSong'
-import Playlist from './pages/Playlist'
+import Deck from './pages/Deck'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -23,13 +23,22 @@ function AnimatedRoutes() {
         <Route path="/" element={<Library />} />
         <Route path="/library" element={<Library />} />
         <Route path="/songs/add" element={<AddSong />} />
-        <Route path="/playlists" element={<Playlist />} />
+        <Route path="/deck" element={<Deck />} />
       </Routes>
     </AnimatePresence>
   )
 }
 
 function App() {
+  useEffect(() => {
+    // Lock screen orientation to portrait (only in secure contexts)
+    if (window.isSecureContext && screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('portrait').catch(() => {
+        // Silently fail - orientation lock is a progressive enhancement
+      })
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <main>

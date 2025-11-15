@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../../utils/db';
@@ -13,65 +13,6 @@ function AddSong() {
   const [status, setStatus] = useState("seen");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-
-  // Swipe gesture detection
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-  const isSwiping = useRef(false);
-
-  // Swipe gesture handlers
-  useEffect(() => {
-    const handleTouchStart = (e) => {
-      // Ignore touches on interactive elements (inputs, buttons, etc.)
-      const target = e.target;
-      if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' ||
-          target.closest('button') || target.closest('input')) {
-        isSwiping.current = false;
-        return;
-      }
-
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
-      isSwiping.current = true;
-    };
-
-    const handleTouchMove = (e) => {
-      if (!isSwiping.current) return;
-
-      touchEndX.current = e.touches[0].clientX;
-      touchEndY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = () => {
-      if (!isSwiping.current) return;
-
-      const deltaX = touchStartX.current - touchEndX.current;
-      const deltaY = touchStartY.current - touchEndY.current;
-      const minSwipeDistance = 50;
-
-      // Check if horizontal swipe is dominant
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-        // Swipe left - navigate back to Library
-        if (deltaX > 0) {
-          navigate('/');
-        }
-      }
-
-      isSwiping.current = false;
-    };
-
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [navigate]);
 
   // Pre-fill title from query parameter
   useEffect(() => {

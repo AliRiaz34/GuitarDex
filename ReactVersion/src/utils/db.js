@@ -1,10 +1,10 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 2; // Incremented to add playlists stores
+const DB_VERSION = 2; // Incremented to add decks stores
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
-const PLAYLISTS_STORE = 'playlists';
-const PLAYLIST_SONGS_STORE = 'playlist_songs';
+const DECKS_STORE = 'decks';
+const DECK_SONGS_STORE = 'deck_songs';
 
 let dbInstance = null;
 
@@ -40,20 +40,20 @@ export function initDB() {
         practicesStore.createIndex('practiceDate', 'practiceDate', { unique: false });
       }
 
-      // Create playlists store (metadata)
-      if (!db.objectStoreNames.contains(PLAYLISTS_STORE)) {
-        const playlistsStore = db.createObjectStore(PLAYLISTS_STORE, { keyPath: 'playlistId' });
-        playlistsStore.createIndex('createdDate', 'createdDate', { unique: false });
-        playlistsStore.createIndex('title', 'title', { unique: false });
+      // Create decks store (metadata)
+      if (!db.objectStoreNames.contains(DECKS_STORE)) {
+        const decksStore = db.createObjectStore(DECKS_STORE, { keyPath: 'deckId' });
+        decksStore.createIndex('creationDate', 'creationDate', { unique: false });
+        decksStore.createIndex('title', 'title', { unique: false });
       }
 
-      // Create playlist_songs store (junction table for many-to-many relationship)
-      if (!db.objectStoreNames.contains(PLAYLIST_SONGS_STORE)) {
-        const playlistSongsStore = db.createObjectStore(PLAYLIST_SONGS_STORE, { keyPath: 'id', autoIncrement: true });
-        playlistSongsStore.createIndex('playlistId', 'playlistId', { unique: false });
-        playlistSongsStore.createIndex('songId', 'songId', { unique: false });
-        playlistSongsStore.createIndex('playlistSong', ['playlistId', 'songId'], { unique: true }); // Prevent duplicate song in same playlist
-        playlistSongsStore.createIndex('order', 'order', { unique: false });
+      // Create deck_songs store (junction table for many-to-many relationship)
+      if (!db.objectStoreNames.contains(DECK_SONGS_STORE)) {
+        const deckSongsStore = db.createObjectStore(DECK_SONGS_STORE, { keyPath: 'id', autoIncrement: true });
+        deckSongsStore.createIndex('deckId', 'deckId', { unique: false });
+        deckSongsStore.createIndex('songId', 'songId', { unique: false });
+        deckSongsStore.createIndex('deckSong', ['deckId', 'songId'], { unique: true }); // Prevent duplicate song in same deck
+        deckSongsStore.createIndex('order', 'order', { unique: false });
       }
     };
   });
@@ -285,14 +285,16 @@ export async function getTotalPracticeSessions(songId) {
   return practices.length;
 }
 
-// PLAYLISTS OPERATIONS
+// DECKS (DECKS) OPERATIONS
+// Note: Using "deck" terminology in function names while maintaining "deck" in database
+// for backwards compatibility
 
-// Get all playlists
-export async function getAllPlaylists() {
+// Get all decks
+export async function getAllDecks() {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLISTS_STORE], 'readonly');
-    const store = transaction.objectStore(PLAYLISTS_STORE);
+    const transaction = db.transaction([DECKS_STORE], 'readonly');
+    const store = transaction.objectStore(DECKS_STORE);
     const request = store.getAll();
 
     request.onsuccess = () => {
@@ -300,107 +302,107 @@ export async function getAllPlaylists() {
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to get playlists'));
+      reject(new Error('Failed to get decks'));
     };
   });
 }
 
-// Get a single playlist by ID
-export async function getPlaylistById(playlistId) {
+// Get a single deck by ID
+export async function getDeckById(deckId) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLISTS_STORE], 'readonly');
-    const store = transaction.objectStore(PLAYLISTS_STORE);
-    const request = store.get(playlistId);
+    const transaction = db.transaction([DECKS_STORE], 'readonly');
+    const store = transaction.objectStore(DECKS_STORE);
+    const request = store.get(deckId);
 
     request.onsuccess = () => {
       resolve(request.result);
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to get playlist'));
+      reject(new Error('Failed to get deck'));
     };
   });
 }
 
-// Add a new playlist
-export async function addPlaylist(playlistData) {
+// Add a new deck
+export async function addDeck(deckData) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLISTS_STORE], 'readwrite');
-    const store = transaction.objectStore(PLAYLISTS_STORE);
-    const request = store.add(playlistData);
+    const transaction = db.transaction([DECKS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECKS_STORE);
+    const request = store.add(deckData);
 
     request.onsuccess = () => {
-      resolve(playlistData);
+      resolve(deckData);
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to add playlist'));
+      reject(new Error('Failed to add deck'));
     };
   });
 }
 
-// Update a playlist
-export async function updatePlaylist(playlistId, updates) {
+// Update a deck
+export async function updateDeck(deckId, updates) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLISTS_STORE], 'readwrite');
-    const store = transaction.objectStore(PLAYLISTS_STORE);
+    const transaction = db.transaction([DECKS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECKS_STORE);
 
-    const getRequest = store.get(playlistId);
+    const getRequest = store.get(deckId);
 
     getRequest.onsuccess = () => {
-      const existingPlaylist = getRequest.result;
+      const existingDeck = getRequest.result;
 
-      if (!existingPlaylist) {
-        reject(new Error('Playlist not found'));
+      if (!existingDeck) {
+        reject(new Error('Deck not found'));
         return;
       }
 
-      const updatedPlaylist = { ...existingPlaylist, ...updates };
-      const putRequest = store.put(updatedPlaylist);
+      const updatedDeck = { ...existingDeck, ...updates };
+      const putRequest = store.put(updatedDeck);
 
       putRequest.onsuccess = () => {
-        resolve(updatedPlaylist);
+        resolve(updatedDeck);
       };
 
       putRequest.onerror = () => {
-        reject(new Error('Failed to update playlist'));
+        reject(new Error('Failed to update deck'));
       };
     };
 
     getRequest.onerror = () => {
-      reject(new Error('Failed to get existing playlist'));
+      reject(new Error('Failed to get existing deck'));
     };
   });
 }
 
-// Delete a playlist and all associated playlist-song relationships
-export async function deletePlaylist(playlistId) {
+// Delete a deck and all associated deck-song relationships
+export async function deleteDeck(deckId) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLISTS_STORE, PLAYLIST_SONGS_STORE], 'readwrite');
+    const transaction = db.transaction([DECKS_STORE, DECK_SONGS_STORE], 'readwrite');
 
-    // First, delete all playlist-song entries
-    const playlistSongsStore = transaction.objectStore(PLAYLIST_SONGS_STORE);
-    const playlistSongsIndex = playlistSongsStore.index('playlistId');
-    const playlistSongsRequest = playlistSongsIndex.openCursor(IDBKeyRange.only(playlistId));
+    // First, delete all deck-song entries
+    const deckSongsStore = transaction.objectStore(DECK_SONGS_STORE);
+    const deckSongsIndex = deckSongsStore.index('deckId');
+    const deckSongsRequest = deckSongsIndex.openCursor(IDBKeyRange.only(deckId));
 
-    playlistSongsRequest.onsuccess = (event) => {
+    deckSongsRequest.onsuccess = (event) => {
       const cursor = event.target.result;
       if (cursor) {
         cursor.delete();
         cursor.continue();
       } else {
-        // All playlist-song entries deleted, now delete the playlist
-        const playlistsStore = transaction.objectStore(PLAYLISTS_STORE);
-        playlistsStore.delete(playlistId);
+        // All deck-song entries deleted, now delete the deck
+        const decksStore = transaction.objectStore(DECKS_STORE);
+        decksStore.delete(deckId);
       }
     };
 
-    playlistSongsRequest.onerror = () => {
-      reject(new Error('Failed to delete playlist songs'));
+    deckSongsRequest.onerror = () => {
+      reject(new Error('Failed to delete deck songs'));
     };
 
     transaction.oncomplete = () => {
@@ -408,81 +410,97 @@ export async function deletePlaylist(playlistId) {
     };
 
     transaction.onerror = () => {
-      reject(new Error('Failed to delete playlist'));
+      reject(new Error('Failed to delete deck'));
     };
   });
 }
 
-// Get next available playlist ID
-export async function getNextPlaylistId() {
-  const playlists = await getAllPlaylists();
-  if (playlists.length === 0) return 1;
-  const maxId = Math.max(...playlists.map(p => p.playlistId));
+// Get next available deck ID
+export async function getNextDeckId() {
+  const decks = await getAllDecks();
+  if (decks.length === 0) return 1;
+  const maxId = Math.max(...decks.map(p => p.deckId));
   return maxId + 1;
 }
 
-// PLAYLIST-SONG RELATIONSHIP OPERATIONS
+// DECK-SONG RELATIONSHIP OPERATIONS
 
-// Add a song to a playlist
-export async function addSongToPlaylist(playlistId, songId, order) {
+// Add a song to a deck
+export async function addSongToDeck(deckId, songId, order) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
-    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
 
-    const playlistSongData = {
-      playlistId,
+    const deckSongData = {
+      deckId,
       songId,
       order: order || Date.now(), // Use timestamp as default order
       addedDate: new Date().toISOString()
     };
 
-    const request = store.add(playlistSongData);
+    const request = store.add(deckSongData);
 
-    request.onsuccess = () => {
-      resolve(playlistSongData);
-    };
-
-    request.onerror = () => {
-      reject(new Error('Failed to add song to playlist (may already exist)'));
-    };
-  });
-}
-
-// Remove a song from a playlist
-export async function removeSongFromPlaylist(playlistId, songId) {
-  const db = await getDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
-    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
-    const index = store.index('playlistSong');
-    const request = index.getKey([playlistId, songId]);
-
-    request.onsuccess = () => {
-      const key = request.result;
-      if (key) {
-        const deleteRequest = store.delete(key);
-        deleteRequest.onsuccess = () => resolve();
-        deleteRequest.onerror = () => reject(new Error('Failed to remove song from playlist'));
-      } else {
-        reject(new Error('Song not found in playlist'));
+    request.onsuccess = async () => {
+      // Update deck level after adding song
+      try {
+        await updateDeckLevel(deckId);
+        resolve(deckSongData);
+      } catch (error) {
+        console.error('Error updating deck level:', error);
+        resolve(deckSongData); // Still resolve with the added song data
       }
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to find song in playlist'));
+      reject(new Error('Failed to add song to deck (may already exist)'));
     };
   });
 }
 
-// Get all songs in a playlist (returns array of songIds in order)
-export async function getSongsInPlaylist(playlistId) {
+// Remove a song from a deck
+export async function removeSongFromDeck(deckId, songId) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readonly');
-    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
-    const index = store.index('playlistId');
-    const request = index.getAll(playlistId);
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const index = store.index('deckSong');
+    const request = index.getKey([deckId, songId]);
+
+    request.onsuccess = async () => {
+      const key = request.result;
+      if (key) {
+        const deleteRequest = store.delete(key);
+        deleteRequest.onsuccess = async () => {
+          // Update deck level after removing song
+          try {
+            await updateDeckLevel(deckId);
+            resolve();
+          } catch (error) {
+            console.error('Error updating deck level:', error);
+            resolve(); // Still resolve
+          }
+        };
+        deleteRequest.onerror = () => reject(new Error('Failed to remove song from deck'));
+      } else {
+        reject(new Error('Song not found in deck'));
+      }
+    };
+
+    request.onerror = () => {
+      reject(new Error('Failed to find song in deck'));
+    };
+  });
+}
+
+// Get all songs in a deck (returns array of songIds in order)
+export async function getSongsInDeck(deckId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const index = store.index('deckId');
+    const request = index.getAll(deckId);
 
     request.onsuccess = () => {
       // Sort by order field
@@ -491,50 +509,50 @@ export async function getSongsInPlaylist(playlistId) {
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to get songs in playlist'));
+      reject(new Error('Failed to get songs in deck'));
     };
   });
 }
 
-// Get all playlists containing a specific song
-export async function getPlaylistsContainingSong(songId) {
+// Get all decks containing a specific song
+export async function getDecksContainingSong(songId) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readonly');
-    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
     const index = store.index('songId');
     const request = index.getAll(songId);
 
     request.onsuccess = () => {
-      // Return unique playlist IDs
-      const playlistIds = [...new Set(request.result.map(ps => ps.playlistId))];
-      resolve(playlistIds);
+      // Return unique deck IDs
+      const deckIds = [...new Set(request.result.map(ps => ps.deckId))];
+      resolve(deckIds);
     };
 
     request.onerror = () => {
-      reject(new Error('Failed to get playlists for song'));
+      reject(new Error('Failed to get decks for song'));
     };
   });
 }
 
-// Update the order of songs in a playlist
-export async function updatePlaylistSongOrder(playlistId, songOrderArray) {
+// Update the order of songs in a deck
+export async function updateDeckSongOrder(deckId, songOrderArray) {
   const db = await getDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([PLAYLIST_SONGS_STORE], 'readwrite');
-    const store = transaction.objectStore(PLAYLIST_SONGS_STORE);
-    const index = store.index('playlistId');
-    const request = index.getAll(playlistId);
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const index = store.index('deckId');
+    const request = index.getAll(deckId);
 
     request.onsuccess = () => {
-      const playlistSongs = request.result;
+      const deckSongs = request.result;
 
       // Update order for each song
       songOrderArray.forEach((songId, index) => {
-        const playlistSong = playlistSongs.find(ps => ps.songId === songId);
-        if (playlistSong) {
-          playlistSong.order = index;
-          store.put(playlistSong);
+        const deckSong = deckSongs.find(ps => ps.songId === songId);
+        if (deckSong) {
+          deckSong.order = index;
+          store.put(deckSong);
         }
       });
     };
@@ -544,7 +562,69 @@ export async function updatePlaylistSongOrder(playlistId, songOrderArray) {
     };
 
     transaction.onerror = () => {
-      reject(new Error('Failed to update playlist song order'));
+      reject(new Error('Failed to update deck song order'));
     };
   });
+}
+
+// Get all decks with minimal data for menu (optionally check if a specific song is in each)
+export async function getDecksForMenu(songId = null) {
+  const decks = await getAllDecks();
+
+  if (songId === null) {
+    // Just return deck metadata
+    return decks.map(deck => ({
+      deckId: deck.deckId,
+      title: deck.title,
+      containsSong: false
+    }));
+  }
+
+  // Check which decks contain the song
+  const deckIdsContainingSong = await getDecksContainingSong(songId);
+  const deckIdsSet = new Set(deckIdsContainingSong);
+
+  return decks.map(deck => ({
+    deckId: deck.deckId,
+    title: deck.title,
+    containsSong: deckIdsSet.has(deck.deckId)
+  }));
+}
+
+// Calculate and update the average level and total duration of a deck
+export async function updateDeckLevel(deckId) {
+  // Get all songs in the deck
+  const deckSongs = await getSongsInDeck(deckId);
+
+  if (deckSongs.length === 0) {
+    // No songs in deck, set level and duration to null/0
+    await updateDeck(deckId, { level: null, totalDuration: 0 });
+    return { level: null, totalDuration: 0 };
+  }
+
+  // Get full song data for each song in deck
+  const songPromises = deckSongs.map(ds => getSongById(ds.songId));
+  const songs = await Promise.all(songPromises);
+
+  // Calculate total duration (sum of all song durations)
+  const totalDuration = songs.reduce((sum, song) => {
+    return sum + (song && song.songDuration ? song.songDuration : 0);
+  }, 0);
+
+  // Filter out songs with null levels (seen songs) and calculate average level
+  const songsWithLevels = songs.filter(song => song && song.level != null);
+
+  let averageLevel;
+  if (songsWithLevels.length === 0) {
+    // All songs are "seen" (no level), set deck level to null
+    averageLevel = null;
+  } else {
+    // Calculate average level
+    const totalLevel = songsWithLevels.reduce((sum, song) => sum + song.level, 0);
+    averageLevel = Math.round(totalLevel / songsWithLevels.length);
+  }
+
+  // Update deck with new average level and total duration
+  await updateDeck(deckId, { level: averageLevel, totalDuration });
+  return { level: averageLevel, totalDuration };
 }

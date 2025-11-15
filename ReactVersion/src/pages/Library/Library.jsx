@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
 import EditView from './EditView';
-import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong } from '../../utils/db';
+import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/db';
 import { xpThreshold, applyDecay, updateSongWithPractice } from '../../utils/levelingSystem';
 import './Library.css';
 
@@ -17,6 +16,7 @@ function Library() {
   const [selectedSong, setSelectedSong] = useState(null);
   const [sortState, setSortState] = useState('recent');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [playlists, setPlaylists] = useState(null);
   const [sortReversed, setSortReversed] = useState(false);
   const [entryDirection, setEntryDirection] = useState(null); // Track animation direction
 
@@ -25,51 +25,6 @@ function Library() {
 
   // Add Edit view state
   const [editView, setEditView] = useState(null); // song to edit
-
-  // Swipe gesture detection
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-
-  useEffect(() => {
-    // Only enable swipe on list view (not on song detail, practice view, or edit view)
-    if (selectedSong || practiceView || editView) return;
-
-    const handleTouchStart = (e) => {
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e) => {
-      touchEndX.current = e.touches[0].clientX;
-      touchEndY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = () => {
-      const deltaX = touchStartX.current - touchEndX.current;
-      const deltaY = touchStartY.current - touchEndY.current;
-      const minSwipeDistance = 50;
-
-      // Check if horizontal swipe is dominant
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-        // Swipe right - navigate to AddSong
-        if (deltaX < 0) {
-          navigate('/songs/add');
-        }
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [selectedSong, practiceView, navigate]);
 
   // Fetch songs from IndexedDB
   useEffect(() => {
@@ -112,6 +67,35 @@ function Library() {
     loadSongs();
   }, []);
 
+  // Load decks for menu
+  useEffect(() => {
+    async function loadDecks() {
+      try {
+        const decksData = await getDecksForMenu();
+        setPlaylists(decksData);
+      } catch (error) {
+        console.error('Error loading decks:', error);
+      }
+    }
+
+    loadDecks();
+  }, []);
+
+  // Reload deck membership when selected song changes
+  useEffect(() => {
+    if (selectedSong) {
+      async function updateDeckMembership() {
+        try {
+          const decksData = await getDecksForMenu(selectedSong.songId);
+          setPlaylists(decksData);
+        } catch (error) {
+          console.error('Error updating deck membership:', error);
+        }
+      }
+      updateDeckMembership();
+    }
+  }, [selectedSong?.songId]);
+
   // Handle navigation state (new song from AddSong, or reset from nav button)
   useEffect(() => {
     if (location.state?.newSong) {
@@ -125,6 +109,7 @@ function Library() {
       // Nav button clicked - reset to list view
       setPracticeView(null);
       setSelectedSong(null);
+      setSearchQuery('');
       setEditView(null);
     }
   }, [location]);
@@ -303,31 +288,53 @@ function Library() {
     setSelectedSong(cleanSong);
   };
 
+  const handleRandomSelect = () => {
+    // Select a random song from filtered list
+    let i = Math.floor(Math.random() * filteredSongs.length);
+    let song = filteredSongs[i];
+    setEntryDirection(null); // Reset direction when selecting random
+    // Ensure we don't have leftover animation properties
+    const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
+    openPracticeView(cleanSong);
+  };
+
+  const handleToggleDeck = async (deckId, songId, isInDeck) => {
+    try {
+      if (isInDeck) {
+        await removeSongFromDeck(deckId, songId);
+      } else {
+        await addSongToDeck(deckId, songId);
+      }
+      // Reload decks to update membership status
+      const decksData = await getDecksForMenu(songId);
+      setPlaylists(decksData);
+    } catch (error) {
+      console.error('Error toggling deck membership:', error);
+      alert('Error updating deck');
+    }
+  };
+
   // Edit View
   if (editView) {
     return (
-      <AnimatePresence mode="wait">
-        <EditView
-          key={editView.songId}
-          song={editView}
-          onSubmit={handleEditSubmit}
-          onBack={handleEditBack}
-        />
-      </AnimatePresence>
+      <EditView
+        key={editView.songId}
+        song={editView}
+        onSubmit={handleEditSubmit}
+        onBack={handleEditBack}
+      />
     );
   }
 
   // Add Practice View
   if (practiceView) {
     return (
-      <AnimatePresence mode="wait">
-        <PracticeView
-          key={practiceView.song.songId}
-          song={practiceView.song}
-          onSubmit={handlePracticeSubmit}
-          onBack={handlePracticeBack}
-        />
-      </AnimatePresence>
+      <PracticeView
+        key={practiceView.song.songId}
+        song={practiceView.song}
+        onSubmit={handlePracticeSubmit}
+        onBack={handlePracticeBack}
+      />
     );
   }
 
@@ -350,20 +357,20 @@ function Library() {
     };
 
     return (
-      <AnimatePresence mode="wait">
-        <SongDetailView
-          key={selectedSong.songId}
-          song={selectedSong}
-          onBack={() => setSelectedSong(null)}
-          onPractice={() => openPracticeView(selectedSong, true)}
-          onEdit={() => openEditView(selectedSong)}
-          onDelete={handleSongDelete}
-          onNavigate={handleNavigateSong}
-          hasPrevious={currentIndex > 0}
-          hasNext={currentIndex < sortedSongs.length - 1}
-          entryDirection={entryDirection}
-        />
-      </AnimatePresence>
+      <SongDetailView
+        key={selectedSong.songId}
+        song={selectedSong}
+        onBack={() => setSelectedSong(null)}
+        onPractice={() => openPracticeView(selectedSong, true)}
+        onEdit={() => openEditView(selectedSong)}
+        onDelete={handleSongDelete}
+        onNavigate={handleNavigateSong}
+        hasPrevious={currentIndex > 0}
+        hasNext={currentIndex < sortedSongs.length - 1}
+        entryDirection={entryDirection}
+        decks={playlists}
+        onToggleDeck={handleToggleDeck}
+      />
     );
   }
 
@@ -386,6 +393,7 @@ function Library() {
         setSelectedSong(cleanSong);
       }}
       onQuickPractice={openPracticeView}
+      onRandomSelect={handleRandomSelect}
     />
   );
 }

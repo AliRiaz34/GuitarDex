@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { deleteSong } from '../../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection }) {
+function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [touchStartY, setTouchStartY] = useState(null);
@@ -13,6 +14,8 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   const [touchEndY, setTouchEndY] = useState(null);
   const [exitDirection, setExitDirection] = useState(null); // 'up', 'down', 'right'
   const menuRef = useRef(null);
+  const addToDeckMenuRef = useRef(null);
+
 
   // XP animation states
   const previousXp = song._previousXp ?? song.xp;
@@ -30,6 +33,14 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   useEffect(() => {
     setExitDirection(null);
   }, [song.songId]);
+
+  // Force cursor reset on mount to clear any lingering drag cursors
+  useEffect(() => {
+    document.body.style.cursor = 'auto';
+    return () => {
+      document.body.style.cursor = '';
+    };
+  }, []);
 
   // XP animation effect
   useEffect(() => {
@@ -95,9 +106,12 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
       }
+      if (addToDeckMenuRef.current && !addToDeckMenuRef.current.contains(event.target)) {
+        setAddToDeckMenuOpen(false);
+      }
     };
 
-    if (menuOpen) {
+    if (menuOpen || addToDeckMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
@@ -106,7 +120,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [menuOpen]);
+  }, [menuOpen, addToDeckMenuOpen]);
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
@@ -208,6 +222,23 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   return (
     <>
+      {/* Backdrop overlay when menus are open */}
+      <AnimatePresence>
+        {(addToDeckMenuOpen || menuOpen) && (
+          <motion.div
+            className="menu-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => {
+              setAddToDeckMenuOpen(false);
+              setMenuOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       <motion.div
         key={song.songId}
         id="song-view"
@@ -222,19 +253,65 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
         <div id="song-top-div">
           <div id="song-head-div-1">
             <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
-            <div id="song-menu-container" ref={menuRef}>
+            <div id="song-icons-container" ref={addToDeckMenuRef}>
               <img
-                id="song-menu-icon"
-                onClick={() => setMenuOpen(!menuOpen)}
-                src='./images/menu.png'
-              >
+                id="song-addToDeck-icon"
+                 onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
+                src='./images/addToDeckIcon.png'
+                >
               </img>
-              {menuOpen && (
-                <div id="song-menu-dropdown">
-                  <p className="song-menu-option" onClick={handleEditClick}>edit</p>
-                  <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
-                </div>
-              )}
+              <AnimatePresence>
+                {addToDeckMenuOpen && (
+                  <motion.div
+                    id="addToDeck-menu-dropdown"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {decks && decks.length > 0 ? (
+                      decks.map(deck => (
+                        <div
+                          key={deck.deckId}
+                          className="deck-menu-item"
+                          onClick={() => onToggleDeck(deck.deckId, song.songId, deck.containsSong)}
+                        >
+                          <span className="deck-menu-title">{deck.title}</span>
+                          <img
+                            src={deck.containsSong ? './images/addedIcon.png' : './images/addToDeckIcon.png'}
+                            alt={deck.containsSong ? 'Remove' : 'Add'}
+                            className="deck-menu-icon"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="deck-menu-empty">No decks yet</p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div id="song-menu-container" ref={menuRef}>
+                <img
+                  id="song-menu-icon"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  src='./images/menu.png'
+                >
+                </img>
+                <AnimatePresence>
+                  {menuOpen && (
+                    <motion.div
+                      id="song-menu-dropdown"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <p className="song-menu-option" onClick={handleEditClick}>edit</p>
+                      <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
           <h2 id="title">{song.title}</h2>

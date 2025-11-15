@@ -16,26 +16,14 @@ Song 2    Lv            Lv
 Song 3    Lv            Lv
 Song 4    Lv            Lv
 
+field required custom ui
 
-Playlist operations:
-getAllPlaylists()
-getPlaylistById(playlistId)
-addPlaylist(playlistData)
-updatePlaylist(playlistId, updates)
-deletePlaylist(playlistId) - cascades to playlist_songs
-getNextPlaylistId()
-Playlist-song operations:
-addSongToPlaylist(playlistId, songId, order)
-removeSongFromPlaylist(playlistId, songId)
-getSongsInPlaylist(playlistId) - returns ordered array
-getPlaylistsContainingSong(songId) - find which playlists have this song
-updatePlaylistSongOrder(playlistId, songOrderArray) - reorder songs
-
-
+use ascii art somehow
 
 ### ISSUES
 
 fix low battery mode making animations choppy
+- optimize animations
 
 pwa swipe gesutre
 
