@@ -53,9 +53,11 @@ function SortableRow({ song, onPractice, onSelectSong }) {
       className="deck-song-tr"
       {...attributes}
     >
+      <td className="deck-song-td-drag" {...listeners}>
+        <div className="deck-drag-handle">&lt;&gt;</div>
+      </td>
       <td
         className="deck-song-td-title"
-        {...listeners}
         onClick={handleTitleClick}
       >
         <div className="deck-song-title">{song.title}</div>
@@ -256,14 +258,19 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     <>
       {/* Backdrop overlay when menu is open */}
       <AnimatePresence>
-        {menuOpen && (
+        {(menuOpen || showDeleteConfirm) && (
           <motion.div
             className="menu-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              setMenuOpen(false);
+              if (showDeleteConfirm) {
+                setShowDeleteConfirm(false);
+              }
+            }}
           />
         )}
       </AnimatePresence>
@@ -353,21 +360,29 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
           </DndContext>
         )}
 
-        {showDeleteConfirm && (
-          <div id="deck-delete-confirm-overlay">
-            <div id="deck-delete-confirm-widget">
-              <p id="deck-delete-confirm-text">Delete {deck.title}?</p>
-              <div id="deck-delete-confirm-buttons">
-                <button className="deck-delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
-                  cancel
-                </button>
-                <button className="deck-delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
-                  confirm
-                </button>
-              </div>
+        <AnimatePresence>
+          {showDeleteConfirm && (
+            <div id="deck-delete-confirm-overlay">
+              <motion.div
+                id="deck-delete-confirm-widget"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p id="deck-delete-confirm-text">Delete {deck.title}?</p>
+                <div id="deck-delete-confirm-buttons">
+                  <button className="deck-delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
+                    cancel
+                  </button>
+                  <button className="deck-delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
+                    confirm
+                  </button>
+                </div>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );

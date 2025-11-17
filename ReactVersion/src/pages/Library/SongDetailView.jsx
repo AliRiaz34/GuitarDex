@@ -224,7 +224,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     <>
       {/* Backdrop overlay when menus are open */}
       <AnimatePresence>
-        {(addToDeckMenuOpen || menuOpen) && (
+        {(addToDeckMenuOpen || menuOpen || showDeleteConfirm) && (
           <motion.div
             className="menu-backdrop"
             initial={{ opacity: 0 }}
@@ -234,6 +234,9 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
             onClick={() => {
               setAddToDeckMenuOpen(false);
               setMenuOpen(false);
+              if (showDeleteConfirm) {
+                setShowDeleteConfirm(false);
+              }
             }}
           />
         )}
@@ -406,21 +409,29 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
           </>
         )}
 
-        {showDeleteConfirm && (
-          <div id="delete-confirm-overlay">
-            <div id="delete-confirm-widget">
-              <p id="delete-confirm-text">Delete {song.title}?</p>
-              <div id="delete-confirm-buttons">
-                <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
-                  cancel
-                </button>
-                <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
-                  confirm
-                </button>
-              </div>
+        <AnimatePresence>
+          {showDeleteConfirm && (
+            <div id="delete-confirm-overlay">
+              <motion.div
+                id="delete-confirm-widget"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p id="delete-confirm-text">Delete {song.title}?</p>
+                <div id="delete-confirm-buttons">
+                  <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
+                    cancel
+                  </button>
+                  <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
+                    confirm
+                  </button>
+                </div>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
         <button id="practice-button" onClick={onPractice}>PRACTICE</button>
       </motion.div>
     </>

@@ -306,16 +306,34 @@
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-.deck-song-td-title {
+.deck-song-td-drag {
     cursor: grab;
-    padding-bottom: 10px;
+    padding: 0px;
+    width: 30px;
+    text-align: center;
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;
 }
 
-.deck-song-td-title:active {
+.deck-song-td-drag:active {
     cursor: grabbing;
+}
+
+.deck-drag-handle {
+    transform: rotate(90deg);
+    display: inline-block;
+    font-size: 1em;
+    opacity: 0.6;
+    padding-right: 7px;
+    font-weight: bold;
+}
+
+.deck-song-td-title {
+    cursor: pointer;
+    padding-bottom: 10px;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .deck-song-artistName {
@@ -375,7 +393,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
