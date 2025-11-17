@@ -245,7 +245,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
         initial={getInitialAnimation()}
         animate={{ opacity: 1, x: 0, y: 0 }}
         exit={getExitAnimation()}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
