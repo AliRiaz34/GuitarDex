@@ -356,7 +356,7 @@
 }
 
 .deck-song-td-lv {
-    padding: 8px 5px;
+    padding-bottom: 10px;
     width: 70px;
     text-align: center;
     cursor: pointer;
