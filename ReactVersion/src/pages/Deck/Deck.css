@@ -369,7 +369,7 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
-#delete-confirm-overlay {
+#deck-delete-confirm-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -382,38 +382,36 @@
     z-index: 1000;
 }
 
-#delete-confirm-widget {
+#deck-delete-confirm-widget {
     background-color: #0e0e13;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    padding: 20px;
-    border-radius: 8px;
-    min-width: 250px;
-    max-width: 80%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    max-width: 250px;
+    width: 70%;
+    text-align: center;
 }
 
-#delete-confirm-text {
-    margin: 0 0 20px 0;
-    text-align: center;
-    font-size: 1.1em;
+#deck-delete-confirm-text {
+    margin: 0 0 25px 0;
+    font-size: 1em;
     color: white;
 }
 
-#delete-confirm-buttons {
+#deck-delete-confirm-buttons {
     display: flex;
     justify-content: space-around;
-    gap: 10px;
+    gap: 15px;
 }
 
-.delete-confirm-btn {
+.deck-delete-confirm-btn {
     flex: 1;
     padding: 10px;
-    font-family: 'Pokemon-Classic';
-    font-size: 1em;
+    font-size: 0.8em;
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.2);
     background-color: transparent;
     color: white;
-    transition: all 0.2s;
+    font-style: italic;
+    text-transform: lowercase;
+    text-align: center;
 }
-
-

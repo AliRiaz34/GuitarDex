@@ -354,14 +354,14 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
         )}
 
         {showDeleteConfirm && (
-          <div id="delete-confirm-overlay">
-            <div id="delete-confirm-widget">
-              <p id="delete-confirm-text">Delete {deck.title}?</p>
-              <div id="delete-confirm-buttons">
-                <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
+          <div id="deck-delete-confirm-overlay">
+            <div id="deck-delete-confirm-widget">
+              <p id="deck-delete-confirm-text">Delete {deck.title}?</p>
+              <div id="deck-delete-confirm-buttons">
+                <button className="deck-delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
                   cancel
                 </button>
-                <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
+                <button className="deck-delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
                   confirm
                 </button>
               </div>

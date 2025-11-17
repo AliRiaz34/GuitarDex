@@ -517,9 +517,9 @@
 #delete-confirm-widget {
     background-color: #0e0e13;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 30px 25px;
-    max-width: 300px;
-    width: 80%;
+    padding: 10px;
+    max-width: 250px;
+    width: 70%;
     text-align: center;
 }
 
@@ -537,8 +537,8 @@
 
 .delete-confirm-btn {
     flex: 1;
-    padding: 10px 20px;
-    font-size: 0.9em;
+    padding: 10px;
+    font-size: 0.8em;
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.2);
     background-color: transparent;
