@@ -310,8 +310,8 @@
 .deck-song-td-drag {
     cursor: grab;
     padding: 0px;
-    width: 28px;
-    min-width: 28px;
+    width: 26px;
+    min-width: 26px;
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;
@@ -324,9 +324,9 @@
 .deck-drag-handle {
     transform: rotate(90deg);
     display: inline-block;
-    font-size: 0.9em;
+    font-size: 0.8em;
     opacity: 0.6;
-    padding-right: 7px;
+    padding-right: 3px;
     font-weight: bold;
 }
 
