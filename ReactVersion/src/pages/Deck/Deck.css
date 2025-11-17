@@ -310,7 +310,8 @@
 .deck-song-td-drag {
     cursor: grab;
     padding: 0px;
-    width: 27px;
+    width: 28px;
+    min-width: 28px;
     -webkit-user-select: none;
     user-select: none;
     touch-action: none;
