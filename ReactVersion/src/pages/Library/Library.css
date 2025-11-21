@@ -191,7 +191,7 @@
 /* Song view */
 #song-view {
     padding: 15px;
-    min-height: 70vh;
+    min-height: 80vh;
     cursor: auto !important;
 }
 
