@@ -1,16 +1,6 @@
 # GuitarDex
-A pokedex inspired practice tracker for songs you want to learn or know on guitar. 
-
 A guitar practice tracking app that gamifies learning through a Pokemon-inspired leveling system. 
 Track your progress on songs, earn XP through practice sessions, and practice songs from "learning" to "mastered."
-
-
-## How to install on your phone
-
-1. Open guitar-dex.vercel.app on your phone 
-2. Open share button
-3. Click add to your home screen
-4. Done! Enjoy the app :)
 
 ## Features
 
@@ -42,3 +32,9 @@ Track your progress on songs, earn XP through practice sessions, and practice so
 - IndexedDB for local storage
 - PWA with Workbox
 
+## How to install on your phone
+
+1. Open guitar-dex.vercel.app on your phone 
+2. Open share button
+3. Click add to your home screen
+4. Done! Enjoy the app :)
