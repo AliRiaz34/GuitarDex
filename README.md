@@ -1,6 +1,4 @@
 # GuitarDex
-A pokedex inspired practice tracker for songs you want to learn or know on guitar. 
-
 A guitar practice tracking app that gamifies learning through a Pokemon-inspired leveling system. 
 Track your progress on songs, earn XP through practice sessions, and practice songs from "learning" to "mastered."
 
