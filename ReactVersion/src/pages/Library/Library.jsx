@@ -273,6 +273,7 @@ function Library() {
       // Remove any animation properties to prevent repeated indicators
       const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = updatedSong;
       setEditView(null);
+      setEntryDirection(null); // Reset to use fade animation, not swipe
       setSelectedSong(cleanSong);
     } catch (error) {
       console.error("Error updating song:", error);
@@ -285,6 +286,7 @@ function Library() {
     // Remove any animation properties to prevent repeated indicators
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = editView;
     setEditView(null);
+    setEntryDirection(null); // Reset to use fade animation, not swipe
     setSelectedSong(cleanSong);
   };
 
