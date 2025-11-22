@@ -138,9 +138,7 @@ function Library() {
     } else if (sortState === 'level') {
       const aSeen = a.status === 'seen';
       const bSeen = b.status === 'seen';
-      if (aSeen && !bSeen) result = 1;
-      else if (!aSeen && bSeen) result = -1;
-      else result = a.level - b.level;
+      result = a.level - b.level;
     } else if (sortState === 'status') {
       // Status priority: seen -> learning -> stale -> mastered
       const statusOrder = { seen: 0, learning: 1, stale: 2, mastered: 3 };
