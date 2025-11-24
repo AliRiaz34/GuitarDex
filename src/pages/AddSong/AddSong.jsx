@@ -14,7 +14,6 @@ function AddSong() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Pre-fill title from query parameter
   useEffect(() => {
     const titleParam = searchParams.get('title');
     if (titleParam) {
@@ -25,11 +24,9 @@ function AddSong() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Prevent double submission
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    // Validation (matching Flask version)
     if (title.length < 1) {
       alert("Title has to be longer than 1.");
       setIsSubmitting(false);
@@ -93,14 +90,12 @@ function AddSong() {
 
       await addSong(newSong);
 
-      // Add calculated fields for non-seen songs
       if (status !== "seen") {
         newSong.xpThreshold = xpThreshold(newSong.level);
         newSong.totalMinPlayed = await getTotalMinutesPlayed(songId);
         newSong.totalSessions = await getTotalPracticeSessions(songId);
       }
 
-      // Navigate back to library with the new song
       navigate('/', { state: { newSong } });
     } catch (error) {
       console.error("Error:", error);

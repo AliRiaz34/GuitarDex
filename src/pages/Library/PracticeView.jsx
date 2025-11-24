@@ -10,7 +10,6 @@ function PracticeView({ song, onSubmit, onBack }) {
   const [selectedMinButton, setSelectedMinButton] = useState(null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
-  // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
 
   const onTouchStart = (e) => {
@@ -39,7 +38,6 @@ function PracticeView({ song, onSubmit, onBack }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation
     if (minPlayed > 999) {
       alert("Thats too long dawg.");
       return;

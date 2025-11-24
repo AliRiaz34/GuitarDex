@@ -20,25 +20,19 @@ function Library() {
   const [sortReversed, setSortReversed] = useState(false);
   const [entryDirection, setEntryDirection] = useState(null); // Track animation direction
 
-  // Add Practice view state
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
-  // Add Edit view state
   const [editView, setEditView] = useState(null); // song to edit
 
-  // Fetch songs from IndexedDB
   useEffect(() => {
     async function loadSongs() {
       try {
         const songsInfo = await getAllSongs();
 
-        // Apply decay and calculate additional fields for each song
         const processedSongs = await Promise.all(
           songsInfo.map(async (song) => {
-            // Apply decay
             const decayedSong = applyDecay(song);
 
-            // Update song in DB if decay changed anything
             if (
               decayedSong.xp !== song.xp ||
               decayedSong.level !== song.level ||
@@ -47,7 +41,6 @@ function Library() {
               await updateSong(decayedSong.songId, decayedSong);
             }
 
-            // Add calculated fields for non-seen songs
             if (decayedSong.status !== "seen") {
               decayedSong.xpThreshold = xpThreshold(decayedSong.level);
               decayedSong.totalMinPlayed = await getTotalMinutesPlayed(decayedSong.songId);
@@ -67,7 +60,6 @@ function Library() {
     loadSongs();
   }, []);
 
-  // Load decks for menu
   useEffect(() => {
     async function loadDecks() {
       try {
@@ -81,7 +73,6 @@ function Library() {
     loadDecks();
   }, []);
 
-  // Reload deck membership when selected song changes
   useEffect(() => {
     if (selectedSong) {
       async function updateDeckMembership() {
@@ -96,17 +87,14 @@ function Library() {
     }
   }, [selectedSong?.songId]);
 
-  // Handle navigation state (new song from AddSong, or reset from nav button)
   useEffect(() => {
     if (location.state?.newSong) {
-      // New song added - add to list and show detail view
       const newSong = location.state.newSong;
       setSongs(prevSongs => [newSong, ...prevSongs]);
       setSelectedSong(newSong);
       setPracticeView(null);
       setEditView(null);
     } else if (location.pathname === '/library' || location.pathname === '/') {
-      // Nav button clicked - reset to list view
       setPracticeView(null);
       setSelectedSong(null);
       setSearchQuery('');
@@ -114,13 +102,11 @@ function Library() {
     }
   }, [location]);
 
-  // Filter songs based on search
   const filteredSongs = songs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     song.artistName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sort songs
   const sortedSongs = [...filteredSongs].sort((a, b) => {
     let result = 0;
 
@@ -141,7 +127,7 @@ function Library() {
       result = a.level - b.level;
     } else if (sortState === 'status') {
       // Status priority: seen -> learning -> stale -> mastered
-      const statusOrder = { seen: 0, learning: 1, stale: 2, mastered: 3 };
+      const statusOrder = { seen: 0, learning: 1, stale: 2, refined: 3, mastered: 4 };
       const aOrder = statusOrder[a.status] ?? 99;
       const bOrder = statusOrder[b.status] ?? 99;
 
@@ -160,16 +146,13 @@ function Library() {
       result = difficultyConv[a.difficulty] - difficultyConv[b.difficulty];
     }
 
-    // Apply reverse if needed
     return sortReversed ? -result : result;
   });
 
   const handleSortSelect = (newSort) => {
     if (newSort === sortState) {
-      // Toggle reverse if clicking the same sort
       setSortReversed(!sortReversed);
     } else {
-      // New sort selected, reset to not reversed
       setSortState(newSort);
       setSortReversed(false);
     }
@@ -184,10 +167,8 @@ function Library() {
     const song = practiceView.song;
 
     try {
-      // Update song with practice using leveling system
       const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
 
-      // Save practice to IndexedDB
       const practiceId = await getNextPracticeId();
       await addPractice({
         practiceId,
@@ -197,24 +178,18 @@ function Library() {
         practiceDate: new Date().toISOString()
       });
 
-      // Update song in IndexedDB
       await updateSong(updatedSong.songId, updatedSong);
 
-      // Calculate additional fields for updated song
       updatedSong.xpThreshold = xpThreshold(updatedSong.level);
       updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
       updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
 
-      // Update the song in our songs list
       setSongs(prevSongs => prevSongs.map(s =>
         s.songId === song.songId ? updatedSong : s
       ));
 
-      // Close practice view and show updated song detail if from song view
       setPracticeView(null);
       if (practiceView.fromSongView) {
-        // Pass both old and new song data for animation
-        // For first practice of a seen song, default to xp:0 and level:1
         setSelectedSong({
           ...updatedSong,
           _previousXp: song.xp ?? 0,
@@ -231,18 +206,14 @@ function Library() {
 
   const handlePracticeBack = () => {
     if (practiceView.fromSongView) {
-      // Return to song detail view - remove animation properties to prevent repeated indicators
       const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = practiceView.song;
       setSelectedSong(cleanSong);
     }
-    // Close practice view
     setPracticeView(null);
   };
 
   const handleSongDelete = (songId) => {
-    // Remove song from the list
     setSongs(prevSongs => prevSongs.filter(s => s.songId !== songId));
-    // Close the song detail view
     setSelectedSong(null);
   };
 
@@ -252,23 +223,18 @@ function Library() {
 
   const handleEditSubmit = async (updatedData) => {
     try {
-      // Update song in database
       const updatedSong = await updateSong(editView.songId, updatedData);
 
-      // Recalculate fields if song has been practiced
       if (updatedSong.status !== "seen") {
         updatedSong.xpThreshold = xpThreshold(updatedSong.level);
         updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
         updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
       }
 
-      // Update the song in our songs list
       setSongs(prevSongs => prevSongs.map(s =>
         s.songId === editView.songId ? updatedSong : s
       ));
 
-      // Close edit view and return to song detail view with updated song
-      // Remove any animation properties to prevent repeated indicators
       const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = updatedSong;
       setEditView(null);
       setEntryDirection(null); // Reset to use fade animation, not swipe
@@ -280,8 +246,6 @@ function Library() {
   };
 
   const handleEditBack = () => {
-    // Return to song detail view without saving
-    // Remove any animation properties to prevent repeated indicators
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = editView;
     setEditView(null);
     setEntryDirection(null); // Reset to use fade animation, not swipe
@@ -289,11 +253,9 @@ function Library() {
   };
 
   const handleRandomSelect = () => {
-    // Select a random song from filtered list
     let i = Math.floor(Math.random() * filteredSongs.length);
     let song = filteredSongs[i];
     setEntryDirection(null); // Reset direction when selecting random
-    // Ensure we don't have leftover animation properties
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
     openPracticeView(cleanSong);
   };
@@ -305,7 +267,6 @@ function Library() {
       } else {
         await addSongToDeck(deckId, songId);
       }
-      // Reload decks to update membership status
       const decksData = await getDecksForMenu(songId);
       setPlaylists(decksData);
     } catch (error) {
@@ -314,7 +275,6 @@ function Library() {
     }
   };
 
-  // Edit View
   if (editView) {
     return (
       <EditView
@@ -326,7 +286,6 @@ function Library() {
     );
   }
 
-  // Add Practice View
   if (practiceView) {
     return (
       <PracticeView
@@ -338,19 +297,13 @@ function Library() {
     );
   }
 
-  // Song Detail View
   if (selectedSong) {
-    // Find current song index in sortedSongs
     const currentIndex = sortedSongs.findIndex(s => s.songId === selectedSong.songId);
 
     const handleNavigateSong = (direction) => {
       const newIndex = currentIndex + direction;
       if (newIndex >= 0 && newIndex < sortedSongs.length) {
-        // Set entry direction based on swipe direction
-        // direction = 1 means next (swipe up), so animate from top ('up')
-        // direction = -1 means previous (swipe down), so animate from bottom ('down')
         setEntryDirection(direction > 0 ? 'up' : 'down');
-        // Remove any previous animation properties when navigating
         const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = sortedSongs[newIndex];
         setSelectedSong(cleanSong);
       }
@@ -374,7 +327,6 @@ function Library() {
     );
   }
 
-  // Library List View
   return (
     <LibraryListView
       songs={sortedSongs}
@@ -387,8 +339,7 @@ function Library() {
       setSortMenuOpen={setSortMenuOpen}
       onSortSelect={handleSortSelect}
       onSelectSong={(song) => {
-        setEntryDirection(null); // Reset direction when selecting from list
-        // Ensure we don't have leftover animation properties
+        setEntryDirection(null); 
         const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
         setSelectedSong(cleanSong);
       }}

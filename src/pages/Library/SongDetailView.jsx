@@ -17,7 +17,6 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   const addToDeckMenuRef = useRef(null);
 
 
-  // XP animation states
   const previousXp = song._previousXp ?? song.xp;
   const previousLevel = song._previousLevel ?? song.level;
   const [displayXp, setDisplayXp] = useState(previousXp);
@@ -29,12 +28,10 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     ? Math.min((displayXp / song.xpThreshold) * 100, 100)
     : 0;
 
-  // Reset exit direction when song changes
   useEffect(() => {
     setExitDirection(null);
   }, [song.songId]);
 
-  // Force cursor reset on mount to clear any lingering drag cursors
   useEffect(() => {
     document.body.style.cursor = 'auto';
     return () => {
@@ -42,20 +39,14 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     };
   }, []);
 
-  // XP animation effect
   useEffect(() => {
-    // Reset animation states first
     setXpGain(null);
     setShowLevelUp(false);
 
-    // Check if we have previous XP data (meaning we just came back from practice)
     if (song._previousXp != null && song._previousXp !== song.xp && song.xp != null) {
       const xpDiff = song.xp - song._previousXp;
       const levelChanged = song._previousLevel !== song.level;
 
-      // Show XP gain indicator
-      // If we have the actual XP gain from practice, use that (especially important for level ups)
-      // Otherwise fall back to the XP diff if it's positive
       if (song._xpGain != null) {
         setXpGain(Math.floor(song._xpGain));
         setTimeout(() => setXpGain(null), 2000);
@@ -64,13 +55,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
         setTimeout(() => setXpGain(null), 2000);
       }
 
-      // Show level up animation
       if (levelChanged && song.level > song._previousLevel) {
         setShowLevelUp(true);
         setTimeout(() => setShowLevelUp(false), 3000);
       }
 
-      // Animate XP counter
       const duration = 1000; // 1 second
       const steps = 30;
       const stepDuration = duration / steps;
@@ -94,13 +83,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
       return () => clearInterval(interval);
     } else {
-      // No animation needed, just update to current values
       setDisplayXp(song.xp);
       setDisplayLevel(song.level);
     }
   }, [song.songId, song.xp, song.level, song._previousXp, song._previousLevel, song._xpGain]);
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -122,7 +109,6 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     };
   }, [menuOpen, addToDeckMenuOpen]);
 
-  // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
 
   const onTouchStart = (e) => {
@@ -148,26 +134,23 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     const distanceX = touchStartX - touchEndX;
     const distanceY = touchStartY - touchEndY;
 
-    // Determine if swipe is more horizontal or vertical
     const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
 
     if (isHorizontalSwipe) {
-      // Horizontal swipe - check for back gesture
       const isRightSwipe = distanceX < -minSwipeDistance;
       if (isRightSwipe) {
         handleBack();
       }
     } else {
-      // Vertical swipe - navigate between songs
       const isUpSwipe = distanceY > minSwipeDistance;
       const isDownSwipe = distanceY < -minSwipeDistance;
 
       if (isUpSwipe && hasNext && onNavigate) {
         setExitDirection('up');
-        onNavigate(1); // Next song
+        onNavigate(1); 
       } else if (isDownSwipe && hasPrevious && onNavigate) {
         setExitDirection('down');
-        onNavigate(-1); // Previous song
+        onNavigate(-1); 
       }
     }
   };
@@ -198,9 +181,9 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   const getExitAnimation = () => {
     if (exitDirection === 'up') {
-      return { opacity: 0, y: '-100%' }; // Swipe up = current exits up
+      return { opacity: 0, y: '-100%' };
     } else if (exitDirection === 'down') {
-      return { opacity: 0, y: '100%' }; // Swipe down = current exits down
+      return { opacity: 0, y: '100%' }; 
     } else if (exitDirection === 'right') {
       return { opacity: 0, x: '100%' };
     }
@@ -208,21 +191,19 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   };
 
   const getInitialAnimation = () => {
-    // Use library animation if coming from practice view
     if (song._fromPractice) {
-      return { opacity: 0, x: -20 }; // Same as library view
+      return { opacity: 0, x: -20 }; 
     }
     if (entryDirection === 'up') {
-      return { opacity: 0, y: '100%' }; // Swipe up = new enters from bottom
+      return { opacity: 0, y: '100%' }; 
     } else if (entryDirection === 'down') {
-      return { opacity: 0, y: '-100%' }; // Swipe down = new enters from top
+      return { opacity: 0, y: '-100%' }; 
     }
-    return { opacity: 0, y: 20 }; // Default animation
+    return { opacity: 0, y: 20 };
   };
 
   return (
     <>
-      {/* Backdrop overlay when menus are open */}
       <AnimatePresence>
         {(addToDeckMenuOpen || menuOpen || showDeleteConfirm) && (
           <motion.div
@@ -358,7 +339,6 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
               </div>
               <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
 
-              {/* XP Gain Indicator */}
               <AnimatePresence>
                 {xpGain && (
                   <motion.div

@@ -47,7 +47,6 @@ function EditView({ song, onSubmit, onBack }) {
   function handleFormSubmit(e) {
     e.preventDefault();
 
-    // Validation 
     if (title.length < 1) {
       alert("Title has to be longer than 1.");
       return;
