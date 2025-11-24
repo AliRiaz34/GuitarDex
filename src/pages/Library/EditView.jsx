@@ -6,16 +6,14 @@ function EditView({ song, onSubmit, onBack }) {
   const [title, setTitle] = useState(song?.title || '');
   const [artistName, setArtistName] = useState(song?.artistName || '');
   const [difficulty, setDifficulty] = useState(song?.difficulty || 'normal');
-  const [songDuration, setSongDuration] = useState(song?.songDuration || '');
+  const [songDuration, setSongDuration] = useState(song?.songDuration || null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
-  // Swipe gesture detection
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const isSwiping = useRef(false);
 
   const handleTouchStart = (e) => {
-    // Ignore touches on interactive elements (inputs, buttons, etc.)
     const target = e.target;
     if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' ||
         target.closest('button') || target.closest('input')) {
@@ -60,12 +58,11 @@ function EditView({ song, onSubmit, onBack }) {
       return;
     }
 
-    // Call onSubmit with the updated data
     onSubmit({
       title,
       artistName,
       difficulty,
-      songDuration: parseInt(songDuration)
+      songDuration: songDuration ? parseInt(songDuration) : null
     });
   }
 
@@ -196,9 +193,10 @@ function EditView({ song, onSubmit, onBack }) {
                 type="number"
                 className="practice-input"
                 id="songDuration-input"
-                value={songDuration}
+                value={songDuration || ''}
                 onChange={(e) => {
-                  setSongDuration(e.target.value);
+                  const value = e.target.value;
+                  setSongDuration(value === '' ? null : value);
                   setSelectedDurationButton(null);
                 }}
                 inputMode="numeric"
