@@ -551,9 +551,9 @@
 }
 
 .tuning-note {
-    font-size: 1.3em;
+font-size: 1.2em;
     color: #ffffff;
-    min-width: 30px;
+    width: 45px;
     text-align: center;
     font-weight: bold;
 }
