@@ -500,6 +500,64 @@
     color: #b0b0b0;
 }
 
+.song-tuning-display {
+    text-align: center;
+    font-size: 1.1em;
+    color: #b0b0b0;
+    letter-spacing: 0.1em;
+    margin-top: 30px;
+}
+
+/* Tuning Editor */
+#tuning-editor {
+    margin-top: 30px;
+}
+
+.tuning-strings-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.tuning-string-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tuning-arrow {
+    text-align: center;
+    background: none;
+    border: none;
+    color: #b0b0b0;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 5px 5px;
+    transition: color 0.2s;
+}
+
+.tuning-arrow:hover {
+    color: #ffffff;
+}
+
+.tuning-arrow:active {
+    color: #f0ac2d;
+}
+
+.tuning-arrow-down {
+    transform: rotate(180deg);
+    padding-left: 15px;
+}
+
+.tuning-note {
+    font-size: 1.3em;
+    color: #ffffff;
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
 /* Delete Confirmation Widget */
 #delete-confirm-overlay {
     position: fixed;

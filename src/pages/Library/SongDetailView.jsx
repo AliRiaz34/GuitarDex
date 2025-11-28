@@ -386,6 +386,10 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
                 <span className="stat-label"> {showHours ? 'hr' : 'min'}</span>
               </div>
             </div>
+
+            <div className="song-tuning-display">
+              {song.tuning ? song.tuning.join('') : 'E A D G B E'}
+            </div>
           </>
         )}
 

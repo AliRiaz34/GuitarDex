@@ -1,6 +1,6 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 2; // Incremented to add decks stores
+const DB_VERSION = 3; // Incremented to add tuning to songs
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
 const DECKS_STORE = 'decks';
@@ -24,6 +24,8 @@ export function initDB() {
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
+      const oldVersion = event.oldVersion;
+      const transaction = event.target.transaction;
 
       // Create songs store
       if (!db.objectStoreNames.contains(SONGS_STORE)) {
@@ -54,6 +56,25 @@ export function initDB() {
         deckSongsStore.createIndex('songId', 'songId', { unique: false });
         deckSongsStore.createIndex('deckSong', ['deckId', 'songId'], { unique: true }); // Prevent duplicate song in same deck
         deckSongsStore.createIndex('order', 'order', { unique: false });
+      }
+
+      // Migration for version 3: Add tuning to existing songs
+      if (oldVersion < 3 && db.objectStoreNames.contains(SONGS_STORE)) {
+        const songsStore = transaction.objectStore(SONGS_STORE);
+        const standardTuning = ['E', 'A', 'D', 'G', 'B', 'E'];
+
+        songsStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            const song = cursor.value;
+            // Add tuning if it doesn't exist
+            if (!song.tuning) {
+              song.tuning = standardTuning;
+              cursor.update(song);
+            }
+            cursor.continue();
+          }
+        };
       }
     };
   });

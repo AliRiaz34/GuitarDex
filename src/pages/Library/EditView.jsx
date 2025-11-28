@@ -8,6 +8,26 @@ function EditView({ song, onSubmit, onBack }) {
   const [difficulty, setDifficulty] = useState(song?.difficulty || 'normal');
   const [songDuration, setSongDuration] = useState(song?.songDuration || null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
+  const [tuning, setTuning] = useState(song?.tuning || ['E', 'A', 'D', 'G', 'B', 'E']);
+
+  const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+  const changeTuning = (stringIndex, direction) => {
+    const newTuning = [...tuning];
+    const currentNote = newTuning[stringIndex];
+    const currentIndex = chromaticScale.indexOf(currentNote);
+
+    if (currentIndex === -1) {
+      newTuning[stringIndex] = 'E';
+    } else {
+      const newIndex = direction === 'up'
+        ? (currentIndex + 1) % chromaticScale.length
+        : (currentIndex - 1 + chromaticScale.length) % chromaticScale.length;
+      newTuning[stringIndex] = chromaticScale[newIndex];
+    }
+
+    setTuning(newTuning);
+  };
 
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -27,7 +47,6 @@ function EditView({ song, onSubmit, onBack }) {
 
   const handleTouchMove = (e) => {
     if (!isSwiping.current) return;
-    // Track current position for potential swipe detection if needed
   };
 
   const handleTouchEnd = (e) => {
@@ -36,7 +55,6 @@ function EditView({ song, onSubmit, onBack }) {
     const deltaX = touchStartX.current - e.changedTouches[0].clientX;
     const minSwipeDistance = 50;
 
-    // Swipe right to go back
     if (deltaX < -minSwipeDistance) {
       handleBack();
     }
@@ -61,7 +79,8 @@ function EditView({ song, onSubmit, onBack }) {
       title,
       artistName,
       difficulty,
-      songDuration: songDuration ? parseInt(songDuration) : null
+      songDuration: songDuration ? parseInt(songDuration) : null,
+      tuning
     });
   }
 
@@ -207,6 +226,30 @@ function EditView({ song, onSubmit, onBack }) {
                 max="30"
               />
               <label className="min-label">min</label>
+            </div>
+          </div>
+          <div id="tuning-editor">
+            <label className="form-label">current tuning</label>
+            <div className="tuning-strings-container">
+              {tuning.map((note, index) => (
+                <div key={index} className="tuning-string-control">
+                  <button
+                    type="button"
+                    className="tuning-arrow"
+                    onClick={() => changeTuning(index, 'up')}
+                  >
+                    ^
+                  </button>
+                  <div className="tuning-note">{note}</div>
+                  <button
+                    type="button"
+                    className="tuning-arrow tuning-arrow-down"
+                    onClick={() => changeTuning(index, 'down')}
+                  >
+                    ^
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

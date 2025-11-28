@@ -85,7 +85,8 @@ function AddSong() {
         highestLevelReached,
         lastPracticeDate,
         lastDecayDate,
-        addDate
+        addDate,
+        tuning: ['E', 'A', 'D', 'G', 'B', 'E'] // Standard tuning
       };
 
       await addSong(newSong);
