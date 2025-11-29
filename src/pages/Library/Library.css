@@ -492,6 +492,7 @@
 
 .stat-label {
     font-weight: normal;
+    color: #b0b0b0;
 }
 
 .stat-value {
@@ -501,21 +502,68 @@
 }
 
 .song-tuning-display {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.3em;
     font-size: 1.1em;
     color: #b0b0b0;
-    letter-spacing: 0.1em;
     margin-top: 30px;
 }
 
+.tuning-note-detail {
+    color: #b0b0b0;
+}
+
+.tuning-note-detail sup {
+    vertical-align: top;
+    line-height: 1;
+}
+
+.song-capo-display {
+    text-align: center;
+    font-size: 1em;
+    color: #b0b0b0;
+    margin-top: 10px;
+}
+
+.capo-input-group {
+  margin: auto;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-left: 50px;
+}
+
+.capo-input {
+    color: white;
+    font-family: 'Pokemon-Classic';
+    font-size: 1.1em;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    border: 0px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid rgba(240, 172, 45, 0.822);
+    border-radius: 0px;
+    outline: none;
+    background-color: transparent;
+    width: 70px;
+}
+
+
 /* Tuning Editor */
 #tuning-editor {
-    margin-top: 30px;
+    margin-top: 50px;
 }
 
 .tuning-strings-container {
     display: flex;
     justify-content: center;
+    align-items: flex-end;
     margin-top: 10px;
     text-align: center;
 }
@@ -551,11 +599,16 @@
 }
 
 .tuning-note {
-font-size: 1.2em;
+    font-size: 1.2em;
     color: #ffffff;
     width: 45px;
     text-align: center;
     font-weight: bold;
+}
+
+.tuning-note sup {
+    vertical-align: top;
+    line-height: 1;
 }
 
 /* Delete Confirmation Widget */
@@ -624,9 +677,13 @@ font-size: 1.2em;
     font-weight: bolder;
 }
 
+#capo-div {
+    margin-top: 30px;
+}
+
 /* practice add */
 
-#minPlayed-input-div, #duration-div{
+#minPlayed-input-div, #duration-div {
     margin-top: 60px;
     text-align: center;
     display: flex;
@@ -725,6 +782,30 @@ font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 0px;
     margin-top: 80px;
+}
+
+.practice-song-info {
+    text-align: center;
+    font-size: 0.9em;
+    color: #b0b0b0;
+    margin: 5px 0 0 0;
+    font-style: italic;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+.practice-song-info .tuning-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.15em;
+}
+
+.practice-song-info .tuning-note {
+    font-size: 0.9em;
+    color: #b0b0b0;
+    width: auto;
+    font-weight: normal;
 }
 
 input::-webkit-outer-spin-button,

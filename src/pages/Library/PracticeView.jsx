@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import './Library.css';
 
-function PracticeView({ song, onSubmit, onBack }) {
+function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   const [minPlayed, setMinPlayed] = useState(song.songDuration || "");
   const [songDuration, setSongDuration] = useState("");
   const [touchStart, setTouchStart] = useState(null);
@@ -11,6 +11,17 @@ function PracticeView({ song, onSubmit, onBack }) {
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
   const minSwipeDistance = 50;
+
+  const formatTuning = (tuning) => {
+    if (!tuning) return 'EADGBE';
+    return tuning.map((note, i) => {
+      if (note.includes('#')) {
+        const [base] = note.split('#');
+        return <span key={i} className="tuning-note">{base}<sup>#</sup></span>;
+      }
+      return <span key={i} className="tuning-note">{note}</span>;
+    });
+  };
 
   const onTouchStart = (e) => {
     setTouchEnd(null);
@@ -75,7 +86,13 @@ function PracticeView({ song, onSubmit, onBack }) {
         }}
       >
         <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
-        <h1 id="song-practice-title">{song.title}</h1>
+        <h1 id="song-practice-title" onClick={onGoToSong} style={{ cursor: 'pointer' }}>{song.title}</h1>
+        {((song.tuning && song.tuning.join('') !== 'EADGBE') || song.capo > 0) && (
+          <p className="practice-song-info">
+            <span className="tuning-container">{formatTuning(song.tuning)}</span>
+            {song.capo > 0 && <span>capo {song.capo}</span>}
+          </p>
+        )}
         <div id="minPlayed-input-div">
           <label className="form-label"> your practice duration</label>
           <div className="quick-select-button-div">

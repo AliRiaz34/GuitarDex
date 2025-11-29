@@ -9,6 +9,7 @@ function EditView({ song, onSubmit, onBack }) {
   const [songDuration, setSongDuration] = useState(song?.songDuration || null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
   const [tuning, setTuning] = useState(song?.tuning || ['E', 'A', 'D', 'G', 'B', 'E']);
+  const [capo, setCapo] = useState(song?.capo || 0);
 
   const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -80,7 +81,8 @@ function EditView({ song, onSubmit, onBack }) {
       artistName,
       difficulty,
       songDuration: songDuration ? parseInt(songDuration) : null,
-      tuning
+      tuning,
+      capo
     });
   }
 
@@ -105,7 +107,7 @@ function EditView({ song, onSubmit, onBack }) {
         <p id="edit-back-icon" onClick={handleBack}>{'<'}</p>
         <div id="add-input-div">
           <div id="title-input-div">
-            <label htmlFor="title-input" className="form-label">current song name</label>
+            <label htmlFor="title-input" className="form-label">song name</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -124,7 +126,7 @@ function EditView({ song, onSubmit, onBack }) {
             </div>
           </div>
           <div id="artistName-input-div">
-            <label htmlFor="artistName-input" className="form-label">current artist</label>
+            <label htmlFor="artistName-input" className="form-label">artist</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -142,7 +144,7 @@ function EditView({ song, onSubmit, onBack }) {
               />
             </div>
           </div>
-          <label id="buttons-menu-1-label" className="form-label">current difficulty</label>
+          <label id="buttons-menu-1-label" className="form-label">difficulty</label>
           <div id="buttons-menu-1">
               <button
                 type="button"
@@ -170,7 +172,7 @@ function EditView({ song, onSubmit, onBack }) {
               </button>
           </div>
           <div id="duration-div">
-            <label className="form-label">current song duration</label>
+            <label className="form-label">song duration</label>
             <div className="quick-select-button-div">
               <button
                 onClick={() => {
@@ -228,8 +230,28 @@ function EditView({ song, onSubmit, onBack }) {
               <label className="min-label">min</label>
             </div>
           </div>
+          <div id="capo-div">
+            <label className="form-label">capo</label>
+            <div className="capo-input-group">
+              <p className="practice-input-arrow">{'> '}</p>
+              <input
+                type="number"
+                className="capo-input"
+                id="capo-input"
+                value={capo}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 0;
+                  setCapo(Math.max(0, Math.min(15, value)));
+                }}
+                inputMode="numeric"
+                min="0"
+                max="15"
+              />
+              <label className="min-label">fret</label>
+            </div>
+          </div>
           <div id="tuning-editor">
-            <label className="form-label">current tuning</label>
+            <label className="form-label">tuning</label>
             <div className="tuning-strings-container">
               {tuning.map((note, index) => (
                 <div key={index} className="tuning-string-control">
@@ -240,7 +262,9 @@ function EditView({ song, onSubmit, onBack }) {
                   >
                     ^
                   </button>
-                  <div className="tuning-note">{note}</div>
+                  <div className="tuning-note">
+                    {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
+                  </div>
                   <button
                     type="button"
                     className="tuning-arrow tuning-arrow-down"

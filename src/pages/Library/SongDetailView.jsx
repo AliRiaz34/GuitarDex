@@ -28,6 +28,17 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     ? Math.min((displayXp / song.xpThreshold) * 100, 100)
     : 0;
 
+  const formatTuning = (tuning) => {
+    if (!tuning) return 'EADGBE';
+    return tuning.map((note, i) => {
+      if (note.includes('#')) {
+        const [base] = note.split('#');
+        return <span key={i} className="tuning-note-detail">{base}<sup>#</sup></span>;
+      }
+      return <span key={i} className="tuning-note-detail">{note}</span>;
+    });
+  };
+
   useEffect(() => {
     setExitDirection(null);
   }, [song.songId]);
@@ -372,10 +383,10 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
                 <span className="stat-value">{song.difficulty.toUpperCase()}</span>
               </div>
               <div className="stat-item">
+                <span className="stat-label">capo </span>
                 <span className="stat-value">
-                  {song.totalSessions}
+                  {song.capo || 0}
                 </span>
-                <span className="stat-label"> {song.totalSessions === 1 ? 'drill' : 'drills'}</span>
               </div>
               <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
                 <span className="stat-value">
@@ -388,7 +399,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
             </div>
 
             <div className="song-tuning-display">
-              {song.tuning ? song.tuning.join('') : 'E A D G B E'}
+              {formatTuning(song.tuning)}
             </div>
           </>
         )}

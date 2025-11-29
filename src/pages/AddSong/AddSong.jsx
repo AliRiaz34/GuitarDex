@@ -86,7 +86,8 @@ function AddSong() {
         lastPracticeDate,
         lastDecayDate,
         addDate,
-        tuning: ['E', 'A', 'D', 'G', 'B', 'E'] // Standard tuning
+        tuning: ['E', 'A', 'D', 'G', 'B', 'E'], // Standard tuning
+        capo: 0
       };
 
       await addSong(newSong);

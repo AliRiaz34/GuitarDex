@@ -1,6 +1,6 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 3; // Incremented to add tuning to songs
+const DB_VERSION = 4; // Incremented to add capo to songs
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
 const DECKS_STORE = 'decks';
@@ -70,6 +70,24 @@ export function initDB() {
             // Add tuning if it doesn't exist
             if (!song.tuning) {
               song.tuning = standardTuning;
+              cursor.update(song);
+            }
+            cursor.continue();
+          }
+        };
+      }
+
+      // Migration for version 4: Add capo to existing songs
+      if (oldVersion < 4 && db.objectStoreNames.contains(SONGS_STORE)) {
+        const songsStore = transaction.objectStore(SONGS_STORE);
+
+        songsStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            const song = cursor.value;
+            // Add capo if it doesn't exist
+            if (song.capo === undefined) {
+              song.capo = 0;
               cursor.update(song);
             }
             cursor.continue();

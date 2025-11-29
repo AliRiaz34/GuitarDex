@@ -287,12 +287,19 @@ function Library() {
   }
 
   if (practiceView) {
+    const goToSongDetail = () => {
+      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = practiceView.song;
+      setSelectedSong(cleanSong);
+      setPracticeView(null);
+    };
+
     return (
       <PracticeView
         key={practiceView.song.songId}
         song={practiceView.song}
         onSubmit={handlePracticeSubmit}
         onBack={handlePracticeBack}
+        onGoToSong={goToSongDetail}
       />
     );
   }
