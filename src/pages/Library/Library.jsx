@@ -310,6 +310,7 @@ function Library() {
     const handleNavigateSong = (direction) => {
       const newIndex = currentIndex + direction;
       if (newIndex >= 0 && newIndex < sortedSongs.length) {
+        window.scrollTo(0, 0);
         setEntryDirection(direction > 0 ? 'up' : 'down');
         const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = sortedSongs[newIndex];
         setSelectedSong(cleanSong);
