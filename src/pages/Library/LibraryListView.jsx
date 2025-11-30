@@ -6,6 +6,7 @@ import './Library.css';
 function LibraryListView({
   songs,
   allSongs,
+  isLoading,
   searchQuery,
   setSearchQuery,
   sortState,
@@ -97,7 +98,11 @@ function LibraryListView({
           </div>
         )}
 
-        {songs.length > 0 ? (
+        {isLoading ? (
+          <div id="seen-a-new-song" className="empty-library">
+            loading...
+          </div>
+        ) : songs.length > 0 ? (
           <table id="library-table">
             <tbody>
               {songs.map(song => (
@@ -119,7 +124,7 @@ function LibraryListView({
             className={allSongs.length === 0 ? "empty-library" : ""}
             to={`/songs/add?title=${encodeURIComponent(searchQuery)}`}
           >
-            {allSongs.length === 0 ? "spot some songs buddy" : "seen a new song?"}
+            {allSongs.length === 0 ? "spot some songs silly" : "seen a new song?"}
           </Link>
         )}
       </div>
