@@ -12,6 +12,7 @@ function Library() {
   const location = useLocation();
   const navigate = useNavigate();
   const [songs, setSongs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -27,6 +28,7 @@ function Library() {
   useEffect(() => {
     async function loadSongs() {
       try {
+        setIsLoading(true);
         const songsInfo = await getAllSongs();
 
         const processedSongs = await Promise.all(
@@ -54,6 +56,8 @@ function Library() {
         setSongs(processedSongs);
       } catch (error) {
         console.error('Error loading songs:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -339,6 +343,7 @@ function Library() {
     <LibraryListView
       songs={sortedSongs}
       allSongs={songs}
+      isLoading={isLoading}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       sortState={sortState}
@@ -347,7 +352,7 @@ function Library() {
       setSortMenuOpen={setSortMenuOpen}
       onSortSelect={handleSortSelect}
       onSelectSong={(song) => {
-        setEntryDirection(null); 
+        setEntryDirection(null);
         const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
         setSelectedSong(cleanSong);
       }}
