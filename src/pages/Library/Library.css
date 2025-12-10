@@ -82,6 +82,20 @@
     }
 }
 
+.search-clear-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(240, 172, 45, 0.822);
+    font-size: 1.4em;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+}
+
 #library-table-container {
     flex: 1;
     overflow-y: auto;

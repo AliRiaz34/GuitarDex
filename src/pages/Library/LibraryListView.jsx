@@ -52,6 +52,15 @@ function LibraryListView({
                 whatcha lookin for<span className="blinking-question">?</span>
               </div>
             )}
+            {searchQuery && (
+              <button
+                className="search-clear-btn"
+                onClick={() => setSearchQuery('')}
+                type="button"
+              >
+                ×
+              </button>
+            )}
           </div>
         </>
       )}
