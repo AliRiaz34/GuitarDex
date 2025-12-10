@@ -13,7 +13,14 @@ window.addEventListener('touchstart', (e) => {
   touchStartY = e.touches[0].clientY;
 
   // Prevent gesture if starting from the very edge
-  if (touchStartX < 10 || touchStartX > window.innerWidth - 10) {
+  // But don't prevent default on input elements - this breaks keyboard focus on some devices
+  const target = e.target;
+  const isInputElement = target.tagName === 'INPUT' ||
+                         target.tagName === 'TEXTAREA' ||
+                         target.tagName === 'SELECT' ||
+                         target.isContentEditable;
+
+  if (!isInputElement && (touchStartX < 10 || touchStartX > window.innerWidth - 10)) {
     e.preventDefault();
   }
 }, { passive: false });
