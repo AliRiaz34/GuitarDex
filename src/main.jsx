@@ -4,6 +4,18 @@ import './index.css'
 import App from './App.jsx'
 import { initDB } from './utils/db'
 
+// iOS PWA keyboard fix - force focus on input tap
+// iOS standalone PWAs have a bug where tapping inputs doesn't trigger keyboard
+const isIOSPWA = ('standalone' in navigator) && navigator.standalone;
+if (isIOSPWA) {
+  document.addEventListener('touchend', (e) => {
+    const target = e.target;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+      target.focus();
+    }
+  });
+}
+
 // Prevent swipe-back navigation gesture
 let touchStartX = 0;
 let touchStartY = 0;
