@@ -52,6 +52,8 @@
 #searchbar {
     width: 100%;
     display: block;
+    padding-right: 35px;
+    box-sizing: border-box;
 }
 
 #searchbar::placeholder {
@@ -93,7 +95,7 @@
     color: rgba(240, 172, 45, 0.822);
     font-size: 1.4em;
     cursor: pointer;
-    padding: 2px 8px;
+    padding: 2px 8px 2px 10px;
     line-height: 1;
 }
 
