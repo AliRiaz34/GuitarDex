@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Library.css';
 
 function LibraryListView({
@@ -16,10 +16,32 @@ function LibraryListView({
   onSortSelect,
   onSelectSong,
   onQuickPractice,
-  onRandomSelect
+  onRandomSelect,
+  scrollPositionRef
 }) {
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const containerRef = useRef(null);
+
+  // Restore scroll position when component mounts
+  useEffect(() => {
+    if (containerRef.current && scrollPositionRef.current) {
+      containerRef.current.scrollTop = scrollPositionRef.current;
+    }
+  }, [scrollPositionRef]);
+
+  // Save scroll position when scrolling
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      scrollPositionRef.current = container.scrollTop;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [scrollPositionRef]);
 
   return (
     <motion.div
@@ -65,7 +87,7 @@ function LibraryListView({
         </>
       )}
 
-      <div id="library-table-container">
+      <div id="library-table-container" ref={containerRef}>
         {hasAnySongs && (
           <div id="sort-menu">
             <div id="sort-icon" onClick={() => setSortMenuOpen(!sortMenuOpen)}>

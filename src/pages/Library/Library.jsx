@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
@@ -20,6 +20,7 @@ function Library() {
   const [playlists, setPlaylists] = useState(null);
   const [sortReversed, setSortReversed] = useState(false);
   const [entryDirection, setEntryDirection] = useState(null); // Track animation direction
+  const scrollPositionRef = useRef(0); // Store scroll position
 
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
@@ -358,6 +359,7 @@ function Library() {
       }}
       onQuickPractice={openPracticeView}
       onRandomSelect={handleRandomSelect}
+      scrollPositionRef={scrollPositionRef}
     />
   );
 }
