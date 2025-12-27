@@ -138,15 +138,42 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             }
           }}
         >
-          <span className={`tuner-arrow-indicator left ${isListening && detectedNote && centsOff > 5 ? 'sharp' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
-            {'<'}
-          </span>
-          <div className={`tuner-detected-note ${isListening && detectedNote ? tuningStatus : ''}`}>
-            {isListening ? formatNote(detectedNote) : '--'}
+          {/* Pixelated tuning meter */}
+          <div className="tuning-meter">
+            <span className="meter-bracket">[</span>
+            <div className="meter-track">
+              <div className="meter-segments">
+                {[...Array(11)].map((_, i) => (
+                  <span key={i} className={`meter-segment ${i === 5 ? 'center' : ''}`}>
+                    {i === 5 ? '|' : '.'}
+                  </span>
+                ))}
+              </div>
+              <div
+                className={`meter-needle ${isListening && detectedNote ? tuningStatus : ''}`}
+                style={{
+                  left: isListening && detectedNote
+                    ? `${50 + Math.max(-50, Math.min(50, centsOff))}%`
+                    : '50%'
+                }}
+              >
+                |
+              </div>
+            </div>
+            <span className="meter-bracket">]</span>
           </div>
-          <span className={`tuner-arrow-indicator right ${isListening && detectedNote && centsOff < -5 ? 'flat' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
-            {'>'}
-          </span>
+
+          <div className="tuner-note-row">
+            <span className={`tuner-arrow-indicator left ${isListening && detectedNote && centsOff > 5 ? 'sharp' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+              {'<'}
+            </span>
+            <div className={`tuner-detected-note ${isListening && detectedNote ? tuningStatus : ''}`}>
+              {isListening ? formatNote(detectedNote) : '--'}
+            </div>
+            <span className={`tuner-arrow-indicator right ${isListening && detectedNote && centsOff < -5 ? 'flat' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+              {'>'}
+            </span>
+          </div>
         </div>
 
         <div id="minPlayed-input-div">

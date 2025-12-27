@@ -864,10 +864,18 @@
 /* Inline tuner in practice view */
 .practice-tuner {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin: 5px 0 0 0;
+}
+
+.tuner-note-row {
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin: 5px 0 0 0;
 }
 
 .practice-tuner .tuner-detected-note {
@@ -883,6 +891,66 @@
 .practice-tuner.tappable {
     cursor: pointer;
     opacity: 0.6;
+}
+
+/* Pixelated Tuning Meter */
+.tuning-meter {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 1.2em;
+    color: #444;
+}
+
+.meter-bracket {
+    color: #666;
+}
+
+.meter-track {
+    position: relative;
+    width: 120px;
+    height: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.meter-segments {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: #333;
+}
+
+.meter-segment {
+    width: 10px;
+    text-align: center;
+}
+
+.meter-segment.center {
+    color: #666;
+}
+
+.meter-needle {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    color: #666;
+    transition: left 0.1s steps(5), color 0.2s;
+    font-weight: bold;
+}
+
+.meter-needle.in-tune {
+    color: #4CAF50;
+    text-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+}
+
+.meter-needle.close {
+    color: rgba(240, 172, 45, 0.9);
+}
+
+.meter-needle.out-of-tune {
+    color: rgba(240, 172, 45, 0.7);
 }
 
 #practice-view .form__button {

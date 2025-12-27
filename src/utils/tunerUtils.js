@@ -132,15 +132,19 @@ export function useTuner(targetFrequencies) {
 
   // Smoothing: keep last N frequency readings for averaging
   const frequencyHistoryRef = useRef([]);
-  const SMOOTHING_SAMPLES = 10;
+  const SMOOTHING_SAMPLES = 15;
   const silenceCountRef = useRef(0);
-  const SILENCE_THRESHOLD = 30; // Frames of silence before clearing display (~0.5 second)
+  const SILENCE_THRESHOLD = 45; // Frames of silence before clearing display (~0.75 second)
 
   // Note locking: only change note when new note is stable
   const lockedNoteRef = useRef(null);
   const pendingNoteRef = useRef(null);
   const pendingNoteCountRef = useRef(0);
-  const NOTE_CHANGE_THRESHOLD = 8; // Frames of consistent new note before switching
+  const NOTE_CHANGE_THRESHOLD = 35; // Frames of consistent new note before switching
+
+  // Cents smoothing: keep last N cents readings for averaging
+  const centsHistoryRef = useRef([]);
+  const CENTS_SMOOTHING_SAMPLES = 8;
 
   const detectPitch = useCallback(() => {
     if (!analyserRef.current || !detectorRef.current) return;
@@ -200,8 +204,15 @@ export function useTuner(targetFrequencies) {
 
       const { closest, centsOff: cents } = findClosestString(smoothedFreq, targetFrequencies);
       setClosestString(closest);
-      // Round cents to nearest integer to reduce jitter
-      setCentsOff(Math.round(cents));
+
+      // Smooth the cents value to reduce needle jitter
+      centsHistoryRef.current.push(cents);
+      if (centsHistoryRef.current.length > CENTS_SMOOTHING_SAMPLES) {
+        centsHistoryRef.current.shift();
+      }
+      const smoothedCents = centsHistoryRef.current.reduce((a, b) => a + b, 0)
+        / centsHistoryRef.current.length;
+      setCentsOff(Math.round(smoothedCents));
     } else {
       // Increment silence counter
       silenceCountRef.current++;
@@ -209,6 +220,7 @@ export function useTuner(targetFrequencies) {
       // Only clear display after sustained silence
       if (silenceCountRef.current > SILENCE_THRESHOLD) {
         frequencyHistoryRef.current = [];
+        centsHistoryRef.current = [];
         lockedNoteRef.current = null;
         pendingNoteRef.current = null;
         pendingNoteCountRef.current = 0;
