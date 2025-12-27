@@ -120,6 +120,8 @@ export function useTuner(targetFrequencies) {
   // Smoothing: keep last N frequency readings for averaging
   const frequencyHistoryRef = useRef([]);
   const SMOOTHING_SAMPLES = 10;
+  const silenceCountRef = useRef(0);
+  const SILENCE_THRESHOLD = 60; // Frames of silence before clearing display (~1 second)
 
   const detectPitch = useCallback(() => {
     if (!analyserRef.current || !detectorRef.current) return;
@@ -131,6 +133,9 @@ export function useTuner(targetFrequencies) {
     const frequency = detectorRef.current(buffer);
 
     if (frequency && frequency > 60 && frequency < 500) {
+      // Reset silence counter on valid frequency
+      silenceCountRef.current = 0;
+
       // Add to history for smoothing
       frequencyHistoryRef.current.push(frequency);
       if (frequencyHistoryRef.current.length > SMOOTHING_SAMPLES) {
@@ -148,11 +153,16 @@ export function useTuner(targetFrequencies) {
       // Round cents to nearest integer to reduce jitter
       setCentsOff(Math.round(cents));
     } else {
-      // No valid frequency detected - reset state
-      frequencyHistoryRef.current = [];
-      setDetectedFrequency(null);
-      setClosestString(null);
-      setCentsOff(0);
+      // Increment silence counter
+      silenceCountRef.current++;
+
+      // Only clear display after sustained silence
+      if (silenceCountRef.current > SILENCE_THRESHOLD) {
+        frequencyHistoryRef.current = [];
+        setDetectedFrequency(null);
+        setClosestString(null);
+        setCentsOff(0);
+      }
     }
 
     rafIdRef.current = requestAnimationFrame(detectPitch);
