@@ -131,7 +131,7 @@ export function useTuner(targetFrequencies) {
 
     // Check if buffer has actual audio data (not silent)
     const maxSample = Math.max(...buffer.map(Math.abs));
-    const hasAudio = maxSample > 0.01;
+    const hasAudio = maxSample > 0.005; // Lower threshold for iOS sensitivity
 
     const frequency = detectorRef.current(buffer);
 
