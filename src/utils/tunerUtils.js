@@ -107,6 +107,7 @@ export function useTuner(targetFrequencies) {
   const [closestString, setClosestString] = useState(null);
   const [centsOff, setCentsOff] = useState(0);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState('checking'); // 'checking' | 'granted' | 'prompt' | 'denied'
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -243,12 +244,37 @@ export function useTuner(targetFrequencies) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [isListening, stopListening]);
 
+  // Check permission status on mount
+  useEffect(() => {
+    async function checkPermission() {
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const result = await navigator.permissions.query({ name: 'microphone' });
+          setPermissionStatus(result.state); // 'granted', 'denied', or 'prompt'
+
+          // Listen for permission changes
+          result.onchange = () => {
+            setPermissionStatus(result.state);
+          };
+        } else {
+          // Permissions API not supported, assume we need to prompt
+          setPermissionStatus('prompt');
+        }
+      } catch (err) {
+        // Some browsers don't support microphone permission query
+        setPermissionStatus('prompt');
+      }
+    }
+    checkPermission();
+  }, []);
+
   return {
     isListening,
     detectedFrequency,
     closestString,
     centsOff,
     permissionDenied,
+    permissionStatus,
     startListening,
     stopListening,
   };

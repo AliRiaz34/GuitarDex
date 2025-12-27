@@ -23,17 +23,20 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
     isListening,
     closestString,
     centsOff,
+    permissionStatus,
     startListening,
     stopListening,
   } = useTuner(targetFrequencies);
 
   const tuningStatus = getTuningStatus(centsOff);
 
-  // Auto-start tuner on mount
+  // Auto-start tuner only if permission already granted
   useEffect(() => {
-    startListening();
+    if (permissionStatus === 'granted') {
+      startListening();
+    }
     return () => stopListening();
-  }, [startListening, stopListening]);
+  }, [permissionStatus, startListening, stopListening]);
 
   const formatNote = (note) => {
     if (!note) return '--';
@@ -126,7 +129,14 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
         </p>
 
         {/* Inline tuner */}
-        <div className="practice-tuner">
+        <div
+          className={`practice-tuner ${!isListening && permissionStatus !== 'denied' ? 'tappable' : ''}`}
+          onClick={() => {
+            if (!isListening && permissionStatus !== 'denied') {
+              startListening();
+            }
+          }}
+        >
           <span className={`tuner-arrow-indicator left ${isListening && centsOff < -5 ? 'active' : ''} ${isListening && closestString?.note && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
             {'<'}
           </span>
