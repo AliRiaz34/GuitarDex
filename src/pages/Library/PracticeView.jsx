@@ -30,13 +30,10 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
 
   const tuningStatus = getTuningStatus(centsOff);
 
-  // Auto-start tuner only if permission already granted
+  // Cleanup on unmount
   useEffect(() => {
-    if (permissionStatus === 'granted') {
-      startListening();
-    }
     return () => stopListening();
-  }, [permissionStatus, startListening, stopListening]);
+  }, [stopListening]);
 
   const formatNote = (note) => {
     if (!note) return '--';
@@ -130,9 +127,12 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
 
         {/* Inline tuner */}
         <div
-          className={`practice-tuner ${!isListening && permissionStatus !== 'denied' ? 'tappable' : ''}`}
+          className={`practice-tuner ${!isListening ? 'tappable' : ''}`}
           onClick={() => {
-            if (!isListening && permissionStatus !== 'denied') {
+            if (permissionStatus === 'denied') return;
+            if (isListening) {
+              stopListening();
+            } else {
               startListening();
             }
           }}
