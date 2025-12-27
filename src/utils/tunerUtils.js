@@ -99,12 +99,25 @@ export function getTuningStatus(centsOff) {
 }
 
 /**
+ * Convert frequency to note name (e.g., 440 -> 'A')
+ */
+export function frequencyToNote(frequency) {
+  if (!frequency || frequency <= 0) return null;
+
+  // A4 = 440 Hz, MIDI note 69
+  const midiNote = Math.round(12 * Math.log2(frequency / 440) + 69);
+  const noteIndex = ((midiNote % 12) + 12) % 12; // Handle negative modulo
+  return CHROMATIC_SCALE[noteIndex];
+}
+
+/**
  * Custom hook for pitch detection using microphone
  */
 export function useTuner(targetFrequencies) {
   const [isListening, setIsListening] = useState(false);
   const [detectedFrequency, setDetectedFrequency] = useState(null);
-  const [closestString, setClosestString] = useState(null);
+  const [detectedNote, setDetectedNote] = useState(null); // Actual note being played
+  const [closestString, setClosestString] = useState(null); // Target string from song tuning
   const [centsOff, setCentsOff] = useState(0);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState('checking'); // 'checking' | 'granted' | 'prompt' | 'denied'
@@ -148,6 +161,10 @@ export function useTuner(targetFrequencies) {
 
       setDetectedFrequency(Math.round(smoothedFreq));
 
+      // Get the actual note being played from frequency
+      const actualNote = frequencyToNote(smoothedFreq);
+      setDetectedNote(actualNote);
+
       const { closest, centsOff: cents } = findClosestString(smoothedFreq, targetFrequencies);
       setClosestString(closest);
       // Round cents to nearest integer to reduce jitter
@@ -160,6 +177,7 @@ export function useTuner(targetFrequencies) {
       if (silenceCountRef.current > SILENCE_THRESHOLD) {
         frequencyHistoryRef.current = [];
         setDetectedFrequency(null);
+        setDetectedNote(null);
         setClosestString(null);
         setCentsOff(0);
       }
@@ -292,6 +310,7 @@ export function useTuner(targetFrequencies) {
   return {
     isListening,
     detectedFrequency,
+    detectedNote,
     closestString,
     centsOff,
     permissionDenied,

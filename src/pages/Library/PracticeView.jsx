@@ -21,6 +21,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
 
   const {
     isListening,
+    detectedNote,
     closestString,
     centsOff,
     permissionStatus,
@@ -137,13 +138,13 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             }
           }}
         >
-          <span className={`tuner-arrow-indicator left ${isListening && closestString?.note && centsOff < -5 ? 'flat' : ''} ${isListening && closestString?.note && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+          <span className={`tuner-arrow-indicator left ${isListening && detectedNote && centsOff < -5 ? 'flat' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
             {'<'}
           </span>
-          <div className={`tuner-detected-note ${isListening && closestString?.note ? tuningStatus : ''}`}>
-            {isListening ? formatNote(closestString?.note) : '--'}
+          <div className={`tuner-detected-note ${isListening && detectedNote ? tuningStatus : ''}`}>
+            {isListening ? formatNote(detectedNote) : '--'}
           </div>
-          <span className={`tuner-arrow-indicator right ${isListening && closestString?.note && centsOff > 5 ? 'sharp' : ''} ${isListening && closestString?.note && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+          <span className={`tuner-arrow-indicator right ${isListening && detectedNote && centsOff > 5 ? 'sharp' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
             {'>'}
           </span>
         </div>
