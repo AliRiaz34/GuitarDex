@@ -1067,7 +1067,8 @@ input[type=number] {
     text-align: center;
 }
 
-.tuner-arrow-indicator.active {
+.tuner-arrow-indicator.flat,
+.tuner-arrow-indicator.sharp {
     color: rgba(240, 172, 45, 0.9);
 }
 
