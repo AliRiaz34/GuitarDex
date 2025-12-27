@@ -108,6 +108,7 @@ export function useTuner(targetFrequencies) {
   const [centsOff, setCentsOff] = useState(0);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState('checking'); // 'checking' | 'granted' | 'prompt' | 'denied'
+  const [debugInfo, setDebugInfo] = useState('');
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -128,9 +129,16 @@ export function useTuner(targetFrequencies) {
     const buffer = new Float32Array(bufferLength);
     analyserRef.current.getFloatTimeDomainData(buffer);
 
+    // Check if buffer has actual audio data (not silent)
+    const maxSample = Math.max(...buffer.map(Math.abs));
+    const hasAudio = maxSample > 0.01;
+
     const frequency = detectorRef.current(buffer);
 
-    if (frequency && frequency > 60 && frequency < 500) {
+    // Update debug info for on-screen display
+    setDebugInfo(`raw:${frequency ? Math.round(frequency) : '-'} vol:${maxSample.toFixed(3)} audio:${hasAudio ? 'Y' : 'N'}`);
+
+    if (frequency && frequency > 60 && frequency < 500 && hasAudio) {
       // Add to history for smoothing
       frequencyHistoryRef.current.push(frequency);
       if (frequencyHistoryRef.current.length > SMOOTHING_SAMPLES) {
@@ -180,13 +188,15 @@ export function useTuner(targetFrequencies) {
       }
 
       analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 2048;
+      analyserRef.current.fftSize = 4096; // Larger buffer for better low-freq detection on iOS
 
       // Initialize detector with actual sample rate
       detectorRef.current = YIN({
         sampleRate: audioContextRef.current.sampleRate,
-        threshold: 0.1,
+        threshold: 0.05, // Lower threshold = more sensitive
       });
+
+      console.log('Audio context sample rate:', audioContextRef.current.sampleRate);
 
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
@@ -281,6 +291,7 @@ export function useTuner(targetFrequencies) {
     centsOff,
     permissionDenied,
     permissionStatus,
+    debugInfo,
     startListening,
     stopListening,
   };

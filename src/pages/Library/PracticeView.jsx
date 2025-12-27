@@ -23,6 +23,8 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
     isListening,
     closestString,
     centsOff,
+    detectedFrequency,
+    debugInfo,
     permissionStatus,
     startListening,
     stopListening,
@@ -147,6 +149,12 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             {'>'}
           </span>
         </div>
+        {/* Debug info - remove after fixing iOS */}
+        {isListening && (
+          <p style={{ fontSize: '0.7em', opacity: 0.5, textAlign: 'center', margin: '5px 0' }}>
+            {debugInfo || `freq: ${detectedFrequency || 'none'}`}
+          </p>
+        )}
 
         <div id="minPlayed-input-div">
           <label className="form-label"> your practice duration</label>
