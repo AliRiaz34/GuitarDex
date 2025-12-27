@@ -111,6 +111,23 @@ export function frequencyToNote(frequency) {
 }
 
 /**
+ * Calculate cents off from the ideal frequency of the detected note
+ * Returns how sharp (+) or flat (-) the frequency is from the nearest ideal note
+ */
+export function calculateCentsFromIdeal(frequency) {
+  if (!frequency || frequency <= 0) return 0;
+
+  // Calculate exact MIDI note (not rounded)
+  const exactMidi = 12 * Math.log2(frequency / 440) + 69;
+  // Round to get the target MIDI note
+  const targetMidi = Math.round(exactMidi);
+  // Calculate ideal frequency for that note
+  const idealFreq = 440 * Math.pow(2, (targetMidi - 69) / 12);
+  // Calculate cents difference
+  return Math.round(1200 * Math.log2(frequency / idealFreq));
+}
+
+/**
  * Custom hook for pitch detection using microphone
  */
 export function useTuner(targetFrequencies) {
@@ -202,8 +219,11 @@ export function useTuner(targetFrequencies) {
         }
       }
 
-      const { closest, centsOff: cents } = findClosestString(smoothedFreq, targetFrequencies);
+      const { closest } = findClosestString(smoothedFreq, targetFrequencies);
       setClosestString(closest);
+
+      // Calculate cents off from the ideal frequency of the detected note (not target tuning)
+      const cents = calculateCentsFromIdeal(smoothedFreq);
 
       // Smooth the cents value to reduce needle jitter
       centsHistoryRef.current.push(cents);
