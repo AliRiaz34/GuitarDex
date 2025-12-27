@@ -105,7 +105,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   return (
     <motion.div
       id="practice-view"
-      style={{ minHeight: '60vh', padding: '15px' }}
+      style={{ minHeight: '60vh', padding: '15px', paddingBottom: '100px' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: '100%' }}
