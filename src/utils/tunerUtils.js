@@ -108,7 +108,6 @@ export function useTuner(targetFrequencies) {
   const [centsOff, setCentsOff] = useState(0);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState('checking'); // 'checking' | 'granted' | 'prompt' | 'denied'
-  const [debugInfo, setDebugInfo] = useState('');
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -130,10 +129,6 @@ export function useTuner(targetFrequencies) {
     analyserRef.current.getFloatTimeDomainData(buffer);
 
     const frequency = detectorRef.current(buffer);
-
-    // Update debug info for on-screen display
-    const maxSample = Math.max(...buffer.map(Math.abs));
-    setDebugInfo(`raw:${frequency ? Math.round(frequency) : '-'} vol:${maxSample.toFixed(3)}`);
 
     if (frequency && frequency > 60 && frequency < 500) {
       // Add to history for smoothing
@@ -291,7 +286,6 @@ export function useTuner(targetFrequencies) {
     centsOff,
     permissionDenied,
     permissionStatus,
-    debugInfo,
     startListening,
     stopListening,
   };
