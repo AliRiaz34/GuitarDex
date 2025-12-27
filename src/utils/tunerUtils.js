@@ -129,16 +129,13 @@ export function useTuner(targetFrequencies) {
     const buffer = new Float32Array(bufferLength);
     analyserRef.current.getFloatTimeDomainData(buffer);
 
-    // Check if buffer has actual audio data (not silent)
-    const maxSample = Math.max(...buffer.map(Math.abs));
-    const hasAudio = maxSample > 0.005; // Lower threshold for iOS sensitivity
-
     const frequency = detectorRef.current(buffer);
 
     // Update debug info for on-screen display
-    setDebugInfo(`raw:${frequency ? Math.round(frequency) : '-'} vol:${maxSample.toFixed(3)} audio:${hasAudio ? 'Y' : 'N'}`);
+    const maxSample = Math.max(...buffer.map(Math.abs));
+    setDebugInfo(`raw:${frequency ? Math.round(frequency) : '-'} vol:${maxSample.toFixed(3)}`);
 
-    if (frequency && frequency > 60 && frequency < 500 && hasAudio) {
+    if (frequency && frequency > 60 && frequency < 500) {
       // Add to history for smoothing
       frequencyHistoryRef.current.push(frequency);
       if (frequencyHistoryRef.current.length > SMOOTHING_SAMPLES) {
