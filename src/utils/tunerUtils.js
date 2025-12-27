@@ -171,7 +171,7 @@ export function useTuner(targetFrequencies) {
         audio: {
           echoCancellation: false,
           noiseSuppression: false,
-          autoGainControl: false,
+          autoGainControl: true, // Enable to boost weak signals on iOS
         }
       });
 
