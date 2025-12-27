@@ -29,7 +29,11 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
     stopListening,
   } = useTuner(targetFrequencies);
 
-  const tuningStatus = getTuningStatus(centsOff);
+  // Only show green (in-tune) if the detected note matches a target tuning note
+  const matchesTarget = closestString && detectedNote === closestString.note;
+  const baseTuningStatus = getTuningStatus(centsOff);
+  const tuningStatus = baseTuningStatus === 'in-tune' && matchesTarget ? 'in-tune' :
+                       baseTuningStatus === 'in-tune' ? 'close' : baseTuningStatus;
 
   // Cleanup on unmount
   useEffect(() => {
