@@ -173,6 +173,12 @@ export function useTuner(targetFrequencies) {
       mediaStreamRef.current = stream;
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContextRef.current = new AudioContext();
+
+      // iOS Safari requires explicit resume after user interaction
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 2048;
 
