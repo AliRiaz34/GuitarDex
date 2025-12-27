@@ -121,7 +121,7 @@ export function useTuner(targetFrequencies) {
   const frequencyHistoryRef = useRef([]);
   const SMOOTHING_SAMPLES = 10;
   const silenceCountRef = useRef(0);
-  const SILENCE_THRESHOLD = 60; // Frames of silence before clearing display (~1 second)
+  const SILENCE_THRESHOLD = 30; // Frames of silence before clearing display (~0.5 second)
 
   const detectPitch = useCallback(() => {
     if (!analyserRef.current || !detectorRef.current) return;
