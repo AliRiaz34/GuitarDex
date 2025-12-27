@@ -136,6 +136,12 @@ export function useTuner(targetFrequencies) {
   const silenceCountRef = useRef(0);
   const SILENCE_THRESHOLD = 30; // Frames of silence before clearing display (~0.5 second)
 
+  // Note locking: only change note when new note is stable
+  const lockedNoteRef = useRef(null);
+  const pendingNoteRef = useRef(null);
+  const pendingNoteCountRef = useRef(0);
+  const NOTE_CHANGE_THRESHOLD = 8; // Frames of consistent new note before switching
+
   const detectPitch = useCallback(() => {
     if (!analyserRef.current || !detectorRef.current) return;
 
@@ -163,7 +169,34 @@ export function useTuner(targetFrequencies) {
 
       // Get the actual note being played from frequency
       const actualNote = frequencyToNote(smoothedFreq);
-      setDetectedNote(actualNote);
+
+      // Note locking logic - only switch when new note is stable
+      if (lockedNoteRef.current === null) {
+        // No locked note yet, lock immediately
+        lockedNoteRef.current = actualNote;
+        setDetectedNote(actualNote);
+      } else if (actualNote === lockedNoteRef.current) {
+        // Same note, reset pending
+        pendingNoteRef.current = null;
+        pendingNoteCountRef.current = 0;
+      } else {
+        // Different note detected
+        if (actualNote === pendingNoteRef.current) {
+          // Same pending note, increment counter
+          pendingNoteCountRef.current++;
+          if (pendingNoteCountRef.current >= NOTE_CHANGE_THRESHOLD) {
+            // New note is stable, switch to it
+            lockedNoteRef.current = actualNote;
+            setDetectedNote(actualNote);
+            pendingNoteRef.current = null;
+            pendingNoteCountRef.current = 0;
+          }
+        } else {
+          // New pending note
+          pendingNoteRef.current = actualNote;
+          pendingNoteCountRef.current = 1;
+        }
+      }
 
       const { closest, centsOff: cents } = findClosestString(smoothedFreq, targetFrequencies);
       setClosestString(closest);
@@ -176,6 +209,9 @@ export function useTuner(targetFrequencies) {
       // Only clear display after sustained silence
       if (silenceCountRef.current > SILENCE_THRESHOLD) {
         frequencyHistoryRef.current = [];
+        lockedNoteRef.current = null;
+        pendingNoteRef.current = null;
+        pendingNoteCountRef.current = 0;
         setDetectedFrequency(null);
         setDetectedNote(null);
         setClosestString(null);

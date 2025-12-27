@@ -138,13 +138,13 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             }
           }}
         >
-          <span className={`tuner-arrow-indicator left ${isListening && detectedNote && centsOff < -5 ? 'flat' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+          <span className={`tuner-arrow-indicator left ${isListening && detectedNote && centsOff > 5 ? 'sharp' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
             {'<'}
           </span>
           <div className={`tuner-detected-note ${isListening && detectedNote ? tuningStatus : ''}`}>
             {isListening ? formatNote(detectedNote) : '--'}
           </div>
-          <span className={`tuner-arrow-indicator right ${isListening && detectedNote && centsOff > 5 ? 'sharp' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+          <span className={`tuner-arrow-indicator right ${isListening && detectedNote && centsOff < -5 ? 'flat' : ''} ${isListening && detectedNote && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
             {'>'}
           </span>
         </div>
