@@ -193,10 +193,13 @@ export function useTuner(targetFrequencies) {
         threshold: 0.05, // Lower threshold = more sensitive
       });
 
-      console.log('Audio context sample rate:', audioContextRef.current.sampleRate);
+      // Add gain node to amplify weak signals (especially on iOS)
+      const gainNode = audioContextRef.current.createGain();
+      gainNode.gain.value = 30; // Boost signal 30x for iOS
 
       const source = audioContextRef.current.createMediaStreamSource(stream);
-      source.connect(analyserRef.current);
+      source.connect(gainNode);
+      gainNode.connect(analyserRef.current);
 
       setIsListening(true);
       setPermissionDenied(false);
