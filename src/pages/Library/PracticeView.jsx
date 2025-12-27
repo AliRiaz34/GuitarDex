@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTuner, calculateTargetFrequencies, getTuningStatus } from '../../utils/tunerUtils';
 import './Library.css';
 
 function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
@@ -11,6 +12,37 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
 
   const minSwipeDistance = 50;
+
+  // Tuner setup
+  const targetFrequencies = useMemo(
+    () => calculateTargetFrequencies(song?.tuning, song?.capo || 0),
+    [song?.tuning, song?.capo]
+  );
+
+  const {
+    isListening,
+    closestString,
+    centsOff,
+    startListening,
+    stopListening,
+  } = useTuner(targetFrequencies);
+
+  const tuningStatus = getTuningStatus(centsOff);
+
+  // Auto-start tuner on mount
+  useEffect(() => {
+    startListening();
+    return () => stopListening();
+  }, [startListening, stopListening]);
+
+  const formatNote = (note) => {
+    if (!note) return '--';
+    if (note.includes('#')) {
+      const [base] = note.split('#');
+      return <>{base}<sup>#</sup></>;
+    }
+    return note;
+  };
 
   const formatTuning = (tuning) => {
     if (!tuning) return 'EADGBE';
@@ -33,6 +65,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   };
 
   const handleBack = () => {
+    stopListening();
     onBack();
   };
 
@@ -87,12 +120,24 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
       >
         <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
         <h1 id="song-practice-title" onClick={onGoToSong} style={{ cursor: 'pointer' }}>{song.title}</h1>
-        {((song.tuning && song.tuning.join('') !== 'EADGBE') || song.capo > 0) && (
-          <p className="practice-song-info">
-            <span className="tuning-container">{formatTuning(song.tuning)}</span>
-            {song.capo > 0 && <span>capo {song.capo}</span>}
-          </p>
-        )}
+        <p className="practice-song-info">
+          <span className="tuning-container">{formatTuning(song.tuning)}</span>
+          {song.capo > 0 && <span>capo {song.capo}</span>}
+        </p>
+
+        {/* Inline tuner */}
+        <div className="practice-tuner">
+          <span className={`tuner-arrow-indicator left ${isListening && centsOff < -5 ? 'active' : ''} ${isListening && closestString?.note && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+            {'<'}
+          </span>
+          <div className={`tuner-detected-note ${isListening && closestString?.note ? tuningStatus : ''}`}>
+            {isListening ? formatNote(closestString?.note) : '--'}
+          </div>
+          <span className={`tuner-arrow-indicator right ${isListening && centsOff > 5 ? 'active' : ''} ${isListening && closestString?.note && tuningStatus === 'in-tune' ? 'in-tune' : ''}`}>
+            {'>'}
+          </span>
+        </div>
+
         <div id="minPlayed-input-div">
           <label className="form-label"> your practice duration</label>
           <div className="quick-select-button-div">
@@ -224,11 +269,9 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             </div>
           </div>
         )}
-        <div className="save-div">
-          <button type="submit" className="form__button">
-            Save
-          </button>
-        </div>
+        <button type="submit" className="form__button">
+          Save
+        </button>
       </form>
     </motion.div>
   );

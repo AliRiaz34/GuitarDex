@@ -142,12 +142,25 @@
 }
 
 #deck-create-save {
-    margin: auto;
+    margin: 120px auto 300px;
     display: block;
-    margin-top: 120px;
+    width: 100%;
+    max-width: 200px;
     text-align: center;
-    font-size: 1.4em;
-    margin-bottom: 300px;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.6);
+    color: rgba(240, 172, 45, 0.9);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#deck-create-save:hover {
+    background: rgba(240, 172, 45, 0.1);
+    border-color: rgba(240, 172, 45, 0.9);
 }
 
 #create-deck-button {

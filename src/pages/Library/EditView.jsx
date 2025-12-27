@@ -144,6 +144,32 @@ function EditView({ song, onSubmit, onBack }) {
               />
             </div>
           </div>
+          <div id="tuning-editor">
+            <label className="form-label">tuning</label>
+            <div className="tuning-strings-container">
+              {tuning.map((note, index) => (
+                <div key={index} className="tuning-string-control">
+                  <button
+                    type="button"
+                    className="tuning-arrow"
+                    onClick={() => changeTuning(index, 'up')}
+                  >
+                    ^
+                  </button>
+                  <div className="tuning-note">
+                    {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
+                  </div>
+                  <button
+                    type="button"
+                    className="tuning-arrow tuning-arrow-down"
+                    onClick={() => changeTuning(index, 'down')}
+                  >
+                    ^
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
           <label id="buttons-menu-1-label" className="form-label">difficulty</label>
           <div id="buttons-menu-1">
               <button
@@ -248,32 +274,6 @@ function EditView({ song, onSubmit, onBack }) {
                 max="15"
               />
               <label className="min-label">fret</label>
-            </div>
-          </div>
-          <div id="tuning-editor">
-            <label className="form-label">tuning</label>
-            <div className="tuning-strings-container">
-              {tuning.map((note, index) => (
-                <div key={index} className="tuning-string-control">
-                  <button
-                    type="button"
-                    className="tuning-arrow"
-                    onClick={() => changeTuning(index, 'up')}
-                  >
-                    ^
-                  </button>
-                  <div className="tuning-note">
-                    {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
-                  </div>
-                  <button
-                    type="button"
-                    className="tuning-arrow tuning-arrow-down"
-                    onClick={() => changeTuning(index, 'down')}
-                  >
-                    ^
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
         </div>
