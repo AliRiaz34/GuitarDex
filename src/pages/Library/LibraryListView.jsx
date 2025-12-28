@@ -123,7 +123,7 @@ function LibraryListView({
             </AnimatePresence>
             {!sortMenuOpen && (
               <div id="random-button" onClick={onRandomSelect}>
-                random
+                practice
               </div>
             )}
           </div>

@@ -258,8 +258,44 @@ function Library() {
   };
 
   const handleRandomSelect = () => {
-    let i = Math.floor(Math.random() * filteredSongs.length);
-    let song = filteredSongs[i];
+    if (filteredSongs.length === 0) return;
+
+    // Calculate weight for each song based on:
+    // 1. Days since last practice (more days = higher weight, capped at 30)
+    // 2. Lower level = higher weight
+    // Goal: cycle through all songs to build a well-rounded guitardex
+    const now = Date.now();
+    const DAY_CAP = 30; // After 30 days, staleness factor maxes out
+
+    const weights = filteredSongs.map(song => {
+      // Days since last practice (never-practiced songs get max priority)
+      const lastPractice = song.lastPracticeDate ? new Date(song.lastPracticeDate).getTime() : 0;
+      const rawDays = lastPractice ? (now - lastPractice) / (1000 * 60 * 60 * 24) : DAY_CAP;
+      const daysSinceLastPractice = Math.min(rawDays, DAY_CAP);
+
+      // Level weight: lower level = higher priority (treat null/seen as level 0)
+      const level = song.level || 0;
+      const levelWeight = 26 - level; // Max level is 25, so this gives 1-26 range
+
+      // Combined weight: multiply factors together
+      // Add 1 to days to avoid zero weight for songs practiced today
+      return (daysSinceLastPractice + 1) * levelWeight;
+    });
+
+    // Weighted random selection
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    let random = Math.random() * totalWeight;
+
+    let selectedIndex = 0;
+    for (let i = 0; i < weights.length; i++) {
+      random -= weights[i];
+      if (random <= 0) {
+        selectedIndex = i;
+        break;
+      }
+    }
+
+    let song = filteredSongs[selectedIndex];
     setEntryDirection(null); // Reset direction when selecting random
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
     openPracticeView(cleanSong);
