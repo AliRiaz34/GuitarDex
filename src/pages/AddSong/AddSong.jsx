@@ -53,7 +53,7 @@ function AddSong() {
         lastDecayDate = null;
         lastPracticeDate = null;
       } else if (status === "mastered") {
-        level = 25; // MAX_LEVEL_BEFORE_MASTERY
+        level = 20; // MAX_LEVEL_BEFORE_MASTERY
         xp = 0;
         highestLevelReached = level;
         lastDecayDate = addDate;
@@ -83,6 +83,7 @@ function AddSong() {
         difficulty,
         songDuration,
         highestLevelReached,
+        practiceStreak: status === "seen" ? null : 0,
         lastPracticeDate,
         lastDecayDate,
         addDate,

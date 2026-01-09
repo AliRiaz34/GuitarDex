@@ -2,11 +2,12 @@
 
 // XP System Configuration
 const XP_BASE_AMOUNT = 50;  // Base XP required for level 1
-const XP_SCALING_EXPONENT = 1.4;  // How quickly XP requirements increase per level
+const XP_SCALING_EXPONENT = 1.2;  // How quickly XP requirements increase per level
 const XP_PRACTICE_BASE = 60;  // Base XP earned per practice session
 
-// Streak Bonus Configuration (index = days since last practice)
-const STREAK_BONUS_VALUES = [0, 0.1, 0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0];  // 0=today, 1=yesterday, etc.
+// Streak Bonus Configuration (index = consecutive days practiced)
+// 0=first day, 1=second consecutive day, etc. Caps at 30% bonus
+const STREAK_BONUS_VALUES = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.30, 0.30];
 
 // Decay System Configuration
 const DECAY_GRACE_PERIOD_DAYS = 7;
@@ -15,7 +16,7 @@ const DECAY_RATE_PER_DAY = 0.02;
 
 // Level Thresholds
 const MAX_LEVEL_BEFORE_REFINED = 10;
-const MAX_LEVEL_BEFORE_MASTERY = 25;
+const MAX_LEVEL_BEFORE_MASTERY = 20;
 
 // Difficulty Multipliers
 const DIFFICULTY_MULTIPLIERS = {
@@ -45,20 +46,34 @@ export function xpThreshold(level) {
   return Math.floor(XP_BASE_AMOUNT * Math.pow(level, XP_SCALING_EXPONENT));
 }
 
-// Calculate XP gain from a practice session
-export function calculateXpGain(songInfo, minPlayed) {
+// Calculate the current streak for XP bonus calculation
+function calculateCurrentStreak(songInfo) {
   const today = new Date().toISOString().split('T')[0];
   const daysSinceSongPracticed = daysBetween(today, songInfo.lastPracticeDate);
+  const currentStreak = songInfo.practiceStreak || 0;
+
+  // If practiced today (same day), use existing streak
+  if (daysSinceSongPracticed === 0) {
+    return currentStreak;
+  }
+  // If practiced yesterday, streak continues (will be incremented after practice)
+  if (daysSinceSongPracticed === 1) {
+    return currentStreak + 1;
+  }
+  // Gap of 2+ days, streak resets
+  return 0;
+}
+
+// Calculate XP gain from a practice session
+export function calculateXpGain(songInfo, minPlayed) {
   const difficulty = songInfo.difficulty;
   const songDuration = Number(songInfo.songDuration);
   const highestLevelReached = songInfo.highestLevelReached;
 
-  let streakBonus;
-  if (daysSinceSongPracticed < STREAK_BONUS_VALUES.length) {
-    streakBonus = STREAK_BONUS_VALUES[daysSinceSongPracticed];
-  } else {
-    streakBonus = STREAK_BONUS_VALUES[STREAK_BONUS_VALUES.length - 1];
-  }
+  // Get streak-based bonus (consecutive days practiced)
+  const streakCount = calculateCurrentStreak(songInfo);
+  const streakIndex = Math.min(streakCount, STREAK_BONUS_VALUES.length - 1);
+  const streakBonus = STREAK_BONUS_VALUES[streakIndex];
 
   return (
     XP_PRACTICE_BASE *
@@ -167,6 +182,7 @@ export function initializeSeenSong(songInfo, songDuration) {
     level: 1,
     xp: 0,
     highestLevelReached: 1,
+    practiceStreak: 0,
     lastDecayDate: new Date().toISOString(),
     lastPracticeDate: new Date().toISOString(),
     songDuration
@@ -198,6 +214,21 @@ export function updateSongWithPractice(songInfo, minPlayed, songDuration) {
   updatedSong.level = levelUpResult.level;
   updatedSong.xp = levelUpResult.xp;
   updatedSong.status = levelUpResult.status;
+
+  // Update practice streak
+  const today = new Date().toISOString().split('T')[0];
+  const daysSincePracticed = daysBetween(today, updatedSong.lastPracticeDate);
+
+  if (daysSincePracticed === 0) {
+    // Same day practice - don't change streak
+  } else if (daysSincePracticed === 1) {
+    // Yesterday - increment streak
+    updatedSong.practiceStreak = (updatedSong.practiceStreak || 0) + 1;
+  } else {
+    // Gap of 2+ days - reset streak (this is first day of new streak)
+    updatedSong.practiceStreak = 0;
+  }
+
   updatedSong.lastPracticeDate = new Date().toISOString();
 
   // Update highest level reached if needed

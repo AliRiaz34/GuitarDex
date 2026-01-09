@@ -1,6 +1,6 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 4; // Incremented to add capo to songs
+const DB_VERSION = 5; // Incremented for leveling system rebalance
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
 const DECKS_STORE = 'decks';
@@ -90,6 +90,88 @@ export function initDB() {
               song.capo = 0;
               cursor.update(song);
             }
+            cursor.continue();
+          }
+        };
+      }
+
+      // Migration for version 5: Leveling system rebalance
+      // - Change XP_SCALING_EXPONENT from 1.4 to 1.2
+      // - Change MAX_LEVEL_BEFORE_MASTERY from 25 to 20
+      // - Add practiceStreak field
+      if (oldVersion < 5 && db.objectStoreNames.contains(SONGS_STORE)) {
+        const songsStore = transaction.objectStore(SONGS_STORE);
+
+        // Old and new constants
+        const OLD_EXPONENT = 1.4;
+        const NEW_EXPONENT = 1.2;
+        const XP_BASE = 50;
+        const NEW_MAX_MASTERY = 20;
+        const NEW_MAX_REFINED = 10;
+
+        // Helper to calculate XP threshold
+        const xpThreshold = (level, exponent) => Math.floor(XP_BASE * Math.pow(level, exponent));
+
+        // Helper to calculate total XP for a level + remaining xp
+        const totalXpForLevel = (level, xp, exponent) => {
+          let total = xp;
+          for (let l = 1; l < level; l++) {
+            total += xpThreshold(l, exponent);
+          }
+          return total;
+        };
+
+        // Helper to convert total XP back to level + remaining xp
+        const xpToLevelAndRemainder = (totalXp, exponent) => {
+          let level = 1;
+          let remaining = totalXp;
+          while (remaining >= xpThreshold(level, exponent)) {
+            remaining -= xpThreshold(level, exponent);
+            level++;
+          }
+          return { level, xp: remaining };
+        };
+
+        songsStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            const song = cursor.value;
+
+            // Add practiceStreak field to all songs
+            if (song.practiceStreak === undefined) {
+              song.practiceStreak = song.level === null ? null : 0;
+            }
+
+            // Only convert XP for songs with level data
+            if (song.level !== null && song.level !== undefined) {
+              // Calculate total XP under old system
+              const oldTotalXp = totalXpForLevel(song.level, song.xp || 0, OLD_EXPONENT);
+
+              // Convert to new system
+              const newResult = xpToLevelAndRemainder(oldTotalXp, NEW_EXPONENT);
+              song.level = newResult.level;
+              song.xp = newResult.xp;
+
+              // Update highestLevelReached proportionally
+              if (song.highestLevelReached !== null) {
+                const oldHighestTotalXp = totalXpForLevel(song.highestLevelReached, 0, OLD_EXPONENT);
+                const newHighestResult = xpToLevelAndRemainder(oldHighestTotalXp, NEW_EXPONENT);
+                song.highestLevelReached = Math.max(newHighestResult.level, song.level);
+              }
+
+              // Recalculate status based on new thresholds
+              if (song.level >= NEW_MAX_MASTERY) {
+                song.status = 'mastered';
+              } else if (song.level >= NEW_MAX_REFINED) {
+                // Only upgrade to refined, don't downgrade from mastered
+                if (song.status !== 'mastered') {
+                  song.status = 'refined';
+                }
+              }
+              // Keep learning/stale status for lower levels
+            }
+
+            cursor.update(song);
             cursor.continue();
           }
         };
