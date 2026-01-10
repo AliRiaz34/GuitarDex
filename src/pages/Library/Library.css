@@ -241,6 +241,12 @@
     cursor: pointer;
 }
 
+#song-upgrade-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
 #song-menu-container {
     position: relative;
 }

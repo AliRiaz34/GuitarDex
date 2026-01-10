@@ -316,6 +316,44 @@ function Library() {
     }
   };
 
+  const handleUpgrade = async () => {
+    if (!selectedSong || selectedSong.status === 'mastered') return;
+
+    try {
+      const previousXp = selectedSong.xp ?? 0;
+      const previousLevel = selectedSong.level ?? 1;
+
+      const newStatus = selectedSong.status === 'refined' ? 'mastered' : 'refined';
+      const newLevel = newStatus === 'mastered' ? 20 : 10;
+
+      const updatedData = {
+        status: newStatus,
+        level: newLevel,
+        xp: 0,
+        highestLevelReached: Math.max(selectedSong.highestLevelReached || 0, newLevel)
+      };
+
+      const updatedSong = await updateSong(selectedSong.songId, updatedData);
+
+      updatedSong.xpThreshold = xpThreshold(updatedSong.level);
+      updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
+      updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
+
+      setSongs(prevSongs => prevSongs.map(s =>
+        s.songId === selectedSong.songId ? updatedSong : s
+      ));
+
+      setSelectedSong({
+        ...updatedSong,
+        _previousXp: previousXp,
+        _previousLevel: previousLevel
+      });
+    } catch (error) {
+      console.error('Error upgrading song:', error);
+      alert('Error upgrading song');
+    }
+  };
+
   if (editView) {
     return (
       <EditView
@@ -372,6 +410,7 @@ function Library() {
         entryDirection={entryDirection}
         decks={playlists}
         onToggleDeck={handleToggleDeck}
+        onUpgrade={handleUpgrade}
       />
     );
   }

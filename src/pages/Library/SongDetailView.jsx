@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { deleteSong } from '../../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck }) {
+function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck, onUpgrade }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
@@ -54,9 +54,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     setXpGain(null);
     setShowLevelUp(false);
 
-    if (song._previousXp != null && song._previousXp !== song.xp && song.xp != null) {
-      const xpDiff = song.xp - song._previousXp;
-      const levelChanged = song._previousLevel !== song.level;
+    const levelChanged = song._previousLevel != null && song._previousLevel !== song.level;
+    const xpChanged = song._previousXp != null && song._previousXp !== song.xp;
+
+    if ((xpChanged || levelChanged) && song.xp != null) {
+      const xpDiff = (song.xp ?? 0) - (song._previousXp ?? 0);
 
       if (song._xpGain != null) {
         setXpGain(Math.floor(song._xpGain));
@@ -249,6 +251,19 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
           <div id="song-head-div-1">
             <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
             <div id="song-icons-container" ref={addToDeckMenuRef}>
+              <AnimatePresence>
+                {song.status !== 'mastered' && song.level != null && (
+                  <motion.img
+                    id="song-upgrade-icon"
+                    onClick={onUpgrade}
+                    src='./images/upgrade.png'
+                    alt="Upgrade"
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+              </AnimatePresence>
               <img
                 id="song-addToDeck-icon"
                  onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
