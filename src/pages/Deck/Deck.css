@@ -123,6 +123,14 @@
     white-space: nowrap;
 }
 
+.deck-title-virtual {
+    color: rgb(240, 172, 45);
+}
+
+.deck-td-lv-virtual {
+    color: rgb(240, 172, 45);
+}
+
 .deck-input {
     color: white;
     font-family: 'Pokemon-Classic';
@@ -282,6 +290,23 @@
     text-align: right;
 }
 
+#deck-practice-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 30px;
+    font-family: 'Pokemon-Classic';
+    font-size: 0.9em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#deck-practice-button:active {
+    background-color: rgba(240, 172, 45, 0.2);
+}
+
 #deck-description-box {
     margin: 15px;
     margin-top: 0;
@@ -313,11 +338,6 @@
 }
 
 .deck-song-tr {
-    transition: background-color 0.2s ease;
-}
-
-.deck-song-tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .deck-song-td-drag {

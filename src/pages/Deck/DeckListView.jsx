@@ -97,11 +97,11 @@ function DeckListView({
           <table id="deck-table">
             <tbody>
               {decks.map(deck => (
-                <tr key={deck.deckId} className="deck-tr">
+                <tr key={deck.deckId} className={`deck-tr ${deck.isVirtual ? 'deck-tr-virtual' : ''}`}>
                   <td className="deck-td" onClick={() => onSelectDeck(deck)}>
-                    <div className="deck-title">{deck.title}</div>
+                    <div className={`deck-title ${deck.isVirtual ? 'deck-title-virtual' : ''}`}>{deck.title}</div>
                   </td>
-                  <td className="deck-td-lv">
+                  <td className={`deck-td-lv ${deck.isVirtual ? 'deck-td-lv-virtual' : ''}`}>
                     {deck.level != null ? `Lv ${deck.level}` : '???'}
                   </td>
                 </tr>

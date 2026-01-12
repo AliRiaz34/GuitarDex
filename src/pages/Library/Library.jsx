@@ -258,7 +258,10 @@ function Library() {
   };
 
   const handleRandomSelect = () => {
-    if (filteredSongs.length === 0) return;
+    // Exclude mastered songs from practice selection
+    const practicableSongs = filteredSongs.filter(song => song.status !== 'mastered');
+
+    if (practicableSongs.length === 0) return;
 
     // Calculate weight for each song based on:
     // 1. Days since last practice (more days = higher weight, capped at 30)
@@ -267,7 +270,7 @@ function Library() {
     const now = Date.now();
     const DAY_CAP = 30; // After 30 days, staleness factor maxes out
 
-    const weights = filteredSongs.map(song => {
+    const weights = practicableSongs.map(song => {
       // Days since last practice (never-practiced songs get max priority)
       const lastPractice = song.lastPracticeDate ? new Date(song.lastPracticeDate).getTime() : 0;
       const rawDays = lastPractice ? (now - lastPractice) / (1000 * 60 * 60 * 24) : DAY_CAP;
@@ -295,7 +298,7 @@ function Library() {
       }
     }
 
-    let song = filteredSongs[selectedIndex];
+    let song = practicableSongs[selectedIndex];
     setEntryDirection(null); // Reset direction when selecting random
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
     openPracticeView(cleanSong);

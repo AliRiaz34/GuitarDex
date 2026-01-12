@@ -7,7 +7,7 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel } from '../../utils/db';
+import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel, getMasteredSongs } from '../../utils/db';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import './Deck.css';
 
@@ -53,6 +53,31 @@ function Deck() {
     loadDecks();
   }, []);
 
+  // Create virtual Mastered deck from mastered songs
+  const [masteredDeck, setMasteredDeck] = useState(null);
+
+  useEffect(() => {
+    async function loadMasteredDeck() {
+      try {
+        const masteredSongs = await getMasteredSongs();
+        const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration || 0), 0);
+
+        setMasteredDeck({
+          deckId: 'mastered',
+          title: 'mastered',
+          level: 20, // Mastered songs are level 20+
+          totalDuration,
+          creationDate: new Date(0).toISOString(), // Oldest possible date
+          isVirtual: true, // Flag to identify virtual deck
+          songs: masteredSongs
+        });
+      } catch (error) {
+        console.error('Error loading mastered deck:', error);
+      }
+    }
+    loadMasteredDeck();
+  }, [decks]); // Reload when decks change (which happens after practice)
+
   // Handle navigation state (new deck from DeckCreateView, or reset from nav button)
   useEffect(() => {
     if (location.state?.newDeck) {
@@ -96,7 +121,7 @@ function Deck() {
   );
 
   // Sort decks
-  const sortedDecks = [...filteredDecks].sort((a, b) => {
+  const sortedRegularDecks = [...filteredDecks].sort((a, b) => {
     let result = 0;
 
     if (sortState === 'recent') {
@@ -119,6 +144,15 @@ function Deck() {
     // Apply reverse if needed
     return sortReversed ? -result : result;
   });
+
+  // Add Mastered deck at top if it matches search and has songs
+  const showMasteredDeck = masteredDeck &&
+    masteredDeck.songs.length > 0 &&
+    masteredDeck.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const sortedDecks = showMasteredDeck
+    ? [masteredDeck, ...sortedRegularDecks]
+    : sortedRegularDecks;
 
   const handleSortSelect = (newSort) => {
     if (newSort === sortState) {
@@ -505,10 +539,13 @@ function Deck() {
   }
 
   // Deck List View
+  // Include mastered deck in allDecks count if it has songs
+  const allDecksWithMastered = showMasteredDeck ? [masteredDeck, ...decks] : decks;
+
   return (
     <DeckListView
       decks={sortedDecks}
-      allDecks={decks}
+      allDecks={allDecksWithMastered}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       sortState={sortState}

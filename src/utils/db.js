@@ -712,6 +712,12 @@ export async function getDecksForMenu(songId = null) {
   }));
 }
 
+// Get all mastered songs (for virtual Mastered deck)
+export async function getMasteredSongs() {
+  const allSongs = await getAllSongs();
+  return allSongs.filter(song => song.status === 'mastered');
+}
+
 // Calculate and update the average level and total duration of a deck
 export async function updateDeckLevel(deckId) {
   // Get all songs in the deck

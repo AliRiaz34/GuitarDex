@@ -17,6 +17,30 @@ import {
 } from '@dnd-kit/sortable';
 import './Deck.css';
 
+// Simple row for virtual decks (no drag)
+function SimpleRow({ song, onPractice, onSelectSong }) {
+  const handlePracticeClick = (e) => {
+    e.stopPropagation();
+    onPractice(song);
+  };
+
+  return (
+    <tr className="deck-song-tr">
+      <td
+        className="deck-song-td-title"
+        onClick={() => onSelectSong(song)}
+        style={{ paddingLeft: '16px' }}
+      >
+        <div className="deck-song-title">{song.title}</div>
+        <div className="deck-song-artistName">{song.artistName}</div>
+      </td>
+      <td className="deck-song-td-lv" onClick={handlePracticeClick}>
+        {song.level != null ? `Lv ${song.level}` : '???'}
+      </td>
+    </tr>
+  );
+}
+
 // Sortable row component
 function SortableRow({ song, onPractice, onSelectSong }) {
   const {
@@ -105,6 +129,15 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     async function loadDeckSongs() {
       try {
         setLoading(true);
+
+        // For virtual decks (like Mastered), songs are already provided
+        if (deck.isVirtual && deck.songs) {
+          setSongs(deck.songs);
+          setTotalMinutes(deck.totalDuration || 0);
+          setLoading(false);
+          return;
+        }
+
         const deckSongs = await getSongsInDeck(deck.deckId);
 
         // Fetch full song details for each song in deck
@@ -129,7 +162,7 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     }
 
     loadDeckSongs();
-  }, [deck.deckId, deck.totalDuration]);
+  }, [deck.deckId, deck.totalDuration, deck.isVirtual, deck.songs]);
 
   // Swipe gesture handlers
   useEffect(() => {
@@ -230,6 +263,12 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     setShowDeleteConfirm(false);
   };
 
+  const handleRandomPractice = () => {
+    if (songs.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * songs.length);
+    onPractice(songs[randomIndex]);
+  };
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
@@ -286,28 +325,31 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
         <div id="deck-top-div">
           <div id="deck-head-div-1">
             <p className="deck-back-icon" onClick={handleBack}>{'<'}</p>
-            <div id="deck-menu-container" ref={menuRef}>
-              <img
-                id="deck-menu-icon"
-                onClick={() => setMenuOpen(!menuOpen)}
-                src='./images/menu.png'
-              >
-              </img>
-              <AnimatePresence>
-                {menuOpen && (
-                  <motion.div
-                    id="deck-menu-dropdown"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <p className="deck-menu-option" onClick={handleEditClick}>edit</p>
-                    <p className="deck-menu-option" onClick={handleDeleteClick}>delete</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {/* Hide menu for virtual decks (like Mastered) */}
+            {!deck.isVirtual && (
+              <div id="deck-menu-container" ref={menuRef}>
+                <img
+                  id="deck-menu-icon"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  src='./images/menu.png'
+                >
+                </img>
+                <AnimatePresence>
+                  {menuOpen && (
+                    <motion.div
+                      id="deck-menu-dropdown"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <p className="deck-menu-option" onClick={handleEditClick}>edit</p>
+                      <p className="deck-menu-option" onClick={handleDeleteClick}>delete</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
           <h2 id="deck-title">{deck.title}</h2>
           <div id="deck-head-div-2">
@@ -331,6 +373,22 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
         ) : songs.length === 0 ? (
           <div id="deck-empty">
             <p>No songs in this deck yet</p>
+          </div>
+        ) : deck.isVirtual ? (
+          /* Simple table for virtual decks (no drag-and-drop) */
+          <div id="deck-songs-table-container">
+            <table id="deck-songs-table">
+              <tbody>
+                {songs.map((song) => (
+                  <SimpleRow
+                    key={song.songId}
+                    song={song}
+                    onPractice={onPractice}
+                    onSelectSong={() => onSelectSong(song, songs)}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <DndContext
@@ -358,6 +416,12 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
               </table>
             </div>
           </DndContext>
+        )}
+
+        {songs.length > 0 && (
+          <button id="deck-practice-button" onClick={handleRandomPractice}>
+            practice
+          </button>
         )}
 
         <AnimatePresence>
