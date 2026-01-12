@@ -60,7 +60,7 @@ function Deck() {
     async function loadMasteredDeck() {
       try {
         const masteredSongs = await getMasteredSongs();
-        const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration || 0), 0);
+        const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration ? Number(song.songDuration) : 0), 0);
 
         setMasteredDeck({
           deckId: 'mastered',
