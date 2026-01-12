@@ -12,7 +12,7 @@ const STREAK_BONUS_VALUES = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.30, 0.30];
 // Decay System Configuration
 const DECAY_GRACE_PERIOD_DAYS = 7;
 const MASTERED_DECAY_GRACE_PERIOD_DAYS = 90;
-const DECAY_RATE_PER_DAY = 0.02;
+const DECAY_RATE_PER_DAY = 0.0075;  // 0.75% per day - balanced for realistic skill retention
 
 // Level Thresholds
 const MAX_LEVEL_BEFORE_REFINED = 10;
@@ -143,9 +143,9 @@ export function applyDecay(songInfo) {
 
   const decayDays = daysSinceSongPracticed - DECAY_GRACE_PERIOD_DAYS;
 
-  // Difficulty modifier: harder songs decay faster
-  // easy: 1.0x, normal: 1.15x, hard: 1.3x decay rate
-  const difficultyDecayModifier = 1 + (0.15 * (DIFFICULTY_MULTIPLIERS[songInfo.difficulty] - 1));
+  // Difficulty modifier: harder songs decay slightly faster
+  // easy: 1.0x, normal: 1.1x, hard: 1.2x decay rate
+  const difficultyDecayModifier = 1 + (0.10 * (DIFFICULTY_MULTIPLIERS[songInfo.difficulty] - 1));
 
   // Apply decay: base decay rate is multiplied by difficulty modifier
   const effectiveDecayRate = DECAY_RATE_PER_DAY * difficultyDecayModifier;
