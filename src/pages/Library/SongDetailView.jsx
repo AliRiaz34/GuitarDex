@@ -251,19 +251,6 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
           <div id="song-head-div-1">
             <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
             <div id="song-icons-container" ref={addToDeckMenuRef}>
-              <AnimatePresence>
-                {song.status !== 'mastered' && song.level != null && (
-                  <motion.img
-                    id="song-upgrade-icon"
-                    onClick={onUpgrade}
-                    src='./images/upgrade.png'
-                    alt="Upgrade"
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-              </AnimatePresence>
               <img
                 id="song-addToDeck-icon"
                  onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
@@ -317,6 +304,9 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
                       transition={{ duration: 0.2 }}
                     >
                       <p className="song-menu-option" onClick={handleEditClick}>edit</p>
+                      {song.status !== 'mastered' && song.level != null && (
+                        <p className="song-menu-option" onClick={() => { setMenuOpen(false); onUpgrade(); }}>level up</p>
+                      )}
                       <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
                     </motion.div>
                   )}
