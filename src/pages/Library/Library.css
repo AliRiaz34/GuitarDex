@@ -486,14 +486,16 @@
 #library-practice-button {
     display: block;
     margin: -20px auto 0;
-    padding: 10px 30px;
+    padding: 6px 20px;
     font-family: 'Pokemon-Classic';
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: rgb(240, 172, 45);
-    background-color: transparent;
+    background-color: #0e0e13;
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
+    position: relative;
+    z-index: 10;
 }
 
 #library-practice-button:active {
