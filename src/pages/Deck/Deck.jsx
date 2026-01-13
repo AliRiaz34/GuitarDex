@@ -463,6 +463,10 @@ function Deck() {
         song={practiceView.song}
         onSubmit={handlePracticeSubmit}
         onBack={handlePracticeBack}
+        onGoToSong={() => {
+          setPracticeView(null);
+          setSelectedSong(practiceView.song);
+        }}
       />
     );
   }
