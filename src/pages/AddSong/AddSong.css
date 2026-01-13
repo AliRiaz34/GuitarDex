@@ -116,21 +116,19 @@ button.selected {
 #song-add-save {
     margin: 60px auto 250px;
     display: block;
+    padding: 6px 20px;
     width: 100%;
     max-width: 200px;
     text-align: center;
-    font-size: 1em;
-    font-weight: 600;
-    padding: 8px 16px;
-    background: transparent;
-    border: 2px solid rgba(240, 172, 45, 0.6);
-    color: rgba(240, 172, 45, 0.9);
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-#song-add-save:hover {
-    background: rgba(240, 172, 45, 0.1);
-    border-color: rgba(240, 172, 45, 0.9);
+#song-add-save:active {
+    background-color: rgba(240, 172, 45, 0.2);
 }

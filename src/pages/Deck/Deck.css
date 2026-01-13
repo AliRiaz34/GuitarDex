@@ -96,6 +96,13 @@
     mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 30px), transparent 100%);
 }
 
+#deck-list-divider {
+    width: 90%;
+    margin: auto;
+    border-bottom: 2px solid rgba(145, 143, 143, 0.301);
+    margin-bottom: 10px;
+}
+
 #deck-table {
     padding: 15px;
     padding-top: 0px;
@@ -183,6 +190,9 @@
     display: block;
     margin: -20px auto 0;
     padding: 6px 20px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
     font-family: 'Pokemon-Classic';
     font-size: 0.8em;
     color: rgb(240, 172, 45);
@@ -314,10 +324,13 @@
 
 #deck-practice-button {
     display: block;
-    margin: -20px auto 0;
-    padding: 10px 30px;
+    margin: 10px auto 0;
+    padding: 6px 20px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
     font-family: 'Pokemon-Classic';
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: rgb(240, 172, 45);
     background-color: transparent;
     border: 2px solid rgba(240, 172, 45, 0.7);

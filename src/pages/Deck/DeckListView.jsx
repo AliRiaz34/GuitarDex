@@ -48,6 +48,7 @@ function DeckListView({
         </>
       )}
 
+      {hasAnyDecks && <div id="deck-list-divider" />}
       <div id="deck-table-container">
         {decks.length > 0 && (
           <table id="deck-table">

@@ -104,8 +104,9 @@
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 60px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 60px), transparent 100%);
+    padding-bottom: 40px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 30px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 30px), transparent 100%);
 }
 
 #library-table {
@@ -438,23 +439,21 @@
     margin: auto;
     margin-top: 30vw;
     display: block;
+    padding: 6px 20px;
     width: 100%;
     max-width: 200px;
     text-align: center;
-    font-size: 1em;
-    font-weight: 600;
-    padding: 8px 16px;
-    background: transparent;
-    border: 2px solid rgba(240, 172, 45, 0.6);
-    color: rgba(240, 172, 45, 0.9);
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-#practice-button:hover {
-    background: rgba(240, 172, 45, 0.1);
-    border-color: rgba(240, 172, 45, 0.9);
+#practice-button:active {
+    background-color: rgba(240, 172, 45, 0.2);
 }
 
 #practice-button-link {
@@ -463,39 +462,38 @@
 
 .form__button {
     display: block;
+    margin: 30px auto;
+    padding: 6px 20px;
     width: 100%;
     max-width: 200px;
-    margin: 30px auto;
     text-align: center;
-    font-size: 0.9em;
-    font-weight: 600;
-    padding: 8px 16px;
-    background: transparent;
-    border: 2px solid rgba(240, 172, 45, 0.6);
-    color: rgba(240, 172, 45, 0.9);
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.form__button:hover {
-    background: rgba(240, 172, 45, 0.1);
-    border-color: rgba(240, 172, 45, 0.9);
+.form__button:active {
+    background-color: rgba(240, 172, 45, 0.2);
 }
 
 #library-practice-button {
     display: block;
-    margin: -20px auto 0;
+    margin: 10px auto 0;
     padding: 6px 20px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
     font-family: 'Pokemon-Classic';
     font-size: 0.8em;
     color: rgb(240, 172, 45);
-    background-color: #0e0e13;
+    background-color: transparent;
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
-    position: relative;
-    z-index: 10;
 }
 
 #library-practice-button:active {
