@@ -481,11 +481,13 @@
 }
 
 #library-practice-button {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 10px auto 0;
     padding: 6px 20px;
     width: 100%;
-    max-width: 200px;
+    max-width: 150px;
     text-align: center;
     font-family: 'Pokemon-Classic';
     font-size: 0.8em;
@@ -494,6 +496,7 @@
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 #library-practice-button:active {

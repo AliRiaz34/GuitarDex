@@ -420,7 +420,7 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
 
         {songs.length > 0 && (
           <button id="deck-practice-button" onClick={handleRandomPractice}>
-            practice
+            random
           </button>
         )}
 

@@ -155,7 +155,7 @@ function LibraryListView({
 
       {hasAnySongs && songs.length > 0 && (
         <button id="library-practice-button" onClick={onRandomSelect}>
-          practice
+          random
         </button>
       )}
     </motion.div>
