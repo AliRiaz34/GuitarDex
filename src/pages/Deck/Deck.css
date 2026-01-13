@@ -1,6 +1,6 @@
 #deck-list-view {
     max-width: 100vw;
-    height: 85vh;
+    height: 83vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
