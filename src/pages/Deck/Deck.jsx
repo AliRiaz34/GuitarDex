@@ -234,8 +234,8 @@ function Deck() {
       updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
       updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
 
-      // Update deck level and duration if we're viewing from a deck
-      if (selectedDeck) {
+      // Update deck level and duration if we're viewing from a real deck (not virtual)
+      if (selectedDeck && !selectedDeck.isVirtual) {
         await updateDeckLevel(selectedDeck.deckId);
         const refreshedDeck = await getDeckById(selectedDeck.deckId);
         setSelectedDeck(refreshedDeck);
@@ -412,8 +412,8 @@ function Deck() {
         updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
       }
 
-      // Update deck level and duration if we're viewing from a deck
-      if (selectedDeck) {
+      // Update deck level and duration if we're viewing from a real deck (not virtual)
+      if (selectedDeck && !selectedDeck.isVirtual) {
         await updateDeckLevel(selectedDeck.deckId);
         const refreshedDeck = await getDeckById(selectedDeck.deckId);
         setSelectedDeck(refreshedDeck);
