@@ -60,6 +60,12 @@ function Deck() {
     async function loadMasteredDeck() {
       try {
         const masteredSongs = await getMasteredSongs();
+        // Sort by most recent (lastPracticed or creationDate)
+        masteredSongs.sort((a, b) => {
+          const dateA = new Date(a.lastPracticed || a.creationDate || 0);
+          const dateB = new Date(b.lastPracticed || b.creationDate || 0);
+          return dateB - dateA;
+        });
         const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration ? Number(song.songDuration) : 0), 0);
 
         setMasteredDeck({
@@ -382,8 +388,8 @@ function Deck() {
   };
 
   const handleSongBack = async () => {
-    // Refresh deck data before going back to deck view
-    if (selectedDeck) {
+    // Refresh deck data before going back to deck view (skip for virtual decks)
+    if (selectedDeck && !selectedDeck.isVirtual) {
       await updateDeckLevel(selectedDeck.deckId);
       const refreshedDeck = await getDeckById(selectedDeck.deckId);
       setSelectedDeck(refreshedDeck);
