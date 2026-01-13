@@ -483,12 +483,21 @@
     border-color: rgba(240, 172, 45, 0.9);
 }
 
-#random-button {
-    margin-left: auto;
-    text-align: right;
+#library-practice-button {
+    display: block;
+    margin: -20px auto 0;
+    padding: 10px 30px;
+    font-family: 'Pokemon-Classic';
     font-size: 0.9em;
-    width: fit-content;
-    color: white;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#library-practice-button:active {
+    background-color: rgba(240, 172, 45, 0.2);
 }
 
 .practice-input-arrow {

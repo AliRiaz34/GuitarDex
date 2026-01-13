@@ -117,7 +117,7 @@ function AddSong() {
       <form id="song-form" onSubmit={handleSubmit}>
         <div id="add-input-div">
           <div id="title-input-div">
-            <label htmlFor="title-input" className="form-label">the song's name</label>
+            <label htmlFor="title-input" className="form-label">song name</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -136,7 +136,7 @@ function AddSong() {
             </div>
           </div>
           <div id="artistName-input-div">
-            <label htmlFor="artistName-input" className="form-label">the artist</label>
+            <label htmlFor="artistName-input" className="form-label">artist</label>
             <div className="input-group">
               <p className="input-arrow">{'> '}</p>
               <input
@@ -154,7 +154,7 @@ function AddSong() {
               />
             </div>
           </div>
-          <label id="buttons-menu-1-label" className="form-label">select difficulty</label>
+          <label id="buttons-menu-1-label" className="form-label">difficulty</label>
           <div id="buttons-menu-1">
               <button
                 type="button"
@@ -181,7 +181,7 @@ function AddSong() {
                 Hard
               </button>
           </div>
-          <label id="buttons-menu-1-label" className="form-label">select current status</label>
+          <label id="buttons-menu-1-label" className="form-label">current status</label>
           <div id="buttons-menu-2">
             <button
               type="button"

@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import './Deck.css';
 
@@ -7,11 +7,6 @@ function DeckListView({
   allDecks,
   searchQuery,
   setSearchQuery,
-  sortState,
-  sortReversed,
-  sortMenuOpen,
-  setSortMenuOpen,
-  onSortSelect,
   onSelectDeck,
   onCreateDeck,
 }) {
@@ -54,45 +49,6 @@ function DeckListView({
       )}
 
       <div id="deck-table-container">
-        {hasAnyDecks && (
-          <div id="sort-menu">
-            <div id="sort-icon" onClick={() => setSortMenuOpen(!sortMenuOpen)}>
-              <p className="sort-p">↓↑</p>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {sortMenuOpen ? (
-                <motion.div
-                  id="sort-menu-text-div"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                >
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('recent')}>recent</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('level')}>level</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('duration')}>duration</p>
-                </motion.div>
-              ) : (
-                <motion.p
-                  className="sort-p-state"
-                  onClick={() => onSortSelect(sortState)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                >
-                  {sortState} {sortReversed ? '↑' : '↓'}
-                </motion.p>
-              )}
-            </AnimatePresence>
-            <div id="create-deck-button" onClick={() => onCreateDeck(searchQuery)}>
-              +
-            </div>
-
-          </div>
-        )}
-
         {decks.length > 0 && (
           <table id="deck-table">
             <tbody>
@@ -119,6 +75,12 @@ function DeckListView({
         >
           {allDecks.length === 0 ? "make a deck dummy" : "just make it"}
         </div>
+      )}
+
+      {hasAnyDecks && decks.length > 0 && (
+        <button id="deck-new-button" onClick={() => onCreateDeck(searchQuery)}>
+          new deck
+        </button>
       )}
     </motion.div>
   );

@@ -548,11 +548,6 @@ function Deck() {
       allDecks={allDecksWithMastered}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      sortState={sortState}
-      sortReversed={sortReversed}
-      sortMenuOpen={sortMenuOpen}
-      setSortMenuOpen={setSortMenuOpen}
-      onSortSelect={handleSortSelect}
       onSelectDeck={(deck) => {
         setEntryDirection(null);
         setSelectedDeck(deck);

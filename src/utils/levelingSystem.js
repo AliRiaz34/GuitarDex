@@ -47,7 +47,7 @@ export function xpThreshold(level) {
 }
 
 // Calculate the current streak for XP bonus calculation
-function calculateCurrentStreak(songInfo) {
+export function calculateCurrentStreak(songInfo) {
   const today = new Date().toISOString().split('T')[0];
   const daysSinceSongPracticed = daysBetween(today, songInfo.lastPracticeDate);
   const currentStreak = songInfo.practiceStreak || 0;
@@ -62,6 +62,17 @@ function calculateCurrentStreak(songInfo) {
   }
   // Gap of 2+ days, streak resets
   return 0;
+}
+
+// Get the streak multiplier for display (returns multiplier like 1.0, 1.05, 1.10, etc.)
+export function getStreakMultiplier(songInfo) {
+  if (!songInfo || !songInfo.lastPracticeDate) {
+    return 1.0;
+  }
+  const streakCount = calculateCurrentStreak(songInfo);
+  const streakIndex = Math.min(streakCount, STREAK_BONUS_VALUES.length - 1);
+  const streakBonus = STREAK_BONUS_VALUES[streakIndex];
+  return 1 + streakBonus;
 }
 
 // Calculate XP gain from a practice session

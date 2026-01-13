@@ -105,8 +105,6 @@ function LibraryListView({
                 >
                   <p className="sort-menu-p-state" onClick={() => onSortSelect('recent')}>recent</p>
                   <p className="sort-menu-p-state" onClick={() => onSortSelect('level')}>level</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('status')}>status</p>
-                  <p className="sort-menu-p-state" onClick={() => onSortSelect('difficulty')}>difficulty</p>
                 </motion.div>
               ) : (
                 <motion.p
@@ -121,11 +119,6 @@ function LibraryListView({
                 </motion.p>
               )}
             </AnimatePresence>
-            {!sortMenuOpen && (
-              <div id="random-button" onClick={onRandomSelect}>
-                practice
-              </div>
-            )}
           </div>
         )}
 
@@ -160,6 +153,11 @@ function LibraryListView({
         )}
       </div>
 
+      {hasAnySongs && songs.length > 0 && (
+        <button id="library-practice-button" onClick={onRandomSelect}>
+          practice
+        </button>
+      )}
     </motion.div>
   );
 }
