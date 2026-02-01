@@ -1192,6 +1192,10 @@
     flex-shrink: 0;
 }
 
+#practice-form .song-lyrics-display {
+    margin-top: 50px;
+}
+
 #practice-form .lyrics-placeholder {
     justify-content: center;
 }
