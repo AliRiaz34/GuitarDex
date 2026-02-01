@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { deleteSong, updateSong } from '../../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck, onUpgrade, onLyricsUpdate }) {
+function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirection, decks, onToggleDeck, onUpgrade, onLyricsUpdate }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
@@ -15,10 +15,8 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   const [fetchedLyrics, setFetchedLyrics] = useState('');
   const [lyricsError, setLyricsError] = useState('');
   const [touchStartX, setTouchStartX] = useState(null);
-  const [touchStartY, setTouchStartY] = useState(null);
   const [touchEndX, setTouchEndX] = useState(null);
-  const [touchEndY, setTouchEndY] = useState(null);
-  const [exitDirection, setExitDirection] = useState(null); // 'up', 'down', 'right'
+  const [exitDirection, setExitDirection] = useState(null); // 'right'
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const menuRef = useRef(null);
   const menuDropdownRef = useRef(null);
@@ -135,19 +133,13 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   const minSwipeDistance = 50;
 
-  const touchInLyrics = useRef(false);
-
   const onTouchStart = (e) => {
     setTouchEndX(null);
-    setTouchEndY(null);
     setTouchStartX(e.targetTouches[0].clientX);
-    setTouchStartY(e.targetTouches[0].clientY);
-    touchInLyrics.current = !!e.target.closest('.song-lyrics-display');
   };
 
   const onTouchMove = (e) => {
     setTouchEndX(e.targetTouches[0].clientX);
-    setTouchEndY(e.targetTouches[0].clientY);
   };
 
   const handleBack = () => {
@@ -156,29 +148,12 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
   };
 
   const onTouchEnd = () => {
-    if (!touchStartX || !touchStartY || !touchEndX || !touchEndY) return;
+    if (!touchStartX || !touchEndX) return;
 
     const distanceX = touchStartX - touchEndX;
-    const distanceY = touchStartY - touchEndY;
-
-    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
-
-    if (isHorizontalSwipe) {
-      const isRightSwipe = distanceX < -minSwipeDistance;
-      if (isRightSwipe) {
-        handleBack();
-      }
-    } else if (!touchInLyrics.current) {
-      const isUpSwipe = distanceY > minSwipeDistance;
-      const isDownSwipe = distanceY < -minSwipeDistance;
-
-      if (isUpSwipe && hasNext && onNavigate) {
-        setExitDirection('up');
-        onNavigate(1);
-      } else if (isDownSwipe && hasPrevious && onNavigate) {
-        setExitDirection('down');
-        onNavigate(-1);
-      }
+    const isRightSwipe = distanceX < -minSwipeDistance;
+    if (isRightSwipe) {
+      handleBack();
     }
   };
 
