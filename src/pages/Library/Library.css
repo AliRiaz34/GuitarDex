@@ -706,6 +706,8 @@
     overflow-y: auto;
     padding: 8px;
     margin-bottom: 10px;
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
 }
 
 .lyrics-suggest-text {
@@ -722,6 +724,7 @@
     display: flex;
     justify-content: space-around;
     gap: 15px;
+    margin: 10px 8px;
 }
 
 .lyrics-suggest-btn {
