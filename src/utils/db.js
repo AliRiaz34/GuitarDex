@@ -1,6 +1,6 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 5; // Incremented for leveling system rebalance
+const DB_VERSION = 6; // Incremented for lyrics field
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
 const DECKS_STORE = 'decks';
@@ -172,6 +172,23 @@ export function initDB() {
             }
 
             cursor.update(song);
+            cursor.continue();
+          }
+        };
+      }
+
+      // Migration for version 6: Add lyrics to existing songs
+      if (oldVersion < 6 && db.objectStoreNames.contains(SONGS_STORE)) {
+        const songsStore = transaction.objectStore(SONGS_STORE);
+
+        songsStore.openCursor().onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            const song = cursor.value;
+            if (song.lyrics === undefined) {
+              song.lyrics = '';
+              cursor.update(song);
+            }
             cursor.continue();
           }
         };

@@ -208,9 +208,23 @@
 
 /* Song view */
 #song-view {
-    padding: 15px;
-    min-height: 80vh;
+    height: 83vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     cursor: auto !important;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    background-color: #0e0e13;
+}
+
+.song-view-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px 15px 80px;
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
 }
 
 #song-head-div-1 {
@@ -233,7 +247,7 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 500;
+    z-index: 1100;
 }
 
 #song-addToDeck-icon {
@@ -261,14 +275,12 @@
 }
 
 #song-menu-dropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
+    position: fixed;
     background-color: #0e0e13;
     border: 2px solid rgba(255, 255, 255, 0.2);
     padding: 5px 0;
     min-width: 120px;
-    z-index: 1000;
+    z-index: 1200;
 }
 
 #addToDeck-menu-dropdown {
@@ -282,7 +294,7 @@
     width: 75%;
     max-height: 360px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 1200;
     border-radius: 8px;
 }
 
@@ -436,9 +448,10 @@
 }
 
 #practice-button {
-    margin: auto;
-    margin-top: 30vw;
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto 0;
     padding: 6px 20px;
     width: 100%;
     max-width: 200px;
@@ -450,6 +463,7 @@
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 #practice-button:active {
@@ -544,7 +558,7 @@
 
 /* Song Stats Grid */
 .song-stats-grid {
-    margin-top: 50px;
+    margin-top: 35px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 40px;
@@ -589,6 +603,138 @@
 .tuning-note-detail sup {
     vertical-align: top;
     line-height: 1;
+}
+
+.song-lyrics-display {
+    margin: 30px 0 0;
+    padding: 5px 10px 5px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    background-color: rgba(14, 14, 19, 0.5);
+}
+
+.lyrics-text {
+    font-size: 0.8em;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: center;
+    margin: 0;
+}
+
+.lyrics-truncated {
+    max-height: 20em;
+    overflow-y: auto;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6px, black calc(100% - 6px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 6px, black calc(100% - 6px), transparent 100%);
+}
+
+.lyrics-show-more {
+    display: block;
+    margin: 2px 0 0 0;
+    text-align: center;
+    padding-bottom: 3px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 172, 45, 0.8);
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.lyrics-placeholder {
+    font-size: 0.85em;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lyrics-add-icon {
+    font-style: normal;
+    font-size: 1.2em;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 8px 12px;
+    margin: -8px -12px -8px 0;
+}
+
+#lyrics-suggest-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 5vh;
+    z-index: 1200;
+}
+
+#lyrics-suggest-widget {
+    background-color: #0e0e13;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 5px;
+    max-width: 320px;
+    width: 85%;
+    text-align: center;
+    position: relative;
+}
+
+.lyrics-suggest-close {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 1.2em;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+}
+
+#lyrics-suggest-status {
+    margin: 10px 0;
+    font-size: 0.9em;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#lyrics-suggest-preview {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.lyrics-suggest-text {
+    font-size: 0.75em;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: center;
+    margin: 0;
+}
+
+#lyrics-suggest-buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.lyrics-suggest-btn {
+    flex: 1;
+    padding: 5px;
+    font-size: 0.8em;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: transparent;
+    color: white;
+    font-style: italic;
+    text-transform: lowercase;
+    text-align: center;
 }
 
 .song-capo-display {
@@ -692,7 +838,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1200;
 }
 
 #delete-confirm-widget {
@@ -733,9 +879,24 @@
 /* edit page */
 #edit-song-form {
     width: 100%;
-    margin: auto;
+    height: 83vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.edit-form-content {
+    flex: 1;
+    overflow-y: auto;
     overflow-x: hidden;
-    margin-bottom: 150px;
+    padding-bottom: 80px;
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
+#edit-song-form > .form__button {
+    margin: 10px auto 0;
+    flex-shrink: 0;
 }
 
 #edit-back-icon {
@@ -750,6 +911,40 @@
 
 #capo-div {
     margin-top: 30px;
+}
+
+#lyrics-div {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.lyrics-textarea {
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
+    padding: 10px;
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    line-height: 1.8;
+    color: white;
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.4);
+    border-radius: 4px;
+    outline: none;
+    resize: vertical;
+}
+
+.lyrics-textarea::placeholder {
+    color: rgb(145, 143, 143);
+    font-style: italic;
+}
+
+.lyrics-textarea:focus::placeholder {
+    color: transparent;
+}
+
+.lyrics-textarea:focus {
+    border-color: rgba(240, 172, 45, 0.822);
 }
 
 /* practice add */
@@ -971,9 +1166,31 @@
     color: rgba(240, 172, 45, 0.7);
 }
 
-#practice-view .form__button {
-    margin-top: 100px;
-    margin-bottom: 100px;
+#practice-form {
+    width: 100%;
+    height: 83vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.practice-form-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px;
+    padding-bottom: 80px;
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
+#practice-form > .form__button {
+    margin: 10px auto 0;
+    flex-shrink: 0;
+}
+
+#practice-form .lyrics-placeholder {
+    justify-content: center;
 }
 
 input::-webkit-outer-spin-button,

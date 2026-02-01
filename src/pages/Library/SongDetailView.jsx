@@ -1,20 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteSong } from '../../utils/db';
+import { deleteSong, updateSong } from '../../utils/db';
 import './Library.css';
 
-function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck, onUpgrade }) {
+function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate, hasPrevious, hasNext, entryDirection, decks, onToggleDeck, onUpgrade, onLyricsUpdate }) {
   const [showHours, setShowHours] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [lyricsExpanded, setLyricsExpanded] = useState(false);
+  const [showLyricsSuggest, setShowLyricsSuggest] = useState(false);
+  const [lyricsFetchState, setLyricsFetchState] = useState('idle');
+  const [fetchedLyrics, setFetchedLyrics] = useState('');
+  const [lyricsError, setLyricsError] = useState('');
   const [touchStartX, setTouchStartX] = useState(null);
   const [touchStartY, setTouchStartY] = useState(null);
   const [touchEndX, setTouchEndX] = useState(null);
   const [touchEndY, setTouchEndY] = useState(null);
   const [exitDirection, setExitDirection] = useState(null); // 'up', 'down', 'right'
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const menuRef = useRef(null);
+  const menuDropdownRef = useRef(null);
   const addToDeckMenuRef = useRef(null);
+  const deckDropdownRef = useRef(null);
 
 
   const previousXp = song._previousXp ?? song.xp;
@@ -103,10 +112,12 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (menuRef.current && !menuRef.current.contains(event.target) &&
+          (!menuDropdownRef.current || !menuDropdownRef.current.contains(event.target))) {
         setMenuOpen(false);
       }
-      if (addToDeckMenuRef.current && !addToDeckMenuRef.current.contains(event.target)) {
+      if (addToDeckMenuRef.current && !addToDeckMenuRef.current.contains(event.target) &&
+          (!deckDropdownRef.current || !deckDropdownRef.current.contains(event.target))) {
         setAddToDeckMenuOpen(false);
       }
     };
@@ -124,11 +135,14 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   const minSwipeDistance = 50;
 
+  const touchInLyrics = useRef(false);
+
   const onTouchStart = (e) => {
     setTouchEndX(null);
     setTouchEndY(null);
     setTouchStartX(e.targetTouches[0].clientX);
     setTouchStartY(e.targetTouches[0].clientY);
+    touchInLyrics.current = !!e.target.closest('.song-lyrics-display');
   };
 
   const onTouchMove = (e) => {
@@ -154,16 +168,16 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
       if (isRightSwipe) {
         handleBack();
       }
-    } else {
+    } else if (!touchInLyrics.current) {
       const isUpSwipe = distanceY > minSwipeDistance;
       const isDownSwipe = distanceY < -minSwipeDistance;
 
       if (isUpSwipe && hasNext && onNavigate) {
         setExitDirection('up');
-        onNavigate(1); 
+        onNavigate(1);
       } else if (isDownSwipe && hasPrevious && onNavigate) {
         setExitDirection('down');
-        onNavigate(-1); 
+        onNavigate(-1);
       }
     }
   };
@@ -192,11 +206,75 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
     setShowDeleteConfirm(false);
   };
 
+  const handleMenuToggle = () => {
+    if (!menuOpen && menuRef.current) {
+      const rect = menuRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom,
+        right: window.innerWidth - rect.right
+      });
+    }
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleLyricsFetch = async () => {
+    setShowLyricsSuggest(true);
+    setLyricsFetchState('loading');
+    setFetchedLyrics('');
+    setLyricsError('');
+
+    try {
+      const params = new URLSearchParams({
+        artist_name: song.artistName,
+        track_name: song.title
+      });
+      const response = await fetch(`https://lrclib.net/api/search?${params}`);
+
+      if (!response.ok) {
+        throw new Error('Network error');
+      }
+
+      const results = await response.json();
+
+      if (!results || results.length === 0 || !results[0].plainLyrics) {
+        setLyricsFetchState('error');
+        setLyricsError('no lyrics found');
+        setTimeout(() => handleLyricsDismiss(), 3000);
+        return;
+      }
+
+      setFetchedLyrics(results[0].plainLyrics);
+      setLyricsFetchState('success');
+    } catch (error) {
+      setLyricsFetchState('error');
+      setLyricsError('could not fetch lyrics');
+      setTimeout(() => handleLyricsDismiss(), 2000);
+    }
+  };
+
+  const handleLyricsSave = async () => {
+    try {
+      await updateSong(song.songId, { lyrics: fetchedLyrics });
+      setShowLyricsSuggest(false);
+      setLyricsFetchState('idle');
+      onLyricsUpdate(song.songId, fetchedLyrics);
+    } catch (error) {
+      alert('Error saving lyrics');
+    }
+  };
+
+  const handleLyricsDismiss = () => {
+    setShowLyricsSuggest(false);
+    setLyricsFetchState('idle');
+    setFetchedLyrics('');
+    setLyricsError('');
+  };
+
   const getExitAnimation = () => {
     if (exitDirection === 'up') {
       return { opacity: 0, y: '-100%' };
     } else if (exitDirection === 'down') {
-      return { opacity: 0, y: '100%' }; 
+      return { opacity: 0, y: '100%' };
     } else if (exitDirection === 'right') {
       return { opacity: 0, x: '100%' };
     }
@@ -205,235 +283,365 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, onNavigate
 
   const getInitialAnimation = () => {
     if (song._fromPractice) {
-      return { opacity: 0, x: -20 }; 
+      return { opacity: 0, x: -20 };
     }
     if (entryDirection === 'up') {
-      return { opacity: 0, y: '100%' }; 
+      return { opacity: 0, y: '100%' };
     } else if (entryDirection === 'down') {
-      return { opacity: 0, y: '-100%' }; 
+      return { opacity: 0, y: '-100%' };
     }
-    return { opacity: 0, y: 20 };
+    return { opacity: 0, x: -20 };
   };
 
-  return (
+  const dismissAll = () => {
+    setAddToDeckMenuOpen(false);
+    setMenuOpen(false);
+    if (showDeleteConfirm) {
+      setShowDeleteConfirm(false);
+    }
+    if (showLyricsSuggest) {
+      handleLyricsDismiss();
+    }
+    if (lyricsExpanded) {
+      setLyricsExpanded(false);
+    }
+  };
+
+  const overlayContent = (
     <>
       <AnimatePresence>
-        {(addToDeckMenuOpen || menuOpen || showDeleteConfirm) && (
+        {(addToDeckMenuOpen || menuOpen || showDeleteConfirm || showLyricsSuggest || lyricsExpanded) && (
           <motion.div
             className="menu-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={() => {
-              setAddToDeckMenuOpen(false);
-              setMenuOpen(false);
-              if (showDeleteConfirm) {
-                setShowDeleteConfirm(false);
-              }
-            }}
+            onClick={dismissAll}
           />
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {addToDeckMenuOpen && (
+          <motion.div
+            ref={deckDropdownRef}
+            id="addToDeck-menu-dropdown"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            {decks && decks.length > 0 ? (
+              decks.map(deck => (
+                <div
+                  key={deck.deckId}
+                  className="deck-menu-item"
+                  onClick={() => onToggleDeck(deck.deckId, song.songId, deck.containsSong)}
+                >
+                  <span className="deck-menu-title">{deck.title}</span>
+                  <img
+                    src={deck.containsSong ? './images/addedIcon.png' : './images/addToDeckIcon.png'}
+                    alt={deck.containsSong ? 'Remove' : 'Add'}
+                    className="deck-menu-icon"
+                  />
+                </div>
+              ))
+            ) : (
+              <p className="deck-menu-empty">No decks yet</p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            ref={menuDropdownRef}
+            id="song-menu-dropdown"
+            style={{
+              top: menuPosition.top,
+              right: menuPosition.right
+            }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <p className="song-menu-option" onClick={handleEditClick}>edit</p>
+            {song.status !== 'mastered' && song.level != null && (
+              <p className="song-menu-option" onClick={() => { setMenuOpen(false); onUpgrade(); }}>level up</p>
+            )}
+            <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div id="delete-confirm-overlay">
+            <motion.div
+              id="delete-confirm-widget"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p id="delete-confirm-text">Delete {song.title}?</p>
+              <div id="delete-confirm-buttons">
+                <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
+                  cancel
+                </button>
+                <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
+                  confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLyricsSuggest && (
+          <div id="lyrics-suggest-overlay" onClick={handleLyricsDismiss}>
+            <motion.div
+              id="lyrics-suggest-widget"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AnimatePresence mode="wait">
+                {lyricsFetchState === 'loading' && (
+                  <motion.p
+                    key="loading"
+                    id="lyrics-suggest-status"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    searching<motion.span
+                      animate={{ opacity: [1, 0, 0, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.1, 0.2, 0.3] }}
+                    >.</motion.span><motion.span
+                      animate={{ opacity: [1, 0, 0, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.1, 0.4, 0.5] }}
+                    >.</motion.span><motion.span
+                      animate={{ opacity: [1, 0, 0, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.1, 0.6, 0.7] }}
+                    >.</motion.span>
+                  </motion.p>
+                )}
+
+                {lyricsFetchState === 'error' && (
+                  <motion.p
+                    key="error"
+                    id="lyrics-suggest-status"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {lyricsError}
+                  </motion.p>
+                )}
+
+                {lyricsFetchState === 'success' && (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <div id="lyrics-suggest-preview">
+                      <p className="lyrics-suggest-text">{fetchedLyrics}</p>
+                    </div>
+                    <div id="lyrics-suggest-buttons">
+                      <button className="lyrics-suggest-btn" onClick={handleLyricsDismiss}>
+                        reject
+                      </button>
+                      <button className="lyrics-suggest-btn confirm-btn" onClick={handleLyricsSave}>
+                        approve
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {lyricsExpanded && (
+          <div id="lyrics-suggest-overlay" onClick={() => setLyricsExpanded(false)}>
+            <motion.div
+              id="lyrics-suggest-widget"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div id="lyrics-suggest-preview">
+                <p className="lyrics-suggest-text">{song.lyrics}</p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+
+  return (
+    <>
       <motion.div
         key={song.songId}
         id="song-view"
         initial={getInitialAnimation()}
         animate={{ opacity: 1, x: 0, y: 0 }}
         exit={getExitAnimation()}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <div id="song-top-div">
-          <div id="song-head-div-1">
-            <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
-            <div id="song-icons-container" ref={addToDeckMenuRef}>
-              <img
-                id="song-addToDeck-icon"
-                 onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
-                src='./images/addToDeckIcon.png'
-                >
-              </img>
-              <AnimatePresence>
-                {addToDeckMenuOpen && (
-                  <motion.div
-                    id="addToDeck-menu-dropdown"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {decks && decks.length > 0 ? (
-                      decks.map(deck => (
-                        <div
-                          key={deck.deckId}
-                          className="deck-menu-item"
-                          onClick={() => onToggleDeck(deck.deckId, song.songId, deck.containsSong)}
-                        >
-                          <span className="deck-menu-title">{deck.title}</span>
-                          <img
-                            src={deck.containsSong ? './images/addedIcon.png' : './images/addToDeckIcon.png'}
-                            alt={deck.containsSong ? 'Remove' : 'Add'}
-                            className="deck-menu-icon"
-                          />
-                        </div>
-                      ))
-                    ) : (
-                      <p className="deck-menu-empty">No decks yet</p>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <div id="song-menu-container" ref={menuRef}>
+        <div className="song-view-content">
+          <div id="song-top-div">
+            <div id="song-head-div-1">
+              <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
+              <div id="song-icons-container" ref={addToDeckMenuRef}>
                 <img
-                  id="song-menu-icon"
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  src='./images/menu.png'
-                >
+                  id="song-addToDeck-icon"
+                   onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
+                  src='./images/addToDeckIcon.png'
+                  >
                 </img>
-                <AnimatePresence>
-                  {menuOpen && (
-                    <motion.div
-                      id="song-menu-dropdown"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
+                <div id="song-menu-container" ref={menuRef}>
+                  <img
+                    id="song-menu-icon"
+                    onClick={handleMenuToggle}
+                    src='./images/menu.png'
+                  >
+                  </img>
+                </div>
+              </div>
+            </div>
+            <h2 id="title">{song.title}</h2>
+            <div id="song-head-div-2">
+              <h3 id="artistName">{song.artistName}</h3>
+              {song.songDuration != null && (
+                <p id="duration">{song.songDuration} min</p>
+              )}
+            </div>
+            {song.level == null && (
+              <>
+                <p id="empty-info-p">learn the song to get stats</p>
+                <p id="empty-info-arrow">↓</p>
+              </>
+            )}
+          </div>
+
+          {song.level != null && (
+            <>
+              <div id="song-xp-div" style={{ position: 'relative' }}>
+                <p id="level">
+                  Lv {Math.floor(displayLevel)}
+                  {showLevelUp && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 1, 0, 1, 0, 1, 0] }}
+                      transition={{ duration: 2, times: [0, 0.14, 0.28, 0.42, 0.56, 0.70, 1] }}
                     >
-                      <p className="song-menu-option" onClick={handleEditClick}>edit</p>
-                      {song.status !== 'mastered' && song.level != null && (
-                        <p className="song-menu-option" onClick={() => { setMenuOpen(false); onUpgrade(); }}>level up</p>
-                      )}
-                      <p className="song-menu-option" onClick={handleDeleteClick}>delete</p>
+                      +
+                    </motion.span>
+                  )}
+                </p>
+                <div id="xp-container">
+                  <div
+                    id="xp-bar"
+                    style={{
+                      width: `${xpPercent}%`,
+                      transition: 'width 1s ease-out'
+                    }}
+                  ></div>
+                </div>
+                <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
+
+                <AnimatePresence>
+                  {xpGain && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 0 }}
+                      animate={{ opacity: 1, y: -30 }}
+                      exit={{ opacity: 0, y: -50 }}
+                      transition={{ duration: 0.5 }}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        color: '#ffffffff',
+                        pointerEvents: 'none',
+                        fontSize: '0.8em'
+                      }}
+                    >
+                      +{xpGain} XP
                     </motion.div>
                   )}
                 </AnimatePresence>
+
               </div>
-            </div>
-          </div>
-          <h2 id="title">{song.title}</h2>
-          <div id="song-head-div-2">
-            <h3 id="artistName">{song.artistName}</h3>
-            {song.songDuration != null && (
-              <p id="duration">{song.songDuration} min</p>
-            )}
-          </div>
-          {song.level == null && (
-            <>
-              <p id="empty-info-p">learn the song to get stats</p>
-              <p id="empty-info-arrow">↓</p>
+
+              <div className="song-stats-grid">
+                <div className="stat-item">
+                  <span className="stat-label"></span>
+                  <span className="stat-value">{song.status.toUpperCase()}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label"></span>
+                  <span className="stat-value">{song.difficulty.toUpperCase()}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">capo </span>
+                  <span className="stat-value">
+                    {song.capo || 0}
+                  </span>
+                </div>
+                <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
+                  <span className="stat-value">
+                    {showHours
+                      ? ((song.totalMinPlayed != null ? song.totalMinPlayed : 0) / 60).toFixed(1)
+                      : (song.totalMinPlayed != null ? song.totalMinPlayed : 0)}
+                  </span>
+                  <span className="stat-label"> {showHours ? 'hr' : 'min'}</span>
+                </div>
+              </div>
+
+              <div className="song-tuning-display">
+                {formatTuning(song.tuning)}
+              </div>
+
+              <div className={`song-lyrics-display ${song.lyrics && song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
+                {song.lyrics ? (
+                  <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
+                ) : (
+                  <p className="lyrics-placeholder">no lyrics yet <span className="lyrics-add-icon" onClick={handleLyricsFetch}>+</span></p>
+                )}
+                {song.lyrics && song.lyrics.split('\n').length > 6 && (
+                  <span className="lyrics-show-more" onClick={() => setLyricsExpanded(true)}>
+                    <span style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>^</span>
+                  </span>
+                )}
+              </div>
             </>
           )}
         </div>
-
-        {song.level != null && (
-          <>
-            <div id="song-xp-div" style={{ position: 'relative' }}>
-              <p id="level">
-                Lv {Math.floor(displayLevel)}
-                {showLevelUp && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0, 1, 0, 1, 0, 1, 0] }}
-                    transition={{ duration: 2, times: [0, 0.14, 0.28, 0.42, 0.56, 0.70, 1] }}
-                  >
-                    +
-                  </motion.span>
-                )}
-              </p>
-              <div id="xp-container">
-                <div
-                  id="xp-bar"
-                  style={{
-                    width: `${xpPercent}%`,
-                    transition: 'width 1s ease-out'
-                  }}
-                ></div>
-              </div>
-              <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
-
-              <AnimatePresence>
-                {xpGain && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 0 }}
-                    animate={{ opacity: 1, y: -30 }}
-                    exit={{ opacity: 0, y: -50 }}
-                    transition={{ duration: 0.5 }}
-                    style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '50%',
-                      color: '#ffffffff',
-                      pointerEvents: 'none',
-                      fontSize: '0.8em'
-                    }}
-                  >
-                    +{xpGain} XP
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-            </div>
-
-            <div className="song-stats-grid">
-              <div className="stat-item">
-                <span className="stat-label"></span>
-                <span className="stat-value">{song.status.toUpperCase()}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label"></span>
-                <span className="stat-value">{song.difficulty.toUpperCase()}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">capo </span>
-                <span className="stat-value">
-                  {song.capo || 0}
-                </span>
-              </div>
-              <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
-                <span className="stat-value">
-                  {showHours
-                    ? ((song.totalMinPlayed != null ? song.totalMinPlayed : 0) / 60).toFixed(1)
-                    : (song.totalMinPlayed != null ? song.totalMinPlayed : 0)}
-                </span>
-                <span className="stat-label"> {showHours ? 'hr' : 'min'}</span>
-              </div>
-            </div>
-
-            <div className="song-tuning-display">
-              {formatTuning(song.tuning)}
-            </div>
-          </>
-        )}
-
-        <AnimatePresence>
-          {showDeleteConfirm && (
-            <div id="delete-confirm-overlay">
-              <motion.div
-                id="delete-confirm-widget"
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{ duration: 0.2 }}
-              >
-                <p id="delete-confirm-text">Delete {song.title}?</p>
-                <div id="delete-confirm-buttons">
-                  <button className="delete-confirm-btn cancel-btn" onClick={handleDeleteCancel}>
-                    cancel
-                  </button>
-                  <button className="delete-confirm-btn confirm-btn" onClick={handleDeleteConfirm}>
-                    confirm
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
         <button id="practice-button" onClick={onPractice}>PRACTICE</button>
       </motion.div>
+
+      {createPortal(overlayContent, document.body)}
     </>
   );
 }

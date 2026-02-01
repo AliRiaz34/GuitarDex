@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTuner, calculateTargetFrequencies, getTuningStatus } from '../../utils/tunerUtils';
 import './Library.css';
 
@@ -10,6 +11,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   const [touchEnd, setTouchEnd] = useState(null);
   const [selectedMinButton, setSelectedMinButton] = useState(null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
+  const [lyricsExpanded, setLyricsExpanded] = useState(false);
 
   const minSwipeDistance = 50;
 
@@ -105,7 +107,6 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   return (
     <motion.div
       id="practice-view"
-      style={{ minHeight: '60vh', padding: '15px', paddingBottom: '200px' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: '100%' }}
@@ -115,14 +116,10 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
       onTouchEnd={onTouchEnd}
     >
       <form
+        id="practice-form"
         onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: song.songDuration === null ? 'space-between' : 'center',
-          minHeight: '60vh'
-        }}
       >
+        <div className="practice-form-content">
         <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
         <h1 id="song-practice-title" onClick={onGoToSong} style={{ cursor: 'pointer' }}>{song.title}</h1>
         <p className="practice-song-info">
@@ -311,10 +308,61 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             </div>
           </div>
         )}
+        {song.songDuration !== null && (
+          <div className={`song-lyrics-display ${song.lyrics && song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
+            {song.lyrics ? (
+              <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
+            ) : (
+              <p className="lyrics-placeholder">no lyrics yet</p>
+            )}
+            {song.lyrics && song.lyrics.split('\n').length > 6 && (
+              <span className="lyrics-show-more" onClick={() => setLyricsExpanded(true)}>
+                <span style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>^</span>
+              </span>
+            )}
+          </div>
+        )}
+        </div>
         <button type="submit" className="form__button">
           Save
         </button>
       </form>
+
+      {createPortal(
+        <>
+          <AnimatePresence>
+            {lyricsExpanded && (
+              <motion.div
+                className="menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setLyricsExpanded(false)}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {lyricsExpanded && (
+              <div id="lyrics-suggest-overlay" onClick={() => setLyricsExpanded(false)}>
+                <motion.div
+                  id="lyrics-suggest-widget"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div id="lyrics-suggest-preview">
+                    <p className="lyrics-suggest-text">{song.lyrics}</p>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </motion.div>
   );
 }

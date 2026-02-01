@@ -399,6 +399,13 @@ function Library() {
       }
     };
 
+    const handleLyricsUpdate = (songId, lyrics) => {
+      setSongs(prevSongs => prevSongs.map(s =>
+        s.songId === songId ? { ...s, lyrics } : s
+      ));
+      setSelectedSong(prev => prev && prev.songId === songId ? { ...prev, lyrics } : prev);
+    };
+
     return (
       <SongDetailView
         key={selectedSong.songId}
@@ -414,6 +421,7 @@ function Library() {
         decks={playlists}
         onToggleDeck={handleToggleDeck}
         onUpgrade={handleUpgrade}
+        onLyricsUpdate={handleLyricsUpdate}
       />
     );
   }

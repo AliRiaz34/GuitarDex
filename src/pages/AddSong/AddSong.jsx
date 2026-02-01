@@ -88,7 +88,8 @@ function AddSong() {
         lastDecayDate,
         addDate,
         tuning: ['E', 'A', 'D', 'G', 'B', 'E'], // Standard tuning
-        capo: 0
+        capo: 0,
+        lyrics: ''
       };
 
       await addSong(newSong);
@@ -115,6 +116,7 @@ function AddSong() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <form id="song-form" onSubmit={handleSubmit}>
+        <div className="add-form-content">
         <div id="add-input-div">
           <div id="title-input-div">
             <label htmlFor="title-input" className="form-label">song name</label>
@@ -218,6 +220,7 @@ function AddSong() {
               Mastered
             </button>
           </div>
+        </div>
         </div>
         <button id="song-add-save" type="submit" className="form__button" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : 'Save'}

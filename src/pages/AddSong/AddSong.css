@@ -12,9 +12,24 @@
 
 #song-form {
     width: 100%;
-    margin: auto;
+    height: 83vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.add-form-content {
+    flex: 1;
+    overflow-y: auto;
     overflow-x: hidden;
-    margin-bottom: 120px;
+    padding-bottom: 80px;
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
+#song-form > .form__button {
+    margin: 10px auto 0;
+    flex-shrink: 0;
 }
 
 #buttons-menu-1-label {
@@ -114,7 +129,6 @@ button.selected {
 }
 
 #song-add-save {
-    margin: 60px auto 250px;
     display: block;
     padding: 6px 20px;
     width: 100%;

@@ -10,6 +10,7 @@ function EditView({ song, onSubmit, onBack }) {
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
   const [tuning, setTuning] = useState(song?.tuning || ['E', 'A', 'D', 'G', 'B', 'E']);
   const [capo, setCapo] = useState(song?.capo || 0);
+  const [lyrics, setLyrics] = useState(song?.lyrics || '');
 
   const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -36,8 +37,8 @@ function EditView({ song, onSubmit, onBack }) {
 
   const handleTouchStart = (e) => {
     const target = e.target;
-    if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' ||
-        target.closest('button') || target.closest('input')) {
+    if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || target.tagName === 'TEXTAREA' ||
+        target.closest('button') || target.closest('input') || target.closest('textarea')) {
       isSwiping.current = false;
       return;
     }
@@ -82,7 +83,8 @@ function EditView({ song, onSubmit, onBack }) {
       difficulty,
       songDuration: songDuration ? parseInt(songDuration) : null,
       tuning,
-      capo
+      capo,
+      lyrics
     });
   }
 
@@ -104,6 +106,7 @@ function EditView({ song, onSubmit, onBack }) {
         id="edit-song-form"
         onSubmit={handleFormSubmit}
       >
+        <div className="edit-form-content">
         <p id="edit-back-icon" onClick={handleBack}>{'<'}</p>
         <div id="add-input-div">
           <div id="title-input-div">
@@ -143,6 +146,21 @@ function EditView({ song, onSubmit, onBack }) {
                 required
               />
             </div>
+          </div>
+          <div id="lyrics-div">
+            <label className="form-label">lyrics</label>
+            <textarea
+              className="lyrics-textarea"
+              id="lyrics-input"
+              value={lyrics}
+              onChange={(e) => setLyrics(e.target.value)}
+              placeholder="paste or type lyrics here..."
+              rows={12}
+              autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+            />
           </div>
           <div id="tuning-editor">
             <label className="form-label">tuning</label>
@@ -276,6 +294,7 @@ function EditView({ song, onSubmit, onBack }) {
               <label className="min-label">fret</label>
             </div>
           </div>
+        </div>
         </div>
         <button id="song-add-save" type="submit" className="form__button">
           Save
