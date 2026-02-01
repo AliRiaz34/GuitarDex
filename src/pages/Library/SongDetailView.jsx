@@ -132,10 +132,12 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
   }, [menuOpen, addToDeckMenuOpen]);
 
   const minSwipeDistance = 50;
+  const touchInLyrics = useRef(false);
 
   const onTouchStart = (e) => {
     setTouchEndX(null);
     setTouchStartX(e.targetTouches[0].clientX);
+    touchInLyrics.current = !!e.target.closest('.song-lyrics-display') || !!e.target.closest('#lyrics-suggest-preview');
   };
 
   const onTouchMove = (e) => {
@@ -148,7 +150,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
   };
 
   const onTouchEnd = () => {
-    if (!touchStartX || !touchEndX) return;
+    if (!touchStartX || !touchEndX || touchInLyrics.current) return;
 
     const distanceX = touchStartX - touchEndX;
     const isRightSwipe = distanceX < -minSwipeDistance;
