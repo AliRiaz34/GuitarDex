@@ -426,10 +426,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                 {lyricsFetchState === 'success' && (
                   <motion.div
                     key="success"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ height: { duration: 0.5, ease: 'easeOut' }, opacity: { duration: 0.4, delay: 0.15 } }}
+                    style={{ overflow: 'hidden' }}
                   >
                     <div id="lyrics-suggest-preview">
                       <p className="lyrics-suggest-text">{fetchedLyrics}</p>
