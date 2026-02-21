@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import './Deck.css';
 
+let hasAnimatedDecks = false;
+
 function DeckListView({
   decks,
   allDecks,
@@ -16,10 +18,10 @@ function DeckListView({
   return (
     <motion.div
       id="deck-list-view"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
+      initial={hasAnimatedDecks ? false : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
+      onAnimationComplete={() => { hasAnimatedDecks = true; }}
     >
       {hasAnyDecks && (
         <>
@@ -54,15 +56,25 @@ function DeckListView({
           {decks.length > 0 && (
             <table id="deck-table">
               <tbody>
-                {decks.map(deck => (
-                  <tr key={deck.deckId} className={`deck-tr ${deck.isVirtual ? 'deck-tr-virtual' : ''}`}>
+                {decks.map((deck, index) => (
+                  <motion.tr
+                    key={deck.deckId}
+                    className={`deck-tr ${deck.isVirtual ? 'deck-tr-virtual' : ''}`}
+                    initial={!hasAnimatedDecks && index < 10 ? { opacity: 0 } : false}
+                    animate={{ opacity: 1 }}
+                    transition={!hasAnimatedDecks && index < 10 ? {
+                      duration: 0.4,
+                      ease: 'easeOut',
+                      delay: index * 0.05,
+                    } : { duration: 0 }}
+                  >
                     <td className="deck-td" onClick={() => onSelectDeck(deck)}>
                       <div className={`deck-title ${deck.isVirtual ? 'deck-title-virtual' : ''}`}>{deck.title}</div>
                     </td>
                     <td className={`deck-td-lv ${deck.isVirtual ? 'deck-td-lv-virtual' : ''}`}>
                       {deck.level != null ? `Lv ${deck.level}` : '???'}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>

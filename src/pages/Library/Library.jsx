@@ -4,15 +4,15 @@ import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
 import EditView from './EditView';
-import { getAllSongs, getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/db';
-import { xpThreshold, applyDecay, updateSongWithPractice } from '../../utils/levelingSystem';
+import { getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/db';
+import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
+import { useData } from '../../contexts/DataContext';
 import './Library.css';
 
 function Library() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [songs, setSongs] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { songs, setSongs, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -22,48 +22,11 @@ function Library() {
   const [entryDirection, setEntryDirection] = useState(null); // Track animation direction
   const scrollPositionRef = useRef(0); // Store scroll position
 
+  const [returnFromSong, setReturnFromSong] = useState(false);
+
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
   const [editView, setEditView] = useState(null); // song to edit
-
-  useEffect(() => {
-    async function loadSongs() {
-      try {
-        setIsLoading(true);
-        const songsInfo = await getAllSongs();
-
-        const processedSongs = await Promise.all(
-          songsInfo.map(async (song) => {
-            const decayedSong = applyDecay(song);
-
-            if (
-              decayedSong.xp !== song.xp ||
-              decayedSong.level !== song.level ||
-              decayedSong.status !== song.status
-            ) {
-              await updateSong(decayedSong.songId, decayedSong);
-            }
-
-            if (decayedSong.status !== "seen") {
-              decayedSong.xpThreshold = xpThreshold(decayedSong.level);
-              decayedSong.totalMinPlayed = await getTotalMinutesPlayed(decayedSong.songId);
-              decayedSong.totalSessions = await getTotalPracticeSessions(decayedSong.songId);
-            }
-
-            return decayedSong;
-          })
-        );
-
-        setSongs(processedSongs);
-      } catch (error) {
-        console.error('Error loading songs:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadSongs();
-  }, []);
 
   useEffect(() => {
     async function loadDecks() {
@@ -95,7 +58,6 @@ function Library() {
   useEffect(() => {
     if (location.state?.newSong) {
       const newSong = location.state.newSong;
-      setSongs(prevSongs => [newSong, ...prevSongs]);
       setSelectedSong(newSong);
       setPracticeView(null);
       setEditView(null);
@@ -410,7 +372,7 @@ function Library() {
       <SongDetailView
         key={selectedSong.songId}
         song={selectedSong}
-        onBack={() => setSelectedSong(null)}
+        onBack={() => { setReturnFromSong(true); setSelectedSong(null); }}
         onPractice={() => openPracticeView(selectedSong, true)}
         onEdit={() => openEditView(selectedSong)}
         onDelete={handleSongDelete}
@@ -446,6 +408,8 @@ function Library() {
       onQuickPractice={openPracticeView}
       onRandomSelect={handleRandomSelect}
       scrollPositionRef={scrollPositionRef}
+      returnFromSong={returnFromSong}
+      onReturnAnimationDone={() => setReturnFromSong(false)}
     />
   );
 }

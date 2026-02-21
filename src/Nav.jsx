@@ -12,6 +12,9 @@ function Navbar() {
       <NavLink id='navlink-3' to="/deck" className={({isActive}) => isActive ? 'active' : ''}>
         DECK
       </NavLink>
+      <NavLink id='navlink-4' to="/social" className={({isActive}) => isActive ? 'active' : ''}>
+        SOCIAL
+      </NavLink>
     </nav>
   )
 }

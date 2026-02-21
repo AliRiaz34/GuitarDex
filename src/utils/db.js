@@ -1,12 +1,34 @@
 // IndexedDB wrapper for GuitarDex
 const DB_NAME = 'GuitarDexDB';
-const DB_VERSION = 6; // Incremented for lyrics field
+const DB_VERSION = 7; // Added updated_at + UUID support
 const SONGS_STORE = 'songs';
 const PRACTICES_STORE = 'practices';
 const DECKS_STORE = 'decks';
 const DECK_SONGS_STORE = 'deck_songs';
 
 let dbInstance = null;
+let syncCallback = null;
+
+// Register a callback that fires after every write operation
+// Used by the sync layer to queue changes for Supabase
+export function registerSyncCallback(cb) {
+  syncCallback = cb;
+}
+
+function notifySync(table, action, data) {
+  if (syncCallback) {
+    try {
+      syncCallback(table, action, data);
+    } catch (e) {
+      console.error('Sync callback error:', e);
+    }
+  }
+}
+
+// Generate a UUID for new records (replaces sequential IDs)
+export function generateId() {
+  return crypto.randomUUID();
+}
 
 // Initialize the database
 export function initDB() {
@@ -67,7 +89,6 @@ export function initDB() {
           const cursor = event.target.result;
           if (cursor) {
             const song = cursor.value;
-            // Add tuning if it doesn't exist
             if (!song.tuning) {
               song.tuning = standardTuning;
               cursor.update(song);
@@ -85,7 +106,6 @@ export function initDB() {
           const cursor = event.target.result;
           if (cursor) {
             const song = cursor.value;
-            // Add capo if it doesn't exist
             if (song.capo === undefined) {
               song.capo = 0;
               cursor.update(song);
@@ -96,23 +116,17 @@ export function initDB() {
       }
 
       // Migration for version 5: Leveling system rebalance
-      // - Change XP_SCALING_EXPONENT from 1.4 to 1.2
-      // - Change MAX_LEVEL_BEFORE_MASTERY from 25 to 20
-      // - Add practiceStreak field
       if (oldVersion < 5 && db.objectStoreNames.contains(SONGS_STORE)) {
         const songsStore = transaction.objectStore(SONGS_STORE);
 
-        // Old and new constants
         const OLD_EXPONENT = 1.4;
         const NEW_EXPONENT = 1.2;
         const XP_BASE = 50;
         const NEW_MAX_MASTERY = 20;
         const NEW_MAX_REFINED = 10;
 
-        // Helper to calculate XP threshold
         const xpThreshold = (level, exponent) => Math.floor(XP_BASE * Math.pow(level, exponent));
 
-        // Helper to calculate total XP for a level + remaining xp
         const totalXpForLevel = (level, xp, exponent) => {
           let total = xp;
           for (let l = 1; l < level; l++) {
@@ -121,7 +135,6 @@ export function initDB() {
           return total;
         };
 
-        // Helper to convert total XP back to level + remaining xp
         const xpToLevelAndRemainder = (totalXp, exponent) => {
           let level = 1;
           let remaining = totalXp;
@@ -137,38 +150,29 @@ export function initDB() {
           if (cursor) {
             const song = cursor.value;
 
-            // Add practiceStreak field to all songs
             if (song.practiceStreak === undefined) {
               song.practiceStreak = song.level === null ? null : 0;
             }
 
-            // Only convert XP for songs with level data
             if (song.level !== null && song.level !== undefined) {
-              // Calculate total XP under old system
               const oldTotalXp = totalXpForLevel(song.level, song.xp || 0, OLD_EXPONENT);
-
-              // Convert to new system
               const newResult = xpToLevelAndRemainder(oldTotalXp, NEW_EXPONENT);
               song.level = newResult.level;
               song.xp = newResult.xp;
 
-              // Update highestLevelReached proportionally
               if (song.highestLevelReached !== null) {
                 const oldHighestTotalXp = totalXpForLevel(song.highestLevelReached, 0, OLD_EXPONENT);
                 const newHighestResult = xpToLevelAndRemainder(oldHighestTotalXp, NEW_EXPONENT);
                 song.highestLevelReached = Math.max(newHighestResult.level, song.level);
               }
 
-              // Recalculate status based on new thresholds
               if (song.level >= NEW_MAX_MASTERY) {
                 song.status = 'mastered';
               } else if (song.level >= NEW_MAX_REFINED) {
-                // Only upgrade to refined, don't downgrade from mastered
                 if (song.status !== 'mastered') {
                   song.status = 'refined';
                 }
               }
-              // Keep learning/stale status for lower levels
             }
 
             cursor.update(song);
@@ -192,6 +196,29 @@ export function initDB() {
             cursor.continue();
           }
         };
+      }
+
+      // Migration for version 7: Add updated_at to all existing records
+      if (oldVersion < 7) {
+        const now = new Date().toISOString();
+        const stores = [SONGS_STORE, PRACTICES_STORE, DECKS_STORE, DECK_SONGS_STORE];
+
+        stores.forEach(storeName => {
+          if (db.objectStoreNames.contains(storeName)) {
+            const store = transaction.objectStore(storeName);
+            store.openCursor().onsuccess = (event) => {
+              const cursor = event.target.result;
+              if (cursor) {
+                const record = cursor.value;
+                if (!record.updated_at) {
+                  record.updated_at = now;
+                  cursor.update(record);
+                }
+                cursor.continue();
+              }
+            };
+          }
+        });
       }
     };
   });
@@ -246,12 +273,14 @@ export async function getSongById(songId) {
 // Add a new song
 export async function addSong(songData) {
   const db = await getDB();
+  songData.updated_at = new Date().toISOString();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([SONGS_STORE], 'readwrite');
     const store = transaction.objectStore(SONGS_STORE);
     const request = store.add(songData);
 
     request.onsuccess = () => {
+      notifySync('songs', 'upsert', songData);
       resolve(songData);
     };
 
@@ -267,33 +296,31 @@ export async function updateSong(songId, updates) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([SONGS_STORE], 'readwrite');
     const store = transaction.objectStore(SONGS_STORE);
-    
-    // First, get the existing song
+
     const getRequest = store.get(songId);
-    
+
     getRequest.onsuccess = () => {
       const existingSong = getRequest.result;
-      
+
       if (!existingSong) {
         reject(new Error('Song not found'));
         return;
       }
-      
-      // Merge updates with existing data
-      const updatedSong = { ...existingSong, ...updates };
-      
-      // Now put the merged object
+
+      const updatedSong = { ...existingSong, ...updates, updated_at: new Date().toISOString() };
+
       const putRequest = store.put(updatedSong);
-      
+
       putRequest.onsuccess = () => {
+        notifySync('songs', 'upsert', updatedSong);
         resolve(updatedSong);
       };
-      
+
       putRequest.onerror = () => {
         reject(new Error('Failed to update song'));
       };
     };
-    
+
     getRequest.onerror = () => {
       reject(new Error('Failed to get existing song'));
     };
@@ -303,22 +330,25 @@ export async function updateSong(songId, updates) {
 // Delete a song and all associated practices (cascade delete)
 export async function deleteSong(songId) {
   const db = await getDB();
+  // Get the song data before deleting (needed for sync)
+  const songToDelete = await getSongById(songId);
+
   return new Promise((resolve, reject) => {
-    // Transaction needs access to both stores for cascade delete
     const transaction = db.transaction([SONGS_STORE, PRACTICES_STORE], 'readwrite');
 
-    // First, delete all practices associated with this song
     const practicesStore = transaction.objectStore(PRACTICES_STORE);
     const practicesIndex = practicesStore.index('songId');
     const practicesRequest = practicesIndex.openCursor(IDBKeyRange.only(songId));
 
+    const deletedPracticeIds = [];
+
     practicesRequest.onsuccess = (event) => {
       const cursor = event.target.result;
       if (cursor) {
+        deletedPracticeIds.push(cursor.value.practiceId);
         cursor.delete();
         cursor.continue();
       } else {
-        // All practices deleted, now delete the song
         const songsStore = transaction.objectStore(SONGS_STORE);
         songsStore.delete(songId);
       }
@@ -329,6 +359,13 @@ export async function deleteSong(songId) {
     };
 
     transaction.oncomplete = () => {
+      if (songToDelete) {
+        notifySync('songs', 'delete', { songId });
+        // Also notify about deleted practices
+        deletedPracticeIds.forEach(practiceId => {
+          notifySync('practices', 'delete', { practiceId });
+        });
+      }
       resolve();
     };
 
@@ -338,12 +375,9 @@ export async function deleteSong(songId) {
   });
 }
 
-// Get next available song ID
-export async function getNextSongId() {
-  const songs = await getAllSongs();
-  if (songs.length === 0) return 1;
-  const maxId = Math.max(...songs.map(s => s.songId));
-  return maxId + 1;
+// Get next available song ID (now returns UUID)
+export function getNextSongId() {
+  return Promise.resolve(generateId());
 }
 
 // PRACTICES OPERATIONS
@@ -388,12 +422,14 @@ export async function getPracticesBySongId(songId) {
 // Add a practice session
 export async function addPractice(practiceData) {
   const db = await getDB();
+  practiceData.updated_at = new Date().toISOString();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([PRACTICES_STORE], 'readwrite');
     const store = transaction.objectStore(PRACTICES_STORE);
     const request = store.add(practiceData);
 
     request.onsuccess = () => {
+      notifySync('practices', 'upsert', practiceData);
       resolve(practiceData);
     };
 
@@ -403,12 +439,9 @@ export async function addPractice(practiceData) {
   });
 }
 
-// Get next available practice ID
-export async function getNextPracticeId() {
-  const practices = await getAllPractices();
-  if (practices.length === 0) return 1;
-  const maxId = Math.max(...practices.map(p => p.practiceId));
-  return maxId + 1;
+// Get next available practice ID (now returns UUID)
+export function getNextPracticeId() {
+  return Promise.resolve(generateId());
 }
 
 // Get total minutes played for a song
@@ -423,9 +456,7 @@ export async function getTotalPracticeSessions(songId) {
   return practices.length;
 }
 
-// DECKS (DECKS) OPERATIONS
-// Note: Using "deck" terminology in function names while maintaining "deck" in database
-// for backwards compatibility
+// DECKS OPERATIONS
 
 // Get all decks
 export async function getAllDecks() {
@@ -466,12 +497,14 @@ export async function getDeckById(deckId) {
 // Add a new deck
 export async function addDeck(deckData) {
   const db = await getDB();
+  deckData.updated_at = new Date().toISOString();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([DECKS_STORE], 'readwrite');
     const store = transaction.objectStore(DECKS_STORE);
     const request = store.add(deckData);
 
     request.onsuccess = () => {
+      notifySync('decks', 'upsert', deckData);
       resolve(deckData);
     };
 
@@ -498,10 +531,11 @@ export async function updateDeck(deckId, updates) {
         return;
       }
 
-      const updatedDeck = { ...existingDeck, ...updates };
+      const updatedDeck = { ...existingDeck, ...updates, updated_at: new Date().toISOString() };
       const putRequest = store.put(updatedDeck);
 
       putRequest.onsuccess = () => {
+        notifySync('decks', 'upsert', updatedDeck);
         resolve(updatedDeck);
       };
 
@@ -522,18 +556,19 @@ export async function deleteDeck(deckId) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([DECKS_STORE, DECK_SONGS_STORE], 'readwrite');
 
-    // First, delete all deck-song entries
     const deckSongsStore = transaction.objectStore(DECK_SONGS_STORE);
     const deckSongsIndex = deckSongsStore.index('deckId');
     const deckSongsRequest = deckSongsIndex.openCursor(IDBKeyRange.only(deckId));
 
+    const deletedDeckSongIds = [];
+
     deckSongsRequest.onsuccess = (event) => {
       const cursor = event.target.result;
       if (cursor) {
+        deletedDeckSongIds.push(cursor.value.id);
         cursor.delete();
         cursor.continue();
       } else {
-        // All deck-song entries deleted, now delete the deck
         const decksStore = transaction.objectStore(DECKS_STORE);
         decksStore.delete(deckId);
       }
@@ -544,6 +579,10 @@ export async function deleteDeck(deckId) {
     };
 
     transaction.oncomplete = () => {
+      notifySync('decks', 'delete', { deckId });
+      deletedDeckSongIds.forEach(id => {
+        notifySync('deck_songs', 'delete', { id });
+      });
       resolve();
     };
 
@@ -553,12 +592,9 @@ export async function deleteDeck(deckId) {
   });
 }
 
-// Get next available deck ID
-export async function getNextDeckId() {
-  const decks = await getAllDecks();
-  if (decks.length === 0) return 1;
-  const maxId = Math.max(...decks.map(p => p.deckId));
-  return maxId + 1;
+// Get next available deck ID (now returns UUID)
+export function getNextDeckId() {
+  return Promise.resolve(generateId());
 }
 
 // DECK-SONG RELATIONSHIP OPERATIONS
@@ -571,22 +607,24 @@ export async function addSongToDeck(deckId, songId, order) {
     const store = transaction.objectStore(DECK_SONGS_STORE);
 
     const deckSongData = {
+      id: generateId(),
       deckId,
       songId,
-      order: order || Date.now(), // Use timestamp as default order
-      addedDate: new Date().toISOString()
+      order: order || Date.now(),
+      addedDate: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     const request = store.add(deckSongData);
 
     request.onsuccess = async () => {
-      // Update deck level after adding song
+      notifySync('deck_songs', 'upsert', deckSongData);
       try {
         await updateDeckLevel(deckId);
         resolve(deckSongData);
       } catch (error) {
         console.error('Error updating deck level:', error);
-        resolve(deckSongData); // Still resolve with the added song data
+        resolve(deckSongData);
       }
     };
 
@@ -608,18 +646,25 @@ export async function removeSongFromDeck(deckId, songId) {
     request.onsuccess = async () => {
       const key = request.result;
       if (key) {
-        const deleteRequest = store.delete(key);
-        deleteRequest.onsuccess = async () => {
-          // Update deck level after removing song
-          try {
-            await updateDeckLevel(deckId);
-            resolve();
-          } catch (error) {
-            console.error('Error updating deck level:', error);
-            resolve(); // Still resolve
-          }
+        // Get the full record before deleting (for sync)
+        const getRequest = store.get(key);
+        getRequest.onsuccess = () => {
+          const record = getRequest.result;
+          const deleteRequest = store.delete(key);
+          deleteRequest.onsuccess = async () => {
+            if (record) {
+              notifySync('deck_songs', 'delete', { id: record.id, deckId, songId });
+            }
+            try {
+              await updateDeckLevel(deckId);
+              resolve();
+            } catch (error) {
+              console.error('Error updating deck level:', error);
+              resolve();
+            }
+          };
+          deleteRequest.onerror = () => reject(new Error('Failed to remove song from deck'));
         };
-        deleteRequest.onerror = () => reject(new Error('Failed to remove song from deck'));
       } else {
         reject(new Error('Song not found in deck'));
       }
@@ -641,7 +686,6 @@ export async function getSongsInDeck(deckId) {
     const request = index.getAll(deckId);
 
     request.onsuccess = () => {
-      // Sort by order field
       const results = request.result.sort((a, b) => a.order - b.order);
       resolve(results);
     };
@@ -662,7 +706,6 @@ export async function getDecksContainingSong(songId) {
     const request = index.getAll(songId);
 
     request.onsuccess = () => {
-      // Return unique deck IDs
       const deckIds = [...new Set(request.result.map(ps => ps.deckId))];
       resolve(deckIds);
     };
@@ -684,13 +727,15 @@ export async function updateDeckSongOrder(deckId, songOrderArray) {
 
     request.onsuccess = () => {
       const deckSongs = request.result;
+      const now = new Date().toISOString();
 
-      // Update order for each song
-      songOrderArray.forEach((songId, index) => {
+      songOrderArray.forEach((songId, idx) => {
         const deckSong = deckSongs.find(ps => ps.songId === songId);
         if (deckSong) {
-          deckSong.order = index;
+          deckSong.order = idx;
+          deckSong.updated_at = now;
           store.put(deckSong);
+          notifySync('deck_songs', 'upsert', deckSong);
         }
       });
     };
@@ -710,7 +755,6 @@ export async function getDecksForMenu(songId = null) {
   const decks = await getAllDecks();
 
   if (songId === null) {
-    // Just return deck metadata
     return decks.map(deck => ({
       deckId: deck.deckId,
       title: deck.title,
@@ -718,7 +762,6 @@ export async function getDecksForMenu(songId = null) {
     }));
   }
 
-  // Check which decks contain the song
   const deckIdsContainingSong = await getDecksContainingSong(songId);
   const deckIdsSet = new Set(deckIdsContainingSong);
 
@@ -735,6 +778,18 @@ export async function getMasteredSongs() {
   return allSongs.filter(song => song.status === 'mastered');
 }
 
+// Get all deck-song relationships (used by sync layer)
+export async function getAllDeckSongs() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(new Error('Failed to get deck songs'));
+  });
+}
+
 // BACKUP & RESTORE OPERATIONS
 
 // Export all data from all stores as a JSON object
@@ -745,15 +800,7 @@ export async function exportAllData() {
     getAllDecks()
   ]);
 
-  // Get all deck-song relationships
-  const db = await getDB();
-  const deckSongs = await new Promise((resolve, reject) => {
-    const transaction = db.transaction([DECK_SONGS_STORE], 'readonly');
-    const store = transaction.objectStore(DECK_SONGS_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(new Error('Failed to export deck songs'));
-  });
+  const deckSongs = await getAllDeckSongs();
 
   return {
     version: DB_VERSION,
@@ -796,38 +843,144 @@ export async function importAllData(backup) {
 
 // Calculate and update the average level and total duration of a deck
 export async function updateDeckLevel(deckId) {
-  // Get all songs in the deck
   const deckSongs = await getSongsInDeck(deckId);
 
   if (deckSongs.length === 0) {
-    // No songs in deck, set level and duration to null/0
     await updateDeck(deckId, { level: null, totalDuration: 0 });
     return { level: null, totalDuration: 0 };
   }
 
-  // Get full song data for each song in deck
   const songPromises = deckSongs.map(ds => getSongById(ds.songId));
   const songs = await Promise.all(songPromises);
 
-  // Calculate total duration (sum of all song durations)
   const totalDuration = songs.reduce((sum, song) => {
     return sum + (song && song.songDuration ? Number(song.songDuration) : 0);
   }, 0);
 
-  // Filter out songs with null levels (seen songs) and calculate average level
   const songsWithLevels = songs.filter(song => song && song.level != null);
 
   let averageLevel;
   if (songsWithLevels.length === 0) {
-    // All songs are "seen" (no level), set deck level to null
     averageLevel = null;
   } else {
-    // Calculate average level
     const totalLevel = songsWithLevels.reduce((sum, song) => sum + song.level, 0);
     averageLevel = Math.round(totalLevel / songsWithLevels.length);
   }
 
-  // Update deck with new average level and total duration
   await updateDeck(deckId, { level: averageLevel, totalDuration });
   return { level: averageLevel, totalDuration };
+}
+
+// Direct put operations (used by sync layer to write pulled data without triggering sync callbacks)
+export async function putSongDirect(songData) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(SONGS_STORE);
+    const request = store.put(songData);
+    request.onsuccess = () => resolve(songData);
+    request.onerror = () => reject(new Error('Failed to put song'));
+  });
+}
+
+export async function putPracticeDirect(practiceData) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PRACTICES_STORE], 'readwrite');
+    const store = transaction.objectStore(PRACTICES_STORE);
+    const request = store.put(practiceData);
+    request.onsuccess = () => resolve(practiceData);
+    request.onerror = () => reject(new Error('Failed to put practice'));
+  });
+}
+
+export async function putDeckDirect(deckData) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECKS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECKS_STORE);
+    const request = store.put(deckData);
+    request.onsuccess = () => resolve(deckData);
+    request.onerror = () => reject(new Error('Failed to put deck'));
+  });
+}
+
+export async function putDeckSongDirect(deckSongData) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const request = store.put(deckSongData);
+    request.onsuccess = () => resolve(deckSongData);
+    request.onerror = () => reject(new Error('Failed to put deck song'));
+  });
+}
+
+// Delete operations without triggering sync (used by sync layer for remote deletions)
+export async function deleteSongDirect(songId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SONGS_STORE, PRACTICES_STORE], 'readwrite');
+    const practicesStore = transaction.objectStore(PRACTICES_STORE);
+    const practicesIndex = practicesStore.index('songId');
+    const practicesRequest = practicesIndex.openCursor(IDBKeyRange.only(songId));
+
+    practicesRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        transaction.objectStore(SONGS_STORE).delete(songId);
+      }
+    };
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(new Error('Failed to delete song direct'));
+  });
+}
+
+export async function deleteDeckDirect(deckId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECKS_STORE, DECK_SONGS_STORE], 'readwrite');
+    const deckSongsStore = transaction.objectStore(DECK_SONGS_STORE);
+    const deckSongsIndex = deckSongsStore.index('deckId');
+    const deckSongsRequest = deckSongsIndex.openCursor(IDBKeyRange.only(deckId));
+
+    deckSongsRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        transaction.objectStore(DECKS_STORE).delete(deckId);
+      }
+    };
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(new Error('Failed to delete deck direct'));
+  });
+}
+
+export async function deletePracticeDirect(practiceId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([PRACTICES_STORE], 'readwrite');
+    const store = transaction.objectStore(PRACTICES_STORE);
+    const request = store.delete(practiceId);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Failed to delete practice direct'));
+  });
+}
+
+export async function deleteDeckSongDirect(id) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readwrite');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Failed to delete deck song direct'));
+  });
 }

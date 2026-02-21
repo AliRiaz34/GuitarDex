@@ -72,7 +72,8 @@ th {
 #navbar {
   padding-top: 5px;
   display: flex;
-  justify-content: space-between;
+  gap: 25px;
+  flex-wrap: nowrap;
   position: fixed;
   bottom: 5%;
   left: 3%;
@@ -87,11 +88,20 @@ th {
   will-change: transform;
   backface-visibility: hidden;
   text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#navbar::-webkit-scrollbar {
+  display: none;
 }
 
 #navlink-1 {
   min-width: 73px;
   padding-left: 10px;
+  white-space: nowrap;
 }
 
 #navlink-2 {
@@ -100,11 +110,15 @@ th {
 
 #navlink-3 {
   min-width: 72px;
-  padding-right: 10px;
-
+  white-space: nowrap;
 }
 
-#navlink-1, #navlink-2, #navlink-3,:visited {
+#navlink-4 {
+  min-width: fit-content;
+  padding-right: 10px;
+}
+
+#navlink-1, #navlink-2, #navlink-3, #navlink-4,:visited {
   text-decoration: none;
   color: rgb(114, 114, 114);
   transition: all 0.3s ease;
@@ -141,7 +155,33 @@ th {
 main {
   margin: 0px;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Error bubbles */
+.error-bubble {
+    position: absolute;
+    right: 0;
+    width: fit-content;
+    margin-top: 7px;
+    padding: 5px 12px;
+    font-size: 0.65em;
+    color: rgba(230, 130, 120, 0.8);
+    background-color: rgba(230, 130, 120, 0.06);
+    border: 1px solid rgba(230, 130, 120, 0.15);
+    border-radius: 6px;
+    text-align: left;
+}
+
+.error-bubble-arrow {
+    position: absolute;
+    top: -7px;
+    right: 14px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid rgba(230, 130, 120, 0.15);
 }
 
 /* Headings */

@@ -178,7 +178,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
         </div>
 
         <div id="minPlayed-input-div">
-          <label className="form-label"> your practice duration</label>
+          <label className="form-label" style={{ textAlign: 'center' }}>practice duration</label>
           <div className="quick-select-button-div">
             <button
               onClick={() => {
@@ -225,7 +225,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             </button>
           </div>
           <div className="practice-input-group">
-              <p className="input-arrow">{'> '}</p>
+              <p className="practice-input-arrow">{'> '}</p>
               <input
                 type="number"
                 className="practice-input"
@@ -249,7 +249,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
         </div>
         {song.songDuration === null && (
           <div id="duration-div">
-            <label className="form-label">the song's duration</label>
+            <label className="form-label" style={{ textAlign: 'center' }}>song duration</label>
             <div className="quick-select-button-div">
               <button
                 onClick={() => {
@@ -285,7 +285,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
               </button>
             </div>
             <div className="practice-input-group">
-              <p className="input-arrow">{'> '}</p>
+              <p className="practice-input-arrow">{'> '}</p>
               <input
                 type="number"
                 className="practice-input"
@@ -308,14 +308,10 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
             </div>
           </div>
         )}
-        {song.songDuration !== null && (
-          <div className={`song-lyrics-display ${song.lyrics && song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
-            {song.lyrics ? (
-              <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
-            ) : (
-              <p className="lyrics-placeholder">no lyrics yet</p>
-            )}
-            {song.lyrics && song.lyrics.split('\n').length > 6 && (
+        {song.songDuration !== null && song.lyrics && (
+          <div className={`song-lyrics-display ${song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
+            <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
+            {song.lyrics.split('\n').length > 6 && (
               <span className="lyrics-show-more" onClick={() => setLyricsExpanded(true)}>
                 <span style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>^</span>
               </span>

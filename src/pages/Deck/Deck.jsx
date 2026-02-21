@@ -9,12 +9,13 @@ import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
 import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel, getMasteredSongs } from '../../utils/db';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
+import { useData } from '../../contexts/DataContext';
 import './Deck.css';
 
 function Deck() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [decks, setDecks] = useState([]);
+  const { decks, setDecks } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -38,20 +39,6 @@ function Deck() {
   const [showCreateView, setShowCreateView] = useState(false);
   const [createInitialTitle, setCreateInitialTitle] = useState("");
   const [editingDeck, setEditingDeck] = useState(null);
-
-  // Fetch decks from IndexedDB
-  useEffect(() => {
-    async function loadDecks() {
-      try {
-        const decksInfo = await getAllDecks();
-
-        setDecks(decksInfo);
-      } catch (error) {
-        console.error('Error loading decks:', error);
-      }
-    }
-    loadDecks();
-  }, []);
 
   // Create virtual Mastered deck from mastered songs
   const [masteredDeck, setMasteredDeck] = useState(null);

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { initDB } from './utils/db'
+import './utils/supabaseClient'
 
 // iOS PWA keyboard fix - force focus on input tap
 // iOS standalone PWAs have a bug where tapping inputs doesn't trigger keyboard

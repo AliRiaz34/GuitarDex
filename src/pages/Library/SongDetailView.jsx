@@ -5,7 +5,7 @@ import { deleteSong, updateSong } from '../../utils/db';
 import './Library.css';
 
 function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirection, decks, onToggleDeck, onUpgrade, onLyricsUpdate }) {
-  const [showHours, setShowHours] = useState(false);
+  const [showHours, setShowHours] = useState(() => localStorage.getItem('guitardex_show_hours') === 'true');
   const [menuOpen, setMenuOpen] = useState(false);
   const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -464,6 +464,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
             >
+              <span className="lyrics-suggest-close" style={{ right: 'auto', left: 14, textTransform: 'none', fontSize: '0.8em' }} onClick={() => setLyricsExpanded(false)}>X</span>
               <div id="lyrics-suggest-preview">
                 <p className="lyrics-suggest-text">{song.lyrics}</p>
               </div>
@@ -517,7 +518,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
             </div>
             {song.level == null && (
               <>
-                <p id="empty-info-p">learn the song to get stats</p>
+                <p id="empty-info-p">practice to get stats schmuck</p>
                 <p id="empty-info-arrow">↓</p>
               </>
             )}
@@ -587,7 +588,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                     {song.capo || 0}
                   </span>
                 </div>
-                <div className="stat-item" onClick={() => setShowHours(!showHours)} style={{ cursor: 'pointer' }}>
+                <div className="stat-item" onClick={() => { const next = !showHours; setShowHours(next); localStorage.setItem('guitardex_show_hours', next); }} style={{ cursor: 'pointer' }}>
                   <span className="stat-value">
                     {showHours
                       ? ((song.totalMinPlayed != null ? song.totalMinPlayed : 0) / 60).toFixed(1)

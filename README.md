@@ -23,7 +23,6 @@ Track your progress on songs, earn XP through practice sessions, quickly tune be
 
 **Practice Decks**
 - Organize songs into custom playlists/decks
-- Group by album, genre, or practice goals
 - Track average level and total duration per deck
 
 **PWA Support**

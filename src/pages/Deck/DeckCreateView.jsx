@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { addDeck, updateDeck, getNextDeckId } from '../../utils/db';
 import './Deck.css';
 
 function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = null }) {
   const [title, setTitle] = useState(editDeck ? editDeck.title : initialTitle);
-  const [description, setDescription] = useState(editDeck ? editDeck.description : "");
+  const [description, setDescription] = useState(editDeck ? (editDeck.description || "") : "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState({ field: '', msg: '' });
   const isEditMode = editDeck != null;
 
   // Swipe gesture detection
@@ -68,6 +69,13 @@ function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = n
     };
   }, [onBack]);
 
+  useEffect(() => {
+    if (error.field) {
+      const timer = setTimeout(() => setError({ field: '', msg: '' }), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -75,14 +83,13 @@ function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = n
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    // Validation
-    if (title.length < 1) {
-      alert("Title has to be longer than 1.");
+    if (title.trim().length < 1) {
+      setError({ field: 'title', msg: 'enter a deck name' });
       setIsSubmitting(false);
       return;
     }
-    if (description.length < 1) {
-      alert("Description has to be longer than 1.");
+    if (description.trim().length < 1) {
+      setError({ field: 'description', msg: 'enter a description' });
       setIsSubmitting(false);
       return;
     }
@@ -130,12 +137,12 @@ function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = n
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      <p id="deck-create-back-icon" onClick={onBack}>{'<'}</p>
       <form id="deck-form" onSubmit={handleSubmit}>
-          <div id="title-input-div">
-            <label htmlFor="title-input" className="form-label">the deck's name</label>
-            <div className="input-group">
-              <p className="input-arrow">{'> '}</p>
+        <div className="deck-form-content">
+          <p id="deck-create-back-icon" onClick={onBack}>{'<'}</p>
+          <div id="deck-form-fields">
+            <div id="title-input-div">
+              <label htmlFor="title-input" className="form-label">deck name</label>
               <input
                 type="text"
                 className="deck-input"
@@ -147,27 +154,54 @@ function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = n
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck="false"
-                required
               />
+              <AnimatePresence>
+                {error.field === 'title' && (
+                  <motion.div
+                    className="error-bubble"
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <div className="error-bubble-arrow" />
+                    {error.msg}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div><div id="description-input-div">
-            <label htmlFor="description-input" className="form-label">the deck's description</label>
-            <div className="input-group">
-              <p className="input-arrow">{'> '}</p>
-              <input
-                type="text"
-                className="deck-input"
+            <div id="description-input-div">
+              <label htmlFor="description-input" className="form-label">description</label>
+              <textarea
+                className="deck-description-textarea"
                 id="description-input"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                maxLength={90}
+                maxLength={200}
+                rows={4}
                 autoCapitalize="off"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck="false"
+                placeholder="describe the deck..."
               />
+              <AnimatePresence>
+                {error.field === 'description' && (
+                  <motion.div
+                    className="error-bubble"
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <div className="error-bubble-arrow" />
+                    {error.msg}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
+        </div>
         <button id="deck-create-save" type="submit" className="form__button" disabled={isSubmitting}>
           {isSubmitting ? (isEditMode ? 'Saving...' : 'Create...') : (isEditMode ? 'Save' : 'Create')}
         </button>

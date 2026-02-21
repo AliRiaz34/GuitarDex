@@ -1,0 +1,149 @@
+#auth-view {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    padding: 15px;
+    padding-top: 10vh;
+}
+
+#auth-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+#auth-logo {
+    width: 120px;
+    height: 120px;
+}
+
+#auth-title {
+    font-size: 1.6em;
+    color: rgb(240, 172, 45);
+    margin: 0;
+    text-align: center;
+}
+
+#auth-form {
+    width: 100%;
+    max-width: 320px;
+}
+
+#auth-input-div {
+    text-align: center;
+    padding: 0 15px;
+}
+
+.auth-field {
+    position: relative;
+    margin-top: 30px;
+}
+
+.auth-field:first-child {
+    margin-top: 0;
+}
+
+.auth-label {
+    font-size: 0.85em;
+    margin: 0;
+    text-align: left;
+    display: block;
+    color: rgb(145, 143, 143);
+}
+
+.auth-input {
+    color: white;
+    font-family: 'Pokemon-Classic';
+    font-size: 0.9em;
+    padding: 4px 8px;
+    margin-top: 6px;
+    box-sizing: border-box;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    width: 100%;
+    display: block;
+}
+
+
+.auth-input-masked {
+    -webkit-text-security: disc;
+}
+
+.auth-input:focus {
+    border-color: rgba(240, 172, 45, 0.822);
+    background-color: rgba(240, 172, 45, 0.05);
+}
+
+.auth-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input-wrapper .auth-input {
+    padding-right: 36px;
+}
+
+.auth-pw-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    translate: 0 -46%;
+    background: none;
+    border: none;
+    color: rgba(145, 143, 143, 0.6);
+    font-family: 'Pokemon-Classic';
+    font-size: 0.75em;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+
+.auth-submit {
+    display: block;
+    margin: 50px auto 0;
+    padding: 6px 20px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.auth-submit:active {
+    background-color: rgba(240, 172, 45, 0.2);
+}
+
+.auth-submit:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#auth-toggle {
+    margin-top: 25px;
+    font-size: 0.75em;
+    color: rgb(145, 143, 143);
+    font-style: italic;
+    text-align: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Pokemon-Classic';
+}
+
+#auth-toggle:hover {
+    color: white;
+}

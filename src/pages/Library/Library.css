@@ -52,7 +52,6 @@
 #searchbar {
     width: 100%;
     display: block;
-    padding-right: 35px;
     box-sizing: border-box;
 }
 
@@ -62,9 +61,9 @@
 
 .custom-placeholder {
     position: absolute;
-    left: 0;
+    left: 50%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     pointer-events: none;
     color: rgba(240, 172, 45, 0.822);
     font-family: 'Pokemon-Classic';
@@ -552,6 +551,15 @@
   animation: bounce 2s ease-in-out infinite;
 }
 
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
 /* XP Bar */
 #xp-bar {
     height: 100%;
@@ -718,6 +726,7 @@
     font-size: 1.2em;
     color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
+    z-index: 10;
 }
 
 #lyrics-suggest-status {
@@ -801,9 +810,71 @@
 }
 
 
+.tuning-difficulty-row {
+    display: flex;
+    margin-top: 50px;
+    justify-content: space-between;
+}
+
+.edit-difficulty-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.edit-difficulty-column button {
+    transition: color 0.3s ease;
+    padding: 0;
+    font-size: 0.9em;
+}
+
 /* Tuning Editor */
 #tuning-editor {
-    margin-top: 50px;
+    text-align: center;
+}
+
+.tuning-strings-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: -4px;
+}
+
+.tuning-string-row {
+    display: flex;
+    align-items: center;
+}
+
+.tuning-side-arrow {
+    background: none;
+    border: none;
+    color: #b0b0b0;
+    font-size: 0.75em;
+    cursor: pointer;
+    padding: 3px 4px;
+    transition: color 0.2s;
+}
+
+.tuning-side-arrow:hover {
+    color: #ffffff;
+}
+
+.tuning-side-arrow:active {
+    color: #f0ac2d;
+}
+
+.tuning-note-inline {
+    font-size: 0.95em;
+    color: #ffffff;
+    width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.tuning-note-inline sup {
+    vertical-align: top;
+    line-height: 1;
 }
 
 .tuning-strings-container {
@@ -942,18 +1013,43 @@
     margin-top: 30px;
 }
 
+.edit-inputs-row {
+    display: flex;
+    gap: 30px;
+    margin-top: 50px;
+    justify-content: center;
+}
+
+.edit-input-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-input-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.edit-input-group .practice-input,
+.edit-input-group .capo-input {
+    width: 45px;
+}
+
 #lyrics-div {
     margin-top: 40px;
     text-align: center;
 }
 
 .lyrics-textarea {
-    width: 90%;
-    max-width: 400px;
+    width: 106%;
+    max-width: 420px;
     margin-top: 10px;
     padding: 10px;
     font-family: 'Pokemon-Classic';
-    font-size: 0.8em;
+    font-size: 16px;
     line-height: 1.8;
     color: white;
     background-color: transparent;
@@ -961,6 +1057,8 @@
     border-radius: 4px;
     outline: none;
     resize: vertical;
+    transform: scale(0.85);
+    transform-origin: top left;
 }
 
 .lyrics-textarea::placeholder {
@@ -1046,7 +1144,8 @@
 .form-label {
     font-size: 1em;
     margin: 0px;
-    text-align: center;
+    text-align: left;
+    display: block;
     color: rgb(145, 143, 143);
 }
 

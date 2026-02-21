@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { exportAllData, importAllData } from '../../utils/db';
 import './Library.css';
+
+let hasAnimatedLibrary = false;
 
 function LibraryListView({
   songs,
@@ -18,52 +19,13 @@ function LibraryListView({
   onSelectSong,
   onQuickPractice,
   onRandomSelect,
-  scrollPositionRef
+  scrollPositionRef,
+  returnFromSong,
+  onReturnAnimationDone
 }) {
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const containerRef = useRef(null);
-  const [backupMenuOpen, setBackupMenuOpen] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleBackup = async () => {
-    try {
-      const data = await exportAllData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const date = new Date().toISOString().slice(0, 10);
-      a.href = url;
-      a.download = `guitardex-backup-${date}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setBackupMenuOpen(false);
-    } catch (error) {
-      console.error('Backup failed:', error);
-      alert('backup failed');
-    }
-  };
-
-  const handleRestore = () => {
-    fileInputRef.current?.click();
-    setBackupMenuOpen(false);
-  };
-
-  const handleFileSelect = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await importAllData(data);
-      window.location.reload();
-    } catch (error) {
-      console.error('Restore failed:', error);
-      alert('restore failed — invalid file');
-    }
-    e.target.value = '';
-  };
 
   // Restore scroll position when component mounts
   useEffect(() => {
@@ -88,10 +50,10 @@ function LibraryListView({
   return (
     <motion.div
       id="library-view"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
+      initial={returnFromSong ? { opacity: 0, x: -20 } : hasAnimatedLibrary ? false : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
+      onAnimationComplete={() => { hasAnimatedLibrary = true; if (onReturnAnimationDone) onReturnAnimationDone(); }}
     >
       {hasAnySongs && (
         <>
@@ -162,45 +124,24 @@ function LibraryListView({
               )}
             </AnimatePresence>
 
-            <div className="backup-menu-container">
-              <p className="backup-icon" onClick={() => setBackupMenuOpen(!backupMenuOpen)}>···</p>
-              <AnimatePresence>
-                {backupMenuOpen && (
-                  <>
-                    <div className="menu-backdrop" onClick={() => setBackupMenuOpen(false)} />
-                    <motion.div
-                      className="backup-dropdown"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <p className="song-menu-option" onClick={handleBackup}>backup</p>
-                      <p className="song-menu-option" onClick={handleRestore}>restore</p>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              style={{ display: 'none' }}
-              onChange={handleFileSelect}
-            />
           </div>
         )}
 
-        {isLoading ? (
-          <div id="seen-a-new-song" className="empty-library">
-            loading...
-          </div>
-        ) : songs.length > 0 ? (
+        {isLoading ? null : songs.length > 0 ? (
           <table id="library-table">
             <tbody>
-              {songs.map(song => (
-                <tr key={song.songId} className="song-tr">
+              {songs.map((song, index) => (
+                <motion.tr
+                  key={song.songId}
+                  className="song-tr"
+                  initial={!hasAnimatedLibrary && index < 10 ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
+                  transition={!hasAnimatedLibrary && index < 10 ? {
+                    duration: 0.4,
+                    ease: 'easeOut',
+                    delay: index * 0.05,
+                  } : { duration: 0 }}
+                >
                   <td className="song-td" onClick={() => onSelectSong(song)}>
                     <div className="song-title">{song.title}</div>
                     <div className="song-artist">{song.artistName}</div>
@@ -208,7 +149,7 @@ function LibraryListView({
                   <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
                     {song.level != null ? `Lv ${song.level}` : '???'}
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>

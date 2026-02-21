@@ -7,7 +7,6 @@ function EditView({ song, onSubmit, onBack }) {
   const [artistName, setArtistName] = useState(song?.artistName || '');
   const [difficulty, setDifficulty] = useState(song?.difficulty || 'normal');
   const [songDuration, setSongDuration] = useState(song?.songDuration || null);
-  const [selectedDurationButton, setSelectedDurationButton] = useState(null);
   const [tuning, setTuning] = useState(song?.tuning || ['E', 'A', 'D', 'G', 'B', 'E']);
   const [capo, setCapo] = useState(song?.capo || 0);
   const [lyrics, setLyrics] = useState(song?.lyrics || '');
@@ -109,42 +108,102 @@ function EditView({ song, onSubmit, onBack }) {
         <div className="edit-form-content">
         <p id="edit-back-icon" onClick={handleBack}>{'<'}</p>
         <div id="add-input-div">
-          <div id="title-input-div">
+          <div className="add-field">
             <label htmlFor="title-input" className="form-label">song name</label>
-            <div className="input-group">
-              <p className="input-arrow">{'> '}</p>
-              <input
-                type="text"
-                className="song-input"
-                id="title-input"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                maxLength={45}
-                autoCapitalize="off"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck="false"
-                required
-              />
+            <input
+              type="text"
+              className="song-input"
+              id="title-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={45}
+              autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              required
+            />
+          </div>
+          <div className="add-field">
+            <label htmlFor="artistName-input" className="form-label">artist</label>
+            <input
+              type="text"
+              className="song-input"
+              id="artistName-input"
+              value={artistName}
+              onChange={(e) => setArtistName(e.target.value)}
+              maxLength={45}
+              autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              required
+            />
+          </div>
+          <div className="tuning-difficulty-row">
+            <div id="tuning-editor">
+              <div className="tuning-strings-vertical">
+                {tuning.map((note, index) => (
+                  <div key={index} className="tuning-string-row">
+                    <button
+                      type="button"
+                      className="tuning-side-arrow"
+                      onClick={() => changeTuning(index, 'down')}
+                    >
+                      {'<'}
+                    </button>
+                    <div className="tuning-note-inline">
+                      {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
+                    </div>
+                    <button
+                      type="button"
+                      className="tuning-side-arrow"
+                      onClick={() => changeTuning(index, 'up')}
+                    >
+                      {'>'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="edit-difficulty-column">
+              <button type="button" className={difficulty === "easy" ? "selected" : ""} onClick={() => setDifficulty("easy")}>Easy</button>
+              <button type="button" className={difficulty === "normal" ? "selected" : ""} onClick={() => setDifficulty("normal")}>Normal</button>
+              <button type="button" className={difficulty === "hard" ? "selected" : ""} onClick={() => setDifficulty("hard")}>Hard</button>
             </div>
           </div>
-          <div id="artistName-input-div">
-            <label htmlFor="artistName-input" className="form-label">artist</label>
-            <div className="input-group">
-              <p className="input-arrow">{'> '}</p>
+          <div className="edit-inputs-row">
+            <div className="edit-input-group">
               <input
-                type="text"
-                className="song-input"
-                id="artistName-input"
-                value={artistName}
-                onChange={(e) => setArtistName(e.target.value)}
-                maxLength={45}
-                autoCapitalize="off"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck="false"
-                required
+                type="number"
+                className="practice-input"
+                id="songDuration-input"
+                value={songDuration || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSongDuration(value === '' ? null : value);
+                }}
+                inputMode="numeric"
+                min="0"
+                max="30"
               />
+              <label className="min-label">min</label>
+            </div>
+            <div className="edit-input-group">
+              <input
+                type="number"
+                className="capo-input"
+                id="capo-input"
+                value={capo || ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : Math.max(0, Math.min(15, parseInt(e.target.value) || 0));
+                  setCapo(value);
+                }}
+                inputMode="numeric"
+                min="0"
+                max="15"
+              />
+              <label className="min-label">fret</label>
             </div>
           </div>
           <div id="lyrics-div">
@@ -161,138 +220,6 @@ function EditView({ song, onSubmit, onBack }) {
               autoCorrect="off"
               spellCheck="false"
             />
-          </div>
-          <div id="tuning-editor">
-            <label className="form-label">tuning</label>
-            <div className="tuning-strings-container">
-              {tuning.map((note, index) => (
-                <div key={index} className="tuning-string-control">
-                  <button
-                    type="button"
-                    className="tuning-arrow"
-                    onClick={() => changeTuning(index, 'up')}
-                  >
-                    ^
-                  </button>
-                  <div className="tuning-note">
-                    {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
-                  </div>
-                  <button
-                    type="button"
-                    className="tuning-arrow tuning-arrow-down"
-                    onClick={() => changeTuning(index, 'down')}
-                  >
-                    ^
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-          <label id="buttons-menu-1-label" className="form-label">difficulty</label>
-          <div id="buttons-menu-1">
-              <button
-                type="button"
-                value="easy"
-                className={difficulty === "easy" ? "selected" : ""}
-                onClick={() => setDifficulty("easy")}
-              >
-                Easy
-              </button>
-              <button
-                type="button"
-                value="normal"
-                className={difficulty === "normal" ? "selected" : ""}
-                onClick={() => setDifficulty("normal")}
-              >
-                Normal
-              </button>
-              <button
-                type="button"
-                value="hard"
-                className={difficulty === "hard" ? "selected" : ""}
-                onClick={() => setDifficulty("hard")}
-              >
-                Hard
-              </button>
-          </div>
-          <div id="duration-div">
-            <label className="form-label">song duration</label>
-            <div className="quick-select-button-div">
-              <button
-                onClick={() => {
-                  setSongDuration(3);
-                  setSelectedDurationButton(3);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 3 ? 'selected-quick' : ''}`}
-              >
-                3
-              </button>
-              <p className="between-button-line"> |</p>
-              <button
-                onClick={() => {
-                  setSongDuration(4);
-                  setSelectedDurationButton(4);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 4 ? 'selected-quick' : ''}`}
-              >
-                4
-              </button>
-              <p className="between-button-line">|</p>
-              <button
-                onClick={() => {
-                  setSongDuration(5);
-                  setSelectedDurationButton(5);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 5 ? 'selected-quick' : ''}`}
-              >
-                5
-              </button>
-            </div>
-            <div className="practice-input-group">
-              <p className="practice-input-arrow">{'> '}</p>
-              <input
-                type="number"
-                className="practice-input"
-                id="songDuration-input"
-                value={songDuration || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSongDuration(value === '' ? null : value);
-                  setSelectedDurationButton(null);
-                }}
-                inputMode="numeric"
-                autoCapitalize="off"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck="false"
-                min="0"
-                max="30"
-              />
-              <label className="min-label">min</label>
-            </div>
-          </div>
-          <div id="capo-div">
-            <label className="form-label">capo</label>
-            <div className="capo-input-group">
-              <p className="practice-input-arrow">{'> '}</p>
-              <input
-                type="number"
-                className="capo-input"
-                id="capo-input"
-                value={capo}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  setCapo(Math.max(0, Math.min(15, value)));
-                }}
-                inputMode="numeric"
-                min="0"
-                max="15"
-              />
-              <label className="min-label">fret</label>
-            </div>
           </div>
         </div>
         </div>

@@ -24,10 +24,31 @@
 
 
 #deck-form {
-    margin: auto;
-    margin-top: 10vw;
+    width: 100%;
+    height: 83vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.deck-form-content {
+    flex: 1;
+    overflow-y: auto;
     overflow-x: hidden;
-    padding: 10px;
+}
+
+#deck-form-fields {
+    text-align: left;
+    padding: 15px;
+    max-width: 320px;
+    margin: 0 auto;
+    margin-top: 25vw;
+    box-sizing: border-box;
+}
+
+#deck-form > .form__button {
+    margin: 10px auto 0;
+    flex-shrink: 0;
 }
 
 #deck-create-back-icon {
@@ -39,10 +60,55 @@
     font-weight: bolder;
 }
 
+#title-input-div {
+    position: relative;
+}
+
 #description-input-div {
+    position: relative;
     display: flex;
     flex-direction: column;
-    margin-top: 100px;
+    margin-top: 40px;
+}
+
+.deck-description-textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    font-family: 'Pokemon-Classic';
+    font-size: 0.9em;
+    line-height: 1.8;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    transform: scale(0.85);
+    transform-origin: top left;
+    width: 118%;
+}
+
+.deck-description-textarea:focus {
+    border-color: rgba(240, 172, 45, 0.822);
+    background-color: rgba(240, 172, 45, 0.05);
+}
+
+.deck-description-textarea::placeholder {
+    color: rgb(145, 143, 143);
+    font-style: italic;
+}
+
+.deck-description-textarea:focus::placeholder {
+    color: transparent;
+}
+
+.deck-form-error {
+    margin: 6px 0 0;
+    font-size: 0.75em;
+    color: rgba(255, 80, 80, 0.9);
+    font-style: italic;
 }
 
 #deck-searchbar-container {
@@ -149,36 +215,41 @@
 .deck-input {
     color: white;
     font-family: 'Pokemon-Classic';
-    font-size: 1.1em;
-    padding: 0px;
-    margin: 0px;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    margin-top: 6px;
     box-sizing: border-box;
-    border: 0px;
-    padding-bottom: 4px;
-    padding-left: 5px;
-    border-bottom: 2px solid rgba(240, 172, 45, 0.822);
-    border-radius: 0px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     outline: none;
-    background-color: transparent;
-    width: 85%;
+    background-color: rgba(255, 255, 255, 0.05);
+    width: 100%;
     max-width: 100%;
+    display: block;
+}
+
+.deck-input:focus {
+    border-color: rgba(240, 172, 45, 0.822);
+    background-color: rgba(240, 172, 45, 0.05);
 }
 
 #deck-create-save {
-    margin: 120px auto 300px;
     display: block;
+    margin: 10px auto 0;
+    padding: 6px 20px;
     width: 100%;
     max-width: 200px;
     text-align: center;
-    font-size: 1em;
-    font-weight: 600;
-    padding: 8px 16px;
-    background: transparent;
-    border: 2px solid rgba(240, 172, 45, 0.6);
-    color: rgba(240, 172, 45, 0.9);
+    font-family: 'Pokemon-Classic';
+    font-size: 0.8em;
+    color: rgb(240, 172, 45);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
+}
+
+#deck-create-save:active {
+    background-color: rgba(240, 172, 45, 0.2);
 }
 
 #deck-create-save:hover {

@@ -6,6 +6,11 @@ import Navbar from './Nav'
 import Library from './pages/Library'
 import AddSong from './pages/AddSong'
 import Deck from './pages/Deck'
+import Social from './pages/Social'
+import Auth from './pages/Auth'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { DataProvider } from './contexts/DataContext'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -20,16 +25,31 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Library />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/songs/add" element={<AddSong />} />
-        <Route path="/deck" element={<Deck />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/" element={
+          <ProtectedRoute><Library /></ProtectedRoute>
+        } />
+        <Route path="/library" element={
+          <ProtectedRoute><Library /></ProtectedRoute>
+        } />
+        <Route path="/songs/add" element={
+          <ProtectedRoute><AddSong /></ProtectedRoute>
+        } />
+        <Route path="/deck" element={
+          <ProtectedRoute><Deck /></ProtectedRoute>
+        } />
+        <Route path="/social" element={
+          <ProtectedRoute><Social /></ProtectedRoute>
+        } />
       </Routes>
     </AnimatePresence>
   )
 }
 
-function App() {
+function AppContent() {
+  const { user, syncing } = useAuth()
+  const location = useLocation()
+
   useEffect(() => {
     // Lock screen orientation to portrait (only in secure contexts)
     if (window.isSecureContext && screen.orientation && screen.orientation.lock) {
@@ -39,12 +59,26 @@ function App() {
     }
   }, [])
 
+  const showNavbar = user && !syncing && location.pathname !== '/auth'
+
   return (
-    <BrowserRouter>
+    <>
       <main>
         <AnimatedRoutes />
       </main>
-      <Navbar />
+      {showNavbar && <Navbar />}
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <DataProvider>
+          <AppContent />
+        </DataProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
