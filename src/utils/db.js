@@ -735,6 +735,65 @@ export async function getMasteredSongs() {
   return allSongs.filter(song => song.status === 'mastered');
 }
 
+// BACKUP & RESTORE OPERATIONS
+
+// Export all data from all stores as a JSON object
+export async function exportAllData() {
+  const [songs, practices, decks] = await Promise.all([
+    getAllSongs(),
+    getAllPractices(),
+    getAllDecks()
+  ]);
+
+  // Get all deck-song relationships
+  const db = await getDB();
+  const deckSongs = await new Promise((resolve, reject) => {
+    const transaction = db.transaction([DECK_SONGS_STORE], 'readonly');
+    const store = transaction.objectStore(DECK_SONGS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(new Error('Failed to export deck songs'));
+  });
+
+  return {
+    version: DB_VERSION,
+    exportDate: new Date().toISOString(),
+    data: { songs, practices, decks, deckSongs }
+  };
+}
+
+// Import data from a backup JSON object (replaces all existing data)
+export async function importAllData(backup) {
+  if (!backup?.data) {
+    throw new Error('Invalid backup file');
+  }
+
+  const db = await getDB();
+  const { songs, practices, decks, deckSongs } = backup.data;
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      [SONGS_STORE, PRACTICES_STORE, DECKS_STORE, DECK_SONGS_STORE],
+      'readwrite'
+    );
+
+    // Clear all stores first
+    transaction.objectStore(SONGS_STORE).clear();
+    transaction.objectStore(PRACTICES_STORE).clear();
+    transaction.objectStore(DECKS_STORE).clear();
+    transaction.objectStore(DECK_SONGS_STORE).clear();
+
+    // Re-populate
+    if (songs) songs.forEach(item => transaction.objectStore(SONGS_STORE).add(item));
+    if (practices) practices.forEach(item => transaction.objectStore(PRACTICES_STORE).add(item));
+    if (decks) decks.forEach(item => transaction.objectStore(DECKS_STORE).add(item));
+    if (deckSongs) deckSongs.forEach(item => transaction.objectStore(DECK_SONGS_STORE).add(item));
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(new Error('Failed to import data'));
+  });
+}
+
 // Calculate and update the average level and total duration of a deck
 export async function updateDeckLevel(deckId) {
   // Get all songs in the deck

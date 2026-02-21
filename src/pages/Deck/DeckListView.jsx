@@ -49,30 +49,40 @@ function DeckListView({
       )}
 
       {hasAnyDecks && <div id="deck-list-divider" />}
-      <div id="deck-table-container">
-        {decks.length > 0 && (
-          <table id="deck-table">
-            <tbody>
-              {decks.map(deck => (
-                <tr key={deck.deckId} className={`deck-tr ${deck.isVirtual ? 'deck-tr-virtual' : ''}`}>
-                  <td className="deck-td" onClick={() => onSelectDeck(deck)}>
-                    <div className={`deck-title ${deck.isVirtual ? 'deck-title-virtual' : ''}`}>{deck.title}</div>
-                  </td>
-                  <td className={`deck-td-lv ${deck.isVirtual ? 'deck-td-lv-virtual' : ''}`}>
-                    {deck.level != null ? `Lv ${deck.level}` : '???'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {hasAnyDecks && (
+        <div id="deck-table-container">
+          {decks.length > 0 && (
+            <table id="deck-table">
+              <tbody>
+                {decks.map(deck => (
+                  <tr key={deck.deckId} className={`deck-tr ${deck.isVirtual ? 'deck-tr-virtual' : ''}`}>
+                    <td className="deck-td" onClick={() => onSelectDeck(deck)}>
+                      <div className={`deck-title ${deck.isVirtual ? 'deck-title-virtual' : ''}`}>{deck.title}</div>
+                    </td>
+                    <td className={`deck-td-lv ${deck.isVirtual ? 'deck-td-lv-virtual' : ''}`}>
+                      {deck.level != null ? `Lv ${deck.level}` : '???'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {decks.length === 0 && (
         <div
           id={allDecks.length === 0 ? "create-a-new-deck" : "just-make-it"}
           onClick={() => onCreateDeck(searchQuery)}
-          style={{ cursor: 'pointer' }}
+          style={{
+            cursor: 'pointer',
+            ...(allDecks.length === 0 && {
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            })
+          }}
         >
           {allDecks.length === 0 ? "make a deck dummy" : "just make it"}
         </div>
