@@ -72,7 +72,7 @@ th {
 #navbar {
   padding-top: 5px;
   display: flex;
-  gap: 25px;
+  gap: 26px;
   flex-wrap: nowrap;
   position: fixed;
   bottom: 5%;
