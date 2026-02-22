@@ -119,10 +119,11 @@
     max-width: 265px;
 }
 
-#searchbar {
+#deck-searchbar-container #searchbar {
     max-width: 265px;
     width: 100%;
     display: block;
+    box-sizing: border-box;
 }
 
 #searchbar::placeholder {
