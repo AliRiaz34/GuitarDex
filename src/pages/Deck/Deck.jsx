@@ -79,21 +79,6 @@ function Deck() {
       setEditView(null);
       setSelectedSong(null);
       setShowCreateView(false);
-
-      // Recalculate deck levels (songs may have been practiced elsewhere)
-      async function reloadDecks() {
-        try {
-          const allDecks = await getAllDecks();
-          await Promise.all(
-            allDecks.map(deck => updateDeckLevel(deck.deckId))
-          );
-          const decksInfo = await getAllDecks();
-          setDecks(decksInfo);
-        } catch (error) {
-          console.error('Error reloading decks:', error);
-        }
-      }
-      reloadDecks();
     }
   }, [location.key]);
 
@@ -534,9 +519,18 @@ function Deck() {
       allDecks={allDecksWithMastered}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      onSelectDeck={(deck) => {
+      onSelectDeck={async (deck) => {
         setEntryDirection(null);
         setSelectedDeck(deck);
+        // Refresh level for this deck (songs may have been practiced elsewhere)
+        if (!deck.isVirtual) {
+          try {
+            const result = await updateDeckLevel(deck.deckId);
+            const refreshed = { ...deck, ...result };
+            setSelectedDeck(refreshed);
+            setDecks(prev => prev.map(d => d.deckId === deck.deckId ? refreshed : d));
+          } catch (e) { /* level will show stored value */ }
+        }
       }}
       onCreateDeck={(initialTitle) => {
         setCreateInitialTitle(initialTitle);
