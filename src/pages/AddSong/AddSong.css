@@ -35,6 +35,8 @@
   flex-direction: column;
   gap: 25px;
   margin-top: 50px;
+  margin-left: -15px;
+  margin-right: -15px;
 }
 
 .button-row {
@@ -46,9 +48,8 @@
 .button-row button {
   transition: color 0.3s ease;
   padding: 0;
-  font-size: 0.9em;
+  font-size: 1em;
   flex: 1;
-  max-width: 140px;
   text-align: center;
 }
 
@@ -60,7 +61,7 @@ button.selected {
 #add-input-div{
     text-align: left;
     padding: 15px;
-    max-width: 350px;
+    max-width: 360px;
     margin: 0 auto;
     box-sizing: border-box;
 }
