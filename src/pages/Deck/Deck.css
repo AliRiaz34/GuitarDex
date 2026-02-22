@@ -119,18 +119,17 @@
     max-width: 265px;
 }
 
-#deck-searchbar-container #searchbar {
+#searchbar {
     max-width: 265px;
     width: 100%;
     display: block;
-    box-sizing: border-box;
 }
 
 #searchbar::placeholder {
     opacity: 0;
 }
 
-#deck-searchbar-container .custom-placeholder {
+.custom-placeholder {
     position: absolute;
     left: 0;
     top: 50%;
@@ -139,10 +138,6 @@
     color: rgba(240, 172, 45, 0.822);
     font-family: 'Pokemon-Classic';
     font-size: 1.1em;
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .blinking-question {
