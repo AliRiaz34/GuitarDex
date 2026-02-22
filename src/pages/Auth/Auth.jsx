@@ -244,7 +244,7 @@ function Auth() {
           navigate('/', { replace: true });
         }}
       >
-        continue offline
+        offline mode
       </button>
     </motion.div>
   );

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { initSync, fullSync, registerRemoteChangeCallback } from '../utils/sync';
-import { clearQueue } from '../utils/syncQueue';
+import { clearQueue, getLastUserId } from '../utils/syncQueue';
 
 const AuthContext = createContext(null);
 
@@ -22,6 +22,10 @@ export function AuthProvider({ children }) {
         // User has a session — exit offline mode
         setOfflineMode(false);
         localStorage.removeItem('guitardex_offline_mode');
+      } else if (!navigator.onLine && getLastUserId()) {
+        // Offline + was previously logged in → auto-enter offline mode
+        setOfflineMode(true);
+        localStorage.setItem('guitardex_offline_mode', 'true');
       }
       setLoading(false);
     });
