@@ -37,7 +37,17 @@ export function AuthProvider({ children }) {
     ['songs', 'practices', 'decks', 'deck_songs'].forEach(table => {
       channel.on(
         'postgres_changes',
-        { event: '*', schema: 'public', table, filter: `user_id=eq.${user.id}` },
+        { event: 'INSERT', schema: 'public', table, filter: `user_id=eq.${user.id}` },
+        bumpRevision
+      );
+      channel.on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table, filter: `user_id=eq.${user.id}` },
+        bumpRevision
+      );
+      channel.on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table },
         bumpRevision
       );
     });
