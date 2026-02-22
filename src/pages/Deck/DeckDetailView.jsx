@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteDeck, getSongsInDeck, getSongById, updateDeckSongOrder } from '../../utils/supabaseDb';
+import { deleteDeck, updateDeckSongOrder } from '../../utils/supabaseDb';
+import { useData } from '../../contexts/DataContext';
 import {
   DndContext,
   closestCenter,
@@ -95,6 +96,7 @@ function SortableRow({ song, onPractice, onSelectSong }) {
 }
 
 function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSong }) {
+  const { songs: allSongs, deckSongs: allDeckSongs } = useData();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [songs, setSongs] = useState([]);
@@ -124,45 +126,30 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     })
   );
 
-  // Load songs in deck
+  // Compute songs in deck from DataContext (no Supabase call)
   useEffect(() => {
-    async function loadDeckSongs() {
-      try {
-        setLoading(true);
-
-        // For virtual decks (like Mastered), songs are already provided
-        if (deck.isVirtual && deck.songs) {
-          setSongs(deck.songs);
-          setTotalMinutes(deck.totalDuration || 0);
-          setLoading(false);
-          return;
-        }
-
-        const deckSongs = await getSongsInDeck(deck.deckId);
-
-        // Fetch full song details for each song in deck
-        const songDetails = await Promise.all(
-          deckSongs.map(async (ps) => {
-            const song = await getSongById(ps.songId);
-            return { ...song, deckSongId: ps.id, order: ps.order };
-          })
-        );
-
-        const validSongs = songDetails.filter(s => s.songId);
-        setSongs(validSongs);
-
-        // Use totalDuration from deck
-        setTotalMinutes(deck.totalDuration || 0);
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading deck songs:', error);
-        setLoading(false);
-      }
+    // For virtual decks (like Mastered), songs are already provided
+    if (deck.isVirtual && deck.songs) {
+      setSongs(deck.songs);
+      setTotalMinutes(deck.totalDuration || 0);
+      setLoading(false);
+      return;
     }
 
-    loadDeckSongs();
-  }, [deck.deckId, deck.totalDuration, deck.isVirtual, deck.songs]);
+    const songMap = new Map(allSongs.map(s => [s.songId, s]));
+    const memberEntries = allDeckSongs.filter(ds => ds.deckId === deck.deckId);
+    const validSongs = memberEntries
+      .map(ds => {
+        const song = songMap.get(ds.songId);
+        return song ? { ...song, deckSongId: ds.id, order: ds.order } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    setSongs(validSongs);
+    setTotalMinutes(deck.totalDuration || 0);
+    setLoading(false);
+  }, [deck.deckId, deck.totalDuration, deck.isVirtual, deck.songs, allSongs, allDeckSongs]);
 
   // Swipe gesture handlers
   useEffect(() => {

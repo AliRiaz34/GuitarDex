@@ -12,7 +12,7 @@ import './Library.css';
 function Library() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { songs, setSongs, isLoading } = useData();
+  const { songs, setSongs, isLoading, updateDeckMembership } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -269,10 +269,11 @@ function Library() {
   };
 
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
-    // Optimistic UI update
+    // Optimistic UI updates
     setPlaylists(prev => (prev || []).map(d =>
       d.deckId === deckId ? { ...d, containsSong: !isInDeck } : d
     ));
+    updateDeckMembership(deckId, songId, !isInDeck);
 
     try {
       if (isInDeck) {
@@ -281,10 +282,11 @@ function Library() {
         await addSongToDeck(deckId, songId);
       }
     } catch (error) {
-      // Revert optimistic update
+      // Revert optimistic updates
       setPlaylists(prev => (prev || []).map(d =>
         d.deckId === deckId ? { ...d, containsSong: isInDeck } : d
       ));
+      updateDeckMembership(deckId, songId, isInDeck);
       console.error('Error toggling deck membership:', error);
       alert('Error updating deck');
     }

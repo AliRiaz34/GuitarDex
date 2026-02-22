@@ -380,6 +380,17 @@ export async function removeSongFromDeck(deckId, songId) {
   try { await updateDeckLevel(deckId); } catch (e) { console.error('Error updating deck level:', e); }
 }
 
+export async function getAllDeckSongs() {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('deck_songs')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  return (data || []).map(r => toLocal('deck_songs', r));
+}
+
 export async function getSongsInDeck(deckId) {
   const userId = await getUserId();
   const { data, error } = await supabase

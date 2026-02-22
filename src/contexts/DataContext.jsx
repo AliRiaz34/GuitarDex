@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { getAllSongs, getAllDecks, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong } from '../utils/supabaseDb';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { getAllSongs, getAllDecks, getAllDeckSongs, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong } from '../utils/supabaseDb';
 import { xpThreshold, applyDecay } from '../utils/levelingSystem';
 import { useAuth } from './AuthContext';
 
@@ -25,16 +25,40 @@ async function enrichSong(song) {
   return decayed;
 }
 
+function enrichDecks(decksData, deckSongsData, songsData) {
+  const songMap = new Map(songsData.map(s => [s.songId, s]));
+  return decksData.map(deck => {
+    const memberSongs = deckSongsData
+      .filter(ds => ds.deckId === deck.deckId)
+      .map(ds => songMap.get(ds.songId))
+      .filter(Boolean);
+
+    if (memberSongs.length === 0) return { ...deck, level: null, totalDuration: 0 };
+
+    const totalDuration = memberSongs.reduce((sum, s) => sum + (s.songDuration ? Number(s.songDuration) : 0), 0);
+    const withLevels = memberSongs.filter(s => s.level != null);
+    const level = withLevels.length > 0
+      ? Math.round(withLevels.reduce((sum, s) => sum + s.level, 0) / withLevels.length)
+      : null;
+
+    return { ...deck, level, totalDuration };
+  });
+}
+
 export function DataProvider({ children }) {
   const { user, dataRevision } = useAuth();
   const [songs, setSongs] = useState([]);
   const [decks, setDecks] = useState([]);
+  const [deckSongs, setDeckSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const songsRef = useRef(songs);
+  songsRef.current = songs;
 
   useEffect(() => {
     if (!user) {
       setSongs([]);
       setDecks([]);
+      setDeckSongs([]);
       setIsLoading(true);
       return;
     }
@@ -44,14 +68,18 @@ export function DataProvider({ children }) {
     async function loadAll() {
       if (!isBackgroundRefresh) setIsLoading(true);
       try {
-        const [songsData, decksData] = await Promise.all([
+        const [songsData, decksData, deckSongsData] = await Promise.all([
           getAllSongs(),
-          getAllDecks()
+          getAllDecks(),
+          getAllDeckSongs()
         ]);
 
         const processed = await Promise.all(songsData.map(enrichSong));
+        const enrichedDecks = enrichDecks(decksData, deckSongsData, processed);
+
         setSongs(processed);
-        setDecks(decksData);
+        setDeckSongs(deckSongsData);
+        setDecks(enrichedDecks);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -72,17 +100,23 @@ export function DataProvider({ children }) {
     }
   }
 
-  async function refreshDecks() {
-    try {
-      const decksData = await getAllDecks();
-      setDecks(decksData);
-    } catch (error) {
-      console.error('Error refreshing decks:', error);
-    }
+  // Optimistically update deck membership and recompute deck levels locally
+  function updateDeckMembership(deckId, songId, added) {
+    setDeckSongs(prev => {
+      const updated = added
+        ? [...prev, { deckId, songId }]
+        : prev.filter(ds => !(ds.deckId === deckId && ds.songId === songId));
+      // Recompute enriched decks from the updated membership
+      setDecks(currentDecks => {
+        const rawDecks = currentDecks.map(({ level, totalDuration, ...rest }) => rest);
+        return enrichDecks(rawDecks, updated, songsRef.current);
+      });
+      return updated;
+    });
   }
 
   return (
-    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, isLoading, refreshSongs, refreshDecks }}>
+    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, deckSongs, isLoading, refreshSongs, updateDeckMembership }}>
       {children}
     </DataContext.Provider>
   );

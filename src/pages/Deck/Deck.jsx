@@ -7,7 +7,7 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel } from '../../utils/supabaseDb';
+import { getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './Deck.css';
@@ -15,7 +15,7 @@ import './Deck.css';
 function Deck() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { songs, decks, setDecks } = useData();
+  const { songs, decks, setDecks, updateDeckMembership } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -82,6 +82,16 @@ function Deck() {
     }
   }, [location.key]);
 
+  // Keep selectedDeck in sync with DataContext decks (e.g. after level recompute)
+  useEffect(() => {
+    if (selectedDeck && !selectedDeck.isVirtual) {
+      const updated = decks.find(d => d.deckId === selectedDeck.deckId);
+      if (updated && (updated.level !== selectedDeck.level || updated.totalDuration !== selectedDeck.totalDuration)) {
+        setSelectedDeck(updated);
+      }
+    }
+  }, [decks]);
+
   // Filter decks based on search
   const filteredDecks = decks.filter(deck =>
     deck.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -134,24 +144,25 @@ function Deck() {
   };
 
   const handleDeckDelete = (deckId) => {
-    // Remove deck from the list
     setDecks(prevDecks => prevDecks.filter(d => d.deckId !== deckId));
-    // Close the deck detail view
     setSelectedDeck(null);
   };
 
   const handleDeckCreated = (newDeck) => {
     if (editingDeck) {
-      // Update existing deck in the list
-      setDecks(prevDecks => prevDecks.map(d => d.deckId === newDeck.deckId ? newDeck : d));
+      // Preserve enriched fields (level, totalDuration) from existing deck
+      const existing = decks.find(d => d.deckId === newDeck.deckId);
+      const enriched = { ...newDeck, level: existing?.level ?? null, totalDuration: existing?.totalDuration ?? 0 };
+      setDecks(prevDecks => prevDecks.map(d => d.deckId === enriched.deckId ? enriched : d));
       setEditingDeck(null);
+      setShowCreateView(false);
+      setSelectedDeck(enriched);
     } else {
-      // Add new deck to the list
-      setDecks(prevDecks => [newDeck, ...prevDecks]);
+      const enriched = { ...newDeck, level: null, totalDuration: 0 };
+      setDecks(prevDecks => [enriched, ...prevDecks]);
+      setShowCreateView(false);
+      setSelectedDeck(enriched);
     }
-    // Close create view and show the deck
-    setShowCreateView(false);
-    setSelectedDeck(newDeck);
   };
 
   const handleDeckEdit = (deck) => {
@@ -200,18 +211,6 @@ function Deck() {
       updatedSong.xpThreshold = xpThreshold(updatedSong.level);
       updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
       updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-
-      // Update deck level and duration if we're viewing from a real deck (not virtual)
-      if (selectedDeck && !selectedDeck.isVirtual) {
-        await updateDeckLevel(selectedDeck.deckId);
-        const refreshedDeck = await getDeckById(selectedDeck.deckId);
-        setSelectedDeck(refreshedDeck);
-
-        // Also update the deck in the decks array so the list view shows current data
-        setDecks(prevDecks => prevDecks.map(d =>
-          d.deckId === refreshedDeck.deckId ? refreshedDeck : d
-        ));
-      }
 
       // Close practice view and show updated song detail if from song view
       setPracticeView(null);
@@ -300,15 +299,6 @@ function Deck() {
     try {
       await deleteSong(songId);
       setSelectedSong(null);
-      // Refresh the deck if it's still selected
-      if (selectedDeck) {
-        await updateDeckLevel(selectedDeck.deckId);
-        const refreshedDeck = await getDeckById(selectedDeck.deckId);
-        setSelectedDeck(refreshedDeck);
-        // Also refresh the decks list
-        const updatedDecks = await getAllDecks();
-        setDecks(updatedDecks);
-      }
     } catch (error) {
       console.error('Error deleting song:', error);
       alert('Error deleting song');
@@ -316,10 +306,11 @@ function Deck() {
   };
 
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
-    // Optimistic UI update
+    // Optimistic UI updates
     setDecksForMenu(prev => prev.map(d =>
       d.deckId === deckId ? { ...d, containsSong: !isInDeck } : d
     ));
+    updateDeckMembership(deckId, songId, !isInDeck);
 
     try {
       if (isInDeck) {
@@ -327,39 +318,18 @@ function Deck() {
       } else {
         await addSongToDeck(deckId, songId);
       }
-
-      // Refresh the deck data
-      const refreshedDeck = await getDeckById(deckId);
-
-      if (selectedDeck && selectedDeck.deckId === deckId) {
-        setSelectedDeck(refreshedDeck);
-      }
-
-      setDecks(prevDecks => prevDecks.map(d =>
-        d.deckId === deckId ? refreshedDeck : d
-      ));
     } catch (error) {
-      // Revert optimistic update
+      // Revert optimistic updates
       setDecksForMenu(prev => prev.map(d =>
         d.deckId === deckId ? { ...d, containsSong: isInDeck } : d
       ));
+      updateDeckMembership(deckId, songId, isInDeck);
       console.error('Error toggling deck membership:', error);
       alert('Error updating deck');
     }
   };
 
-  const handleSongBack = async () => {
-    // Refresh deck data before going back to deck view (skip for virtual decks)
-    if (selectedDeck && !selectedDeck.isVirtual) {
-      await updateDeckLevel(selectedDeck.deckId);
-      const refreshedDeck = await getDeckById(selectedDeck.deckId);
-      setSelectedDeck(refreshedDeck);
-
-      // Also update the deck in the decks array so the list view shows current data
-      setDecks(prevDecks => prevDecks.map(d =>
-        d.deckId === refreshedDeck.deckId ? refreshedDeck : d
-      ));
-    }
+  const handleSongBack = () => {
     setSelectedSong(null);
   };
 
@@ -377,18 +347,6 @@ function Deck() {
         updatedSong.xpThreshold = xpThreshold(updatedSong.level);
         updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
         updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-      }
-
-      // Update deck level and duration if we're viewing from a real deck (not virtual)
-      if (selectedDeck && !selectedDeck.isVirtual) {
-        await updateDeckLevel(selectedDeck.deckId);
-        const refreshedDeck = await getDeckById(selectedDeck.deckId);
-        setSelectedDeck(refreshedDeck);
-
-        // Also update the deck in the decks array so the list view shows current data
-        setDecks(prevDecks => prevDecks.map(d =>
-          d.deckId === refreshedDeck.deckId ? refreshedDeck : d
-        ));
       }
 
       // Close edit view and return to song detail view with updated song
@@ -519,18 +477,9 @@ function Deck() {
       allDecks={allDecksWithMastered}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
-      onSelectDeck={async (deck) => {
+      onSelectDeck={(deck) => {
         setEntryDirection(null);
         setSelectedDeck(deck);
-        // Refresh level for this deck (songs may have been practiced elsewhere)
-        if (!deck.isVirtual) {
-          try {
-            const result = await updateDeckLevel(deck.deckId);
-            const refreshed = { ...deck, ...result };
-            setSelectedDeck(refreshed);
-            setDecks(prev => prev.map(d => d.deckId === deck.deckId ? refreshed : d));
-          } catch (e) { /* level will show stored value */ }
-        }
       }}
       onCreateDeck={(initialTitle) => {
         setCreateInitialTitle(initialTitle);
