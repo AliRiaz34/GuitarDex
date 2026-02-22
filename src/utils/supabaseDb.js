@@ -358,7 +358,7 @@ export async function addSongToDeck(deckId, songId, order) {
   };
   const remote = toRemote('deck_songs', deckSongData, userId);
 
-  const { error } = await supabase.from('deck_songs').insert(remote);
+  const { error } = await supabase.from('deck_songs').upsert(remote, { onConflict: 'deck_id,song_id' });
   if (error) throw error;
 
   try { await updateDeckLevel(deckId); } catch (e) { console.error('Error updating deck level:', e); }

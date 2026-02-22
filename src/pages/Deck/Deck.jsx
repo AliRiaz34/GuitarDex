@@ -316,6 +316,11 @@ function Deck() {
   };
 
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
+    // Optimistic UI update
+    setDecksForMenu(prev => prev.map(d =>
+      d.deckId === deckId ? { ...d, containsSong: !isInDeck } : d
+    ));
+
     try {
       if (isInDeck) {
         await removeSongFromDeck(deckId, songId);
@@ -323,26 +328,21 @@ function Deck() {
         await addSongToDeck(deckId, songId);
       }
 
-      // Update the affected deck's level and duration
-      await updateDeckLevel(deckId);
-
       // Refresh the deck data
       const refreshedDeck = await getDeckById(deckId);
 
-      // If we're currently viewing the affected deck, update it
       if (selectedDeck && selectedDeck.deckId === deckId) {
         setSelectedDeck(refreshedDeck);
       }
 
-      // Also update the deck in the decks array so the list view shows current data
       setDecks(prevDecks => prevDecks.map(d =>
         d.deckId === deckId ? refreshedDeck : d
       ));
-
-      // Reload decks menu to update membership status
-      const decks = await getDecksForMenu(songId);
-      setDecksForMenu(decks);
     } catch (error) {
+      // Revert optimistic update
+      setDecksForMenu(prev => prev.map(d =>
+        d.deckId === deckId ? { ...d, containsSong: isInDeck } : d
+      ));
       console.error('Error toggling deck membership:', error);
       alert('Error updating deck');
     }

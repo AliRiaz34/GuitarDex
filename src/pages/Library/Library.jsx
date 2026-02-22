@@ -269,15 +269,22 @@ function Library() {
   };
 
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
+    // Optimistic UI update
+    setPlaylists(prev => (prev || []).map(d =>
+      d.deckId === deckId ? { ...d, containsSong: !isInDeck } : d
+    ));
+
     try {
       if (isInDeck) {
         await removeSongFromDeck(deckId, songId);
       } else {
         await addSongToDeck(deckId, songId);
       }
-      const decksData = await getDecksForMenu(songId);
-      setPlaylists(decksData);
     } catch (error) {
+      // Revert optimistic update
+      setPlaylists(prev => (prev || []).map(d =>
+        d.deckId === deckId ? { ...d, containsSong: isInDeck } : d
+      ));
       console.error('Error toggling deck membership:', error);
       alert('Error updating deck');
     }
