@@ -189,7 +189,7 @@ function Auth() {
                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
                 animate={{ opacity: 1, height: 'auto', marginTop: 30 }}
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.35 }}
               >
                 <div className="auth-field" style={{ marginTop: 0 }}>
                   <label htmlFor="auth-confirm" className="auth-label">confirm password</label>
