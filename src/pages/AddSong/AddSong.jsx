@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../../utils/db';
+import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../../utils/supabaseDb';
 import { xpThreshold } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './AddSong.css';

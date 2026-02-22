@@ -4,7 +4,7 @@ import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
 import EditView from './EditView';
-import { getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/db';
+import { getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/supabaseDb';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './Library.css';

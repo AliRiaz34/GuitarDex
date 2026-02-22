@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addDeck, updateDeck, getNextDeckId } from '../../utils/db';
+import { addDeck, updateDeck, getNextDeckId } from '../../utils/supabaseDb';
 import './Deck.css';
 
 function DeckCreateView({ onBack, onDeckCreated, initialTitle = "", editDeck = null }) {

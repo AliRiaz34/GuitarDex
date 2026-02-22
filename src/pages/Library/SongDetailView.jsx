@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteSong, updateSong } from '../../utils/db';
+import { deleteSong, updateSong } from '../../utils/supabaseDb';
 import './Library.css';
 
 function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirection, decks, onToggleDeck, onUpgrade, onLyricsUpdate }) {

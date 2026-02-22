@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteDeck, getSongsInDeck, getSongById, updateDeckSongOrder } from '../../utils/db';
+import { deleteDeck, getSongsInDeck, getSongById, updateDeckSongOrder } from '../../utils/supabaseDb';
 import {
   DndContext,
   closestCenter,

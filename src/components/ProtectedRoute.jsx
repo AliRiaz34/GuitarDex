@@ -3,16 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
 function ProtectedRoute({ children }) {
-  const { user, loading, syncing, offlineMode } = useAuth();
+  const { user, loading } = useAuth();
 
-  const showLoading = loading || (!offlineMode && syncing);
-
-  if (!showLoading && !user && !offlineMode) return <Navigate to="/auth" replace />;
+  if (!loading && !user) return <Navigate to="/auth" replace />;
 
   return (
     <>
       <AnimatePresence>
-        {showLoading && (
+        {loading && (
           <motion.div
             key="loading-screen"
             initial={{ opacity: 1 }}
@@ -36,7 +34,7 @@ function ProtectedRoute({ children }) {
           </motion.div>
         )}
       </AnimatePresence>
-      {!showLoading && (user || offlineMode) && children}
+      {!loading && user && children}
     </>
   );
 }

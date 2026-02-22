@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getAllSongs, getAllDecks, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong } from '../utils/db';
+import { getAllSongs, getAllDecks, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong } from '../utils/supabaseDb';
 import { xpThreshold, applyDecay } from '../utils/levelingSystem';
 import { useAuth } from './AuthContext';
 
@@ -26,21 +26,18 @@ async function enrichSong(song) {
 }
 
 export function DataProvider({ children }) {
-  const { user, syncing, syncRevision, offlineMode } = useAuth();
+  const { user, dataRevision } = useAuth();
   const [songs, setSongs] = useState([]);
   const [decks, setDecks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user && !offlineMode) {
+    if (!user) {
       setSongs([]);
       setDecks([]);
       setIsLoading(true);
       return;
     }
-
-    // Wait for sync to finish before loading data from IndexedDB (not needed in offline mode)
-    if (!offlineMode && syncing) return;
 
     const isBackgroundRefresh = !isLoading && songs.length > 0;
 
@@ -63,7 +60,7 @@ export function DataProvider({ children }) {
     }
 
     loadAll();
-  }, [user, syncing, offlineMode, syncRevision]);
+  }, [user, dataRevision]);
 
   async function refreshSongs() {
     try {
