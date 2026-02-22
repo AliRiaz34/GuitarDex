@@ -34,6 +34,7 @@ export function AuthProvider({ children }) {
         syncCleanupRef.current();
         syncCleanupRef.current = null;
       }
+      setSyncing(false);
       return;
     }
 
