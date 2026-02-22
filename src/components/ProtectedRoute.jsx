@@ -1,16 +1,20 @@
 import { Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const { isLoading: dataLoading } = useData();
+
+  const showLoading = loading || (user && dataLoading);
 
   if (!loading && !user) return <Navigate to="/auth" replace />;
 
   return (
     <>
       <AnimatePresence>
-        {loading && (
+        {showLoading && (
           <motion.div
             key="loading-screen"
             initial={{ opacity: 1 }}
@@ -34,7 +38,7 @@ function ProtectedRoute({ children }) {
           </motion.div>
         )}
       </AnimatePresence>
-      {!loading && user && children}
+      {!showLoading && user && children}
     </>
   );
 }
