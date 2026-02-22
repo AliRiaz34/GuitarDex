@@ -86,3 +86,14 @@ export function setLastSyncTime(isoString) {
 export function isOnline() {
   return navigator.onLine;
 }
+
+// Track which user owns the local data
+const LAST_USER_KEY = 'guitardex_last_user';
+
+export function getLastUserId() {
+  return localStorage.getItem(LAST_USER_KEY) || null;
+}
+
+export function setLastUserId(userId) {
+  localStorage.setItem(LAST_USER_KEY, userId);
+}

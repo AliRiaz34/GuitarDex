@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { initSync } from '../utils/sync';
+import { initSync, fullSync, registerRemoteChangeCallback } from '../utils/sync';
 import { clearQueue } from '../utils/syncQueue';
 
 const AuthContext = createContext(null);
@@ -9,22 +9,40 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(true);
+  const [offlineMode, setOfflineMode] = useState(
+    () => localStorage.getItem('guitardex_offline_mode') === 'true'
+  );
+  const [syncRevision, setSyncRevision] = useState(0);
   const syncCleanupRef = useRef(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        // User has a session — exit offline mode
+        setOfflineMode(false);
+        localStorage.removeItem('guitardex_offline_mode');
+      }
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          setOfflineMode(false);
+          localStorage.removeItem('guitardex_offline_mode');
+        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const enterOfflineMode = () => {
+    setOfflineMode(true);
+    localStorage.setItem('guitardex_offline_mode', 'true');
+  };
 
   // Initialize sync when user is authenticated
   useEffect(() => {
@@ -39,6 +57,11 @@ export function AuthProvider({ children }) {
     }
 
     let cancelled = false;
+
+    // Register callback so realtime events bump syncRevision → DataContext reloads
+    registerRemoteChangeCallback(() => {
+      if (!cancelled) setSyncRevision(r => r + 1);
+    });
 
     async function startSync() {
       setSyncing(true);
@@ -65,6 +88,22 @@ export function AuthProvider({ children }) {
         syncCleanupRef.current = null;
       }
     };
+  }, [user]);
+
+  // Background sync when tab regains visibility (cross-device sync)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fullSync(user.id)
+          .then(() => setSyncRevision(r => r + 1))
+          .catch(err => console.error('Background sync error:', err));
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [user]);
 
   const signUp = async (email, password) => {
@@ -94,7 +133,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, syncing, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, syncing, syncRevision, offlineMode, signUp, signIn, signOut, enterOfflineMode }}>
       {children}
     </AuthContext.Provider>
   );

@@ -26,21 +26,21 @@ async function enrichSong(song) {
 }
 
 export function DataProvider({ children }) {
-  const { user, syncing } = useAuth();
+  const { user, syncing, syncRevision, offlineMode } = useAuth();
   const [songs, setSongs] = useState([]);
   const [decks, setDecks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !offlineMode) {
       setSongs([]);
       setDecks([]);
       setIsLoading(true);
       return;
     }
 
-    // Wait for sync to finish before loading data from IndexedDB
-    if (syncing) return;
+    // Wait for sync to finish before loading data from IndexedDB (not needed in offline mode)
+    if (!offlineMode && syncing) return;
 
     async function loadAll() {
       setIsLoading(true);
@@ -61,7 +61,7 @@ export function DataProvider({ children }) {
     }
 
     loadAll();
-  }, [user, syncing]);
+  }, [user, syncing, offlineMode, syncRevision]);
 
   async function refreshSongs() {
     try {

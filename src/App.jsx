@@ -37,7 +37,7 @@ function AnimatedRoutes() {
 }
 
 function AppContent() {
-  const { user, syncing } = useAuth()
+  const { user, syncing, offlineMode } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
@@ -49,7 +49,7 @@ function AppContent() {
     }
   }, [])
 
-  const showNavbar = user && !syncing && location.pathname !== '/auth'
+  const showNavbar = (user || offlineMode) && !syncing && location.pathname !== '/auth'
 
   return (
     <>

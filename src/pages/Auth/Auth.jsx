@@ -12,7 +12,7 @@ function Auth() {
   const [error, setError] = useState({ field: '', msg: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, enterOfflineMode } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -235,6 +235,16 @@ function Auth() {
 
       <button id="auth-toggle" onClick={toggleMode}>
         {isSignUp ? 'already a member? log in' : 'no account? sign up'}
+      </button>
+
+      <button
+        id="auth-offline"
+        onClick={() => {
+          enterOfflineMode();
+          navigate('/', { replace: true });
+        }}
+      >
+        continue offline
       </button>
     </motion.div>
   );

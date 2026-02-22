@@ -984,3 +984,22 @@ export async function deleteDeckSongDirect(id) {
     request.onerror = () => reject(new Error('Failed to delete deck song direct'));
   });
 }
+
+// Clear all data from all stores (used when switching accounts)
+export async function clearAllData() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      [SONGS_STORE, PRACTICES_STORE, DECKS_STORE, DECK_SONGS_STORE],
+      'readwrite'
+    );
+
+    transaction.objectStore(SONGS_STORE).clear();
+    transaction.objectStore(PRACTICES_STORE).clear();
+    transaction.objectStore(DECKS_STORE).clear();
+    transaction.objectStore(DECK_SONGS_STORE).clear();
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(new Error('Failed to clear all data'));
+  });
+}

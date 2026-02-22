@@ -7,10 +7,11 @@ import {
   getAllSongs, getAllPractices, getAllDecks, getAllDeckSongs,
   putSongDirect, putPracticeDirect, putDeckDirect, putDeckSongDirect,
   deleteSongDirect, deleteDeckDirect, deletePracticeDirect, deleteDeckSongDirect,
-  registerSyncCallback
+  registerSyncCallback, clearAllData
 } from './db';
 import {
-  enqueue, getQueue, clearQueue, getLastSyncTime, setLastSyncTime, isOnline
+  enqueue, getQueue, clearQueue, getLastSyncTime, setLastSyncTime, isOnline,
+  getLastUserId, setLastUserId
 } from './syncQueue';
 
 // ─── Field name mapping (local camelCase ↔ Supabase snake_case) ───
@@ -80,12 +81,9 @@ function toRemote(table, localRecord, userId) {
     }
   }
 
-  // Handle nullable fields that have NOT NULL constraints in Supabase
+  // Default xp to 0 (level, highest_level_reached, practice_streak are nullable)
   if (table === 'songs') {
     if (remote.xp == null) remote.xp = 0;
-    if (remote.level == null) remote.level = 0;
-    if (remote.highest_level_reached == null) remote.highest_level_reached = 0;
-    if (remote.practice_streak == null) remote.practice_streak = 0;
   }
 
   return remote;
@@ -450,6 +448,72 @@ export async function localHasData() {
   return songs.length > 0;
 }
 
+// ─── Realtime subscriptions ───
+
+let remoteChangeCallback = null;
+let remoteChangeTimer = null;
+
+export function registerRemoteChangeCallback(cb) {
+  remoteChangeCallback = cb;
+}
+
+function notifyRemoteChange() {
+  if (remoteChangeCallback) {
+    // Debounce rapid events (e.g. bulk operations) into a single UI refresh
+    clearTimeout(remoteChangeTimer);
+    remoteChangeTimer = setTimeout(() => {
+      try {
+        remoteChangeCallback();
+      } catch (e) {
+        console.error('Remote change callback error:', e);
+      }
+    }, 300);
+  }
+}
+
+async function handleRealtimeEvent(table, payload) {
+  try {
+    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+      const localRecord = toLocal(table, payload.new);
+      switch (table) {
+        case 'songs': await putSongDirect(localRecord); break;
+        case 'practices': await putPracticeDirect(localRecord); break;
+        case 'decks': await putDeckDirect(localRecord); break;
+        case 'deck_songs': await putDeckSongDirect(localRecord); break;
+      }
+    } else if (payload.eventType === 'DELETE') {
+      const id = payload.old.id;
+      switch (table) {
+        case 'songs': await deleteSongDirect(id); break;
+        case 'practices': await deletePracticeDirect(id); break;
+        case 'decks': await deleteDeckDirect(id); break;
+        case 'deck_songs': await deleteDeckSongDirect(id); break;
+      }
+    }
+    notifyRemoteChange();
+  } catch (error) {
+    console.error(`Realtime sync error (${table}):`, error);
+  }
+}
+
+function subscribeToRealtime(userId) {
+  const tables = ['songs', 'practices', 'decks', 'deck_songs'];
+
+  let channel = supabase.channel('guitardex-sync');
+
+  for (const table of tables) {
+    channel = channel.on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` },
+      (payload) => handleRealtimeEvent(table, payload)
+    );
+  }
+
+  channel.subscribe();
+
+  return () => supabase.removeChannel(channel);
+}
+
 // ─── Initialize sync system ───
 
 // Call this after user is authenticated
@@ -479,6 +543,15 @@ export async function initSync(userId) {
   // Perform initial sync if online
   if (isOnline()) {
     try {
+      // Detect user switch — clear stale local data from previous account
+      const lastUserId = getLastUserId();
+      if (lastUserId && lastUserId !== userId) {
+        console.log('User changed, clearing local data from previous account...');
+        await clearAllData();
+        clearQueue();
+      }
+      setLastUserId(userId);
+
       const hasRemote = await remoteHasData(userId);
       const hasLocal = await localHasData();
 
@@ -504,9 +577,14 @@ export async function initSync(userId) {
     }
   }
 
+  // Subscribe to realtime changes from other devices
+  const unsubscribeRealtime = subscribeToRealtime(userId);
+
   // Return cleanup function
   return () => {
     window.removeEventListener('online', handleOnline);
     registerSyncCallback(null);
+    unsubscribeRealtime();
+    registerRemoteChangeCallback(null);
   };
 }

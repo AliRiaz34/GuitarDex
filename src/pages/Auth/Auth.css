@@ -146,3 +146,16 @@
 #auth-toggle:hover {
     color: white;
 }
+
+#auth-offline {
+    margin-top: 40px;
+    font-size: 0.7em;
+    color: rgb(100, 100, 100);
+    text-align: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Pokemon-Classic';
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
