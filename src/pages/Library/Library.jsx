@@ -56,18 +56,20 @@ function Library() {
   }, [selectedSong?.songId]);
 
   useEffect(() => {
+    if (location.pathname !== '/' && location.pathname !== '/library') return;
+
     if (location.state?.newSong) {
       const newSong = location.state.newSong;
       setSelectedSong(newSong);
       setPracticeView(null);
       setEditView(null);
-    } else if (location.pathname === '/library' || location.pathname === '/') {
+    } else {
       setPracticeView(null);
       setSelectedSong(null);
       setSearchQuery('');
       setEditView(null);
     }
-  }, [location]);
+  }, [location.pathname, location.key]);
 
   const filteredSongs = songs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import { AnimatePresence } from 'framer-motion'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import './App.css'
 import Navbar from './Nav'
@@ -14,17 +13,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 function AnimatedRoutes() {
   const location = useLocation()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    // Replace current route to prevent swipe-back navigation
-    const path = window.location.pathname + (window.location.search || '')
-    navigate(path, { replace: true })
-  }, [navigate])
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+    <Routes location={location} key={location.pathname}>
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={
           <ProtectedRoute><Library /></ProtectedRoute>
@@ -42,7 +33,6 @@ function AnimatedRoutes() {
           <ProtectedRoute><Social /></ProtectedRoute>
         } />
       </Routes>
-    </AnimatePresence>
   )
 }
 
