@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import DeckCreateView from './DeckCreateView';
@@ -7,7 +7,7 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel, getMasteredSongs } from '../../utils/supabaseDb';
+import { getAllDecks, getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong, getDeckById, updateDeckLevel } from '../../utils/supabaseDb';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './Deck.css';
@@ -15,7 +15,7 @@ import './Deck.css';
 function Deck() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { decks, setDecks } = useData();
+  const { songs, decks, setDecks } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -40,36 +40,30 @@ function Deck() {
   const [createInitialTitle, setCreateInitialTitle] = useState("");
   const [editingDeck, setEditingDeck] = useState(null);
 
-  // Create virtual Mastered deck from mastered songs
-  const [masteredDeck, setMasteredDeck] = useState(null);
+  // Compute virtual Mastered deck from songs already in DataContext
+  const masteredDeck = useMemo(() => {
+    const masteredSongs = songs
+      .filter(s => s.status === 'mastered')
+      .sort((a, b) => {
+        const dateA = new Date(a.lastPracticed || a.creationDate || 0);
+        const dateB = new Date(b.lastPracticed || b.creationDate || 0);
+        return dateB - dateA;
+      });
 
-  useEffect(() => {
-    async function loadMasteredDeck() {
-      try {
-        const masteredSongs = await getMasteredSongs();
-        // Sort by most recent (lastPracticed or creationDate)
-        masteredSongs.sort((a, b) => {
-          const dateA = new Date(a.lastPracticed || a.creationDate || 0);
-          const dateB = new Date(b.lastPracticed || b.creationDate || 0);
-          return dateB - dateA;
-        });
-        const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration ? Number(song.songDuration) : 0), 0);
+    if (masteredSongs.length === 0) return null;
 
-        setMasteredDeck({
-          deckId: 'mastered',
-          title: 'mastered',
-          level: 20, // Mastered songs are level 20+
-          totalDuration,
-          creationDate: new Date(0).toISOString(), // Oldest possible date
-          isVirtual: true, // Flag to identify virtual deck
-          songs: masteredSongs
-        });
-      } catch (error) {
-        console.error('Error loading mastered deck:', error);
-      }
-    }
-    loadMasteredDeck();
-  }, [decks]); // Reload when decks change (which happens after practice)
+    const totalDuration = masteredSongs.reduce((sum, song) => sum + (song.songDuration ? Number(song.songDuration) : 0), 0);
+
+    return {
+      deckId: 'mastered',
+      title: 'mastered',
+      level: 20,
+      totalDuration,
+      creationDate: new Date(0).toISOString(),
+      isVirtual: true,
+      songs: masteredSongs
+    };
+  }, [songs]);
 
   // Handle navigation state (new deck from DeckCreateView, or reset from nav button)
   useEffect(() => {

@@ -8,7 +8,7 @@ import Deck from './pages/Deck'
 import Social from './pages/Social'
 import Auth from './pages/Auth'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { DataProvider } from './contexts/DataContext'
+import { DataProvider, useData } from './contexts/DataContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function AnimatedRoutes() {
@@ -38,6 +38,7 @@ function AnimatedRoutes() {
 
 function AppContent() {
   const { user } = useAuth()
+  const { isLoading: dataLoading } = useData()
   const location = useLocation()
 
   useEffect(() => {
@@ -49,7 +50,7 @@ function AppContent() {
     }
   }, [])
 
-  const showNavbar = user && location.pathname !== '/auth'
+  const showNavbar = user && !dataLoading && location.pathname !== '/auth'
 
   return (
     <>

@@ -12,11 +12,15 @@ function Auth() {
   const [error, setError] = useState({ field: '', msg: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate('/', { replace: true });
+    if (user) {
+      const timer = setTimeout(() => navigate('/', { replace: true }), 250);
+      return () => clearTimeout(timer);
+    }
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -66,7 +70,7 @@ function Auth() {
       } else {
         await signIn(fakeEmail, password);
       }
-      navigate('/', { replace: true });
+      setLoginSuccess(true);
     } catch (err) {
       console.error('Auth error:', err.message);
       const msg = err.message?.toLowerCase() || '';
@@ -105,16 +109,19 @@ function Auth() {
     <motion.div
       id="auth-view"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      animate={{ opacity: loginSuccess ? 0 : 1 }}
+      transition={{ duration: loginSuccess ? 0.35 : 0.4, ease: 'easeOut' }}
     >
       <div id="auth-logo-container">
         <img id="auth-logo" src="/pwa-192x192.png" alt="GuitarDex" />
         <h1 id="auth-title">GuitarDex</h1>
       </div>
 
-      <form id="auth-form" onSubmit={handleSubmit} noValidate>
+      <form
+        id="auth-form"
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <div id="auth-input-div">
           <div className="auth-field">
             <label htmlFor="auth-email" className="auth-label">username</label>
@@ -233,7 +240,10 @@ function Auth() {
         </button>
       </form>
 
-      <button id="auth-toggle" onClick={toggleMode}>
+      <button
+        id="auth-toggle"
+        onClick={toggleMode}
+      >
         {isSignUp ? 'already a member? log in' : 'no account? sign up'}
       </button>
 
