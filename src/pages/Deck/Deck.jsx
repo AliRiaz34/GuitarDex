@@ -80,18 +80,13 @@ function Deck() {
       setSelectedSong(null);
       setShowCreateView(false);
 
-      // Reload deck data to reflect any changes made from other views
+      // Recalculate deck levels (songs may have been practiced elsewhere)
       async function reloadDecks() {
         try {
-          // First, get all decks to know which ones to update
           const allDecks = await getAllDecks();
-
-          // Recalculate levels for all decks (in case songs were practiced elsewhere)
           await Promise.all(
             allDecks.map(deck => updateDeckLevel(deck.deckId))
           );
-
-          // Now fetch the updated deck data
           const decksInfo = await getAllDecks();
           setDecks(decksInfo);
         } catch (error) {
@@ -100,7 +95,7 @@ function Deck() {
       }
       reloadDecks();
     }
-  }, [location]);
+  }, [location.key]);
 
   // Filter decks based on search
   const filteredDecks = decks.filter(deck =>
