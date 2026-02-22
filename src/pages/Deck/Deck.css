@@ -138,6 +138,10 @@
     color: rgba(240, 172, 45, 0.822);
     font-family: 'Pokemon-Classic';
     font-size: 1.1em;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .blinking-question {
