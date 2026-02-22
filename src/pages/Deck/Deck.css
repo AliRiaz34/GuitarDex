@@ -130,7 +130,7 @@
     opacity: 0;
 }
 
-.custom-placeholder {
+#deck-searchbar-container .custom-placeholder {
     position: absolute;
     left: 0;
     top: 50%;
