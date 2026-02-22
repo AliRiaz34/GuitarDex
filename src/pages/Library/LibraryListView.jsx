@@ -26,6 +26,11 @@ function LibraryListView({
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const containerRef = useRef(null);
+  const hasMountedRef = useRef(false);
+
+  useEffect(() => {
+    hasMountedRef.current = true;
+  }, []);
 
   // Restore scroll position when component mounts
   useEffect(() => {
@@ -130,27 +135,41 @@ function LibraryListView({
         {isLoading ? null : songs.length > 0 ? (
           <table id="library-table">
             <tbody>
-              {songs.map((song, index) => (
-                <motion.tr
-                  key={song.songId}
-                  className="song-tr"
-                  initial={!hasAnimatedLibrary && index < 10 ? { opacity: 0 } : false}
-                  animate={{ opacity: 1 }}
-                  transition={!hasAnimatedLibrary && index < 10 ? {
-                    duration: 0.4,
-                    ease: 'easeOut',
-                    delay: index * 0.05,
-                  } : { duration: 0 }}
-                >
-                  <td className="song-td" onClick={() => onSelectSong(song)}>
-                    <div className="song-title">{song.title}</div>
-                    <div className="song-artist">{song.artistName}</div>
-                  </td>
-                  <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
-                    {song.level != null ? `Lv ${song.level}` : '???'}
-                  </td>
-                </motion.tr>
-              ))}
+              <AnimatePresence>
+                {songs.map((song, index) => {
+                  const isInitialLoad = !hasAnimatedLibrary && index < 10;
+                  const isNewWhileMounted = hasAnimatedLibrary && hasMountedRef.current;
+
+                  return (
+                    <motion.tr
+                      key={song.songId}
+                      className="song-tr"
+                      initial={
+                        isInitialLoad
+                          ? { opacity: 0 }
+                          : isNewWhileMounted
+                            ? { opacity: 0, y: -8 }
+                            : false
+                      }
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={
+                        isInitialLoad
+                          ? { duration: 0.4, ease: 'easeOut', delay: index * 0.05 }
+                          : { duration: 0.25, ease: 'easeOut' }
+                      }
+                    >
+                      <td className="song-td" onClick={() => onSelectSong(song)}>
+                        <div className="song-title">{song.title}</div>
+                        <div className="song-artist">{song.artistName}</div>
+                      </td>
+                      <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
+                        {song.level != null ? `Lv ${song.level}` : '???'}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
             </tbody>
           </table>
         ) : (

@@ -42,8 +42,10 @@ export function DataProvider({ children }) {
     // Wait for sync to finish before loading data from IndexedDB (not needed in offline mode)
     if (!offlineMode && syncing) return;
 
+    const isBackgroundRefresh = !isLoading && songs.length > 0;
+
     async function loadAll() {
-      setIsLoading(true);
+      if (!isBackgroundRefresh) setIsLoading(true);
       try {
         const [songsData, decksData] = await Promise.all([
           getAllSongs(),
