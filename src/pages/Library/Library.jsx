@@ -134,42 +134,43 @@ function Library() {
 
   const handlePracticeSubmit = async ({ minPlayed, songDuration }) => {
     const song = practiceView.song;
+    const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
 
-    try {
-      const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
+    // Optimistic UI — compute transient fields locally and close immediately
+    updatedSong.xpThreshold = xpThreshold(updatedSong.level);
+    updatedSong.totalMinPlayed = (song.totalMinPlayed || 0) + parseFloat(minPlayed);
+    updatedSong.totalSessions = (song.totalSessions || 0) + 1;
 
-      const practiceId = await getNextPracticeId();
-      await addPractice({
-        practiceId,
-        songId: song.songId,
-        minPlayed: parseFloat(minPlayed),
-        xpGain,
-        practiceDate: new Date().toISOString()
+    setSongs(prevSongs => prevSongs.map(s =>
+      s.songId === song.songId ? updatedSong : s
+    ));
+
+    setPracticeView(null);
+    if (practiceView.fromSongView) {
+      setSelectedSong({
+        ...updatedSong,
+        _previousXp: song.xp ?? 0,
+        _previousLevel: song.level ?? 1,
+        _xpGain: xpGain,
+        _fromPractice: true
       });
+    }
 
-      await updateSong(updatedSong.songId, updatedSong);
-
-      updatedSong.xpThreshold = xpThreshold(updatedSong.level);
-      updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
-      updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-
-      setSongs(prevSongs => prevSongs.map(s =>
-        s.songId === song.songId ? updatedSong : s
-      ));
-
-      setPracticeView(null);
-      if (practiceView.fromSongView) {
-        setSelectedSong({
-          ...updatedSong,
-          _previousXp: song.xp ?? 0,
-          _previousLevel: song.level ?? 1,
-          _xpGain: xpGain,
-          _fromPractice: true
-        });
-      }
+    // Supabase writes in background
+    try {
+      const practiceId = await getNextPracticeId();
+      await Promise.all([
+        addPractice({
+          practiceId,
+          songId: song.songId,
+          minPlayed: parseFloat(minPlayed),
+          xpGain,
+          practiceDate: new Date().toISOString()
+        }),
+        updateSong(updatedSong.songId, updatedSong)
+      ]);
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error adding practice");
+      console.error("Error saving practice:", error);
     }
   };
 

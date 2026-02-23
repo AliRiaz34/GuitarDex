@@ -189,45 +189,39 @@ function Deck() {
 
   const handlePracticeSubmit = async ({ minPlayed, songDuration }) => {
     const song = practiceView.song;
+    const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
 
-    try {
-      // Update song with practice using leveling system
-      const { updatedSong, xpGain } = updateSongWithPractice(song, minPlayed, songDuration);
+    // Optimistic UI — compute transient fields locally and close immediately
+    updatedSong.xpThreshold = xpThreshold(updatedSong.level);
+    updatedSong.totalMinPlayed = (song.totalMinPlayed || 0) + parseFloat(minPlayed);
+    updatedSong.totalSessions = (song.totalSessions || 0) + 1;
 
-      // Save practice to IndexedDB
-      const practiceId = await getNextPracticeId();
-      await addPractice({
-        practiceId,
-        songId: song.songId,
-        minPlayed: parseFloat(minPlayed),
-        xpGain,
-        practiceDate: new Date().toISOString()
+    setPracticeView(null);
+    if (practiceView.fromSongView) {
+      setSelectedSong({
+        ...updatedSong,
+        _previousXp: song.xp ?? 0,
+        _previousLevel: song.level ?? 1,
+        _xpGain: xpGain,
+        _fromPractice: true
       });
+    }
 
-      // Update song in IndexedDB
-      await updateSong(updatedSong.songId, updatedSong);
-
-      // Calculate additional fields for updated song
-      updatedSong.xpThreshold = xpThreshold(updatedSong.level);
-      updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
-      updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-
-      // Close practice view and show updated song detail if from song view
-      setPracticeView(null);
-      if (practiceView.fromSongView) {
-        // Pass both old and new song data for animation
-        // For first practice of a seen song, default to xp:0 and level:1
-        setSelectedSong({
-          ...updatedSong,
-          _previousXp: song.xp ?? 0,
-          _previousLevel: song.level ?? 1,
-          _xpGain: xpGain,
-          _fromPractice: true
-        });
-      }
+    // Supabase writes in background
+    try {
+      const practiceId = await getNextPracticeId();
+      await Promise.all([
+        addPractice({
+          practiceId,
+          songId: song.songId,
+          minPlayed: parseFloat(minPlayed),
+          xpGain,
+          practiceDate: new Date().toISOString()
+        }),
+        updateSong(updatedSong.songId, updatedSong)
+      ]);
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error adding practice");
+      console.error("Error saving practice:", error);
     }
   };
 
