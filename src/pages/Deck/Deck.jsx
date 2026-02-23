@@ -7,7 +7,8 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { getSongById, addPractice, getNextPracticeId, updateSong, getTotalMinutesPlayed, getTotalPracticeSessions, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
+import { addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
+
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './Deck.css';
@@ -171,20 +172,9 @@ function Deck() {
     setSelectedDeck(null);
   };
 
-  const openPracticeView = async (song) => {
-    // Fetch full song details with stats
-    try {
-      const fullSong = await getSongById(song.songId);
-      if (fullSong.status !== "seen") {
-        fullSong.xpThreshold = xpThreshold(fullSong.level);
-        fullSong.totalMinPlayed = await getTotalMinutesPlayed(fullSong.songId);
-        fullSong.totalSessions = await getTotalPracticeSessions(fullSong.songId);
-      }
-      setPracticeView({ song: fullSong, fromDeckView: true });
-    } catch (error) {
-      console.error('Error loading song for practice:', error);
-      alert('Error loading song');
-    }
+  const openPracticeView = (song) => {
+    const fullSong = songs.find(s => s.songId === song.songId) || song;
+    setPracticeView({ song: fullSong, fromDeckView: true });
   };
 
   const handlePracticeSubmit = async ({ minPlayed, songDuration }) => {
@@ -237,30 +227,18 @@ function Deck() {
 
   // Song Detail View handlers
   const openSongDetailView = async (song, songsInDeck) => {
-    try {
-      const fullSong = await getSongById(song.songId);
-      if (fullSong.status !== "seen") {
-        fullSong.xpThreshold = xpThreshold(fullSong.level);
-        fullSong.totalMinPlayed = await getTotalMinutesPlayed(fullSong.songId);
-        fullSong.totalSessions = await getTotalPracticeSessions(fullSong.songId);
-      }
+    const fullSong = songs.find(s => s.songId === song.songId) || song;
+    const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
 
-      // Load decks for menu
-      const decks = await getDecksForMenu(song.songId);
-      setDecksForMenu(decks);
-      setSongsInCurrentDeck(songsInDeck);
-      setSongEntryDirection(null);
+    setSongsInCurrentDeck(songsInDeck);
+    setSongEntryDirection(null);
+    setSelectedSong(cleanSong);
 
-      // Remove any animation properties to prevent repeated indicators
-      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
-      setSelectedSong(cleanSong);
-    } catch (error) {
-      console.error('Error loading song details:', error);
-      alert('Error loading song');
-    }
+    // Load decks for menu in background (needs per-song containsSong check)
+    getDecksForMenu(song.songId).then(setDecksForMenu).catch(console.error);
   };
 
-  const handleSongNavigate = async (direction) => {
+  const handleSongNavigate = (direction) => {
     const currentIndex = songsInCurrentDeck.findIndex(s => s.songId === selectedSong.songId);
     const newIndex = currentIndex + direction;
 
@@ -268,20 +246,9 @@ function Deck() {
       const nextSong = songsInCurrentDeck[newIndex];
       setSongEntryDirection(direction > 0 ? 'up' : 'down');
 
-      try {
-        const fullSong = await getSongById(nextSong.songId);
-        if (fullSong.status !== "seen") {
-          fullSong.xpThreshold = xpThreshold(fullSong.level);
-          fullSong.totalMinPlayed = await getTotalMinutesPlayed(fullSong.songId);
-          fullSong.totalSessions = await getTotalPracticeSessions(fullSong.songId);
-        }
-
-        // Remove any animation properties when navigating
-        const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
-        setSelectedSong(cleanSong);
-      } catch (error) {
-        console.error('Error loading next song:', error);
-      }
+      const fullSong = songs.find(s => s.songId === nextSong.songId) || nextSong;
+      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
+      setSelectedSong(cleanSong);
     }
   };
 
@@ -332,25 +299,20 @@ function Deck() {
   };
 
   const handleEditSubmit = async (updatedData) => {
+    // Optimistic UI — merge edits into existing song and close immediately
+    const merged = { ...editView, ...updatedData };
+    if (merged.status !== "seen") {
+      merged.xpThreshold = xpThreshold(merged.level);
+    }
+    const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = merged;
+    setEditView(null);
+    setSelectedSong(cleanSong);
+
+    // Supabase write in background
     try {
-      // Update song in database
-      const updatedSong = await updateSong(editView.songId, updatedData);
-
-      // Recalculate fields if song has been practiced
-      if (updatedSong.status !== "seen") {
-        updatedSong.xpThreshold = xpThreshold(updatedSong.level);
-        updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
-        updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-      }
-
-      // Close edit view and return to song detail view with updated song
-      // Remove any animation properties to prevent repeated indicators
-      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = updatedSong;
-      setEditView(null);
-      setSelectedSong(cleanSong);
+      await updateSong(editView.songId, updatedData);
     } catch (error) {
       console.error("Error updating song:", error);
-      alert("Error updating song");
     }
   };
 

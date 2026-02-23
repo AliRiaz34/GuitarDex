@@ -4,7 +4,7 @@ import PracticeView from './PracticeView';
 import SongDetailView from './SongDetailView';
 import LibraryListView from './LibraryListView';
 import EditView from './EditView';
-import { getTotalMinutesPlayed, getTotalPracticeSessions, addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/supabaseDb';
+import { addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck } from '../../utils/supabaseDb';
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './Library.css';
@@ -192,26 +192,26 @@ function Library() {
   };
 
   const handleEditSubmit = async (updatedData) => {
+    // Optimistic UI — merge edits into existing song and close immediately
+    const merged = { ...editView, ...updatedData };
+    if (merged.status !== "seen") {
+      merged.xpThreshold = xpThreshold(merged.level);
+    }
+
+    setSongs(prevSongs => prevSongs.map(s =>
+      s.songId === editView.songId ? merged : s
+    ));
+
+    const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = merged;
+    setEditView(null);
+    setEntryDirection(null);
+    setSelectedSong(cleanSong);
+
+    // Supabase write in background
     try {
-      const updatedSong = await updateSong(editView.songId, updatedData);
-
-      if (updatedSong.status !== "seen") {
-        updatedSong.xpThreshold = xpThreshold(updatedSong.level);
-        updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
-        updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-      }
-
-      setSongs(prevSongs => prevSongs.map(s =>
-        s.songId === editView.songId ? updatedSong : s
-      ));
-
-      const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = updatedSong;
-      setEditView(null);
-      setEntryDirection(null); // Reset to use fade animation, not swipe
-      setSelectedSong(cleanSong);
+      await updateSong(editView.songId, updatedData);
     } catch (error) {
       console.error("Error updating song:", error);
-      alert("Error updating song");
     }
   };
 
@@ -296,38 +296,37 @@ function Library() {
   const handleUpgrade = async () => {
     if (!selectedSong || selectedSong.status === 'mastered') return;
 
+    const previousXp = selectedSong.xp ?? 0;
+    const previousLevel = selectedSong.level ?? 1;
+
+    const newStatus = selectedSong.status === 'refined' ? 'mastered' : 'refined';
+    const newLevel = newStatus === 'mastered' ? 20 : 10;
+
+    const updatedData = {
+      status: newStatus,
+      level: newLevel,
+      xp: 0,
+      highestLevelReached: Math.max(selectedSong.highestLevelReached || 0, newLevel)
+    };
+
+    // Optimistic UI
+    const merged = { ...selectedSong, ...updatedData, xpThreshold: xpThreshold(newLevel) };
+
+    setSongs(prevSongs => prevSongs.map(s =>
+      s.songId === selectedSong.songId ? merged : s
+    ));
+
+    setSelectedSong({
+      ...merged,
+      _previousXp: previousXp,
+      _previousLevel: previousLevel
+    });
+
+    // Supabase write in background
     try {
-      const previousXp = selectedSong.xp ?? 0;
-      const previousLevel = selectedSong.level ?? 1;
-
-      const newStatus = selectedSong.status === 'refined' ? 'mastered' : 'refined';
-      const newLevel = newStatus === 'mastered' ? 20 : 10;
-
-      const updatedData = {
-        status: newStatus,
-        level: newLevel,
-        xp: 0,
-        highestLevelReached: Math.max(selectedSong.highestLevelReached || 0, newLevel)
-      };
-
-      const updatedSong = await updateSong(selectedSong.songId, updatedData);
-
-      updatedSong.xpThreshold = xpThreshold(updatedSong.level);
-      updatedSong.totalMinPlayed = await getTotalMinutesPlayed(updatedSong.songId);
-      updatedSong.totalSessions = await getTotalPracticeSessions(updatedSong.songId);
-
-      setSongs(prevSongs => prevSongs.map(s =>
-        s.songId === selectedSong.songId ? updatedSong : s
-      ));
-
-      setSelectedSong({
-        ...updatedSong,
-        _previousXp: previousXp,
-        _previousLevel: previousLevel
-      });
+      await updateSong(selectedSong.songId, updatedData);
     } catch (error) {
       console.error('Error upgrading song:', error);
-      alert('Error upgrading song');
     }
   };
 

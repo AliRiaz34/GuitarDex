@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addSong, getNextSongId, getTotalMinutesPlayed, getTotalPracticeSessions } from '../../utils/supabaseDb';
+import { addSong, getNextSongId } from '../../utils/supabaseDb';
 import { xpThreshold } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
 import './AddSong.css';
@@ -102,16 +102,20 @@ function AddSong() {
         lyrics: ''
       };
 
-      await addSong(newSong);
-
+      // Optimistic UI — enrich locally and navigate immediately
       if (status !== "seen") {
         newSong.xpThreshold = xpThreshold(newSong.level);
-        newSong.totalMinPlayed = await getTotalMinutesPlayed(songId);
-        newSong.totalSessions = await getTotalPracticeSessions(songId);
+        newSong.totalMinPlayed = 0;
+        newSong.totalSessions = 0;
       }
 
       setSongs(prevSongs => [newSong, ...prevSongs]);
       navigate('/', { state: { newSong } });
+
+      // Supabase write in background
+      addSong(newSong).catch(error => {
+        console.error("Error saving song:", error);
+      });
     } catch (error) {
       console.error("Error:", error);
       alert("Error adding song");
