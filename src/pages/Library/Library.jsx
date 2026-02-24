@@ -14,7 +14,7 @@ function Library() {
   const navigate = useNavigate();
   const { songs, setSongs, isLoading, updateDeckMembership } = useData();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSong, setSelectedSong] = useState(null);
+  const [selectedSong, setSelectedSong] = useState(location.state?.newSong || null);
   const [sortState, setSortState] = useState('recent');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [playlists, setPlaylists] = useState(null);
