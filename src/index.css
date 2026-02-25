@@ -98,6 +98,7 @@ th {
   text-decoration: none;
   position: relative;
   padding-bottom: 8px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-icon {

@@ -84,7 +84,7 @@ function SocialFeedView({
           </div>
         ) : (
           <p className="social-empty-text">
-            follow some friends !
+            stalk your friends!
           </p>
         )}
       </div>
