@@ -306,7 +306,9 @@ function Library() {
       status: newStatus,
       level: newLevel,
       xp: 0,
-      highestLevelReached: Math.max(selectedSong.highestLevelReached || 0, newLevel)
+      highestLevelReached: Math.max(selectedSong.highestLevelReached || 0, newLevel),
+      lastPracticeDate: new Date().toISOString(),
+      lastDecayDate: new Date().toISOString()
     };
 
     // Optimistic UI

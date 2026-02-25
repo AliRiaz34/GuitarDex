@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { getAllSongs, getAllDecks, getAllDeckSongs, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong } from '../utils/supabaseDb';
+import { getAllSongs, getAllDecks, getAllDeckSongs, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong, getFollowingWithProfiles, getFollowing } from '../utils/supabaseDb';
 import { xpThreshold, applyDecay } from '../utils/levelingSystem';
 import { useAuth } from './AuthContext';
 
@@ -50,6 +50,8 @@ export function DataProvider({ children }) {
   const [songs, setSongs] = useState([]);
   const [decks, setDecks] = useState([]);
   const [deckSongs, setDeckSongs] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [followingIds, setFollowingIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const songsRef = useRef(songs);
   songsRef.current = songs;
@@ -59,6 +61,8 @@ export function DataProvider({ children }) {
       setSongs([]);
       setDecks([]);
       setDeckSongs([]);
+      setFriends([]);
+      setFollowingIds([]);
       setIsLoading(true);
       return;
     }
@@ -68,10 +72,12 @@ export function DataProvider({ children }) {
     async function loadAll() {
       if (!isBackgroundRefresh) setIsLoading(true);
       try {
-        const [songsData, decksData, deckSongsData] = await Promise.all([
+        const [songsData, decksData, deckSongsData, friendsData, followingData] = await Promise.all([
           getAllSongs(),
           getAllDecks(),
-          getAllDeckSongs()
+          getAllDeckSongs(),
+          getFollowingWithProfiles(),
+          getFollowing()
         ]);
 
         const processed = await Promise.all(songsData.map(enrichSong));
@@ -80,6 +86,8 @@ export function DataProvider({ children }) {
         setSongs(processed);
         setDeckSongs(deckSongsData);
         setDecks(enrichedDecks);
+        setFriends(friendsData);
+        setFollowingIds(followingData);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -116,7 +124,7 @@ export function DataProvider({ children }) {
   }
 
   return (
-    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, deckSongs, isLoading, refreshSongs, updateDeckMembership }}>
+    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, deckSongs, friends, setFriends, followingIds, setFollowingIds, isLoading, refreshSongs, updateDeckMembership }}>
       {children}
     </DataContext.Provider>
   );

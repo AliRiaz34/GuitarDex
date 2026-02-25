@@ -91,6 +91,32 @@ CREATE INDEX idx_deck_songs_song_id ON public.deck_songs(song_id);
 CREATE INDEX idx_deck_songs_updated_at ON public.deck_songs(user_id, updated_at);
 
 -- ==================
+-- PROFILES TABLE
+-- ==================
+CREATE TABLE public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_profiles_username ON public.profiles(username);
+
+-- ==================
+-- FOLLOWS TABLE
+-- ==================
+CREATE TABLE public.follows (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  follower_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(follower_id, following_id),
+  CHECK (follower_id != following_id)
+);
+
+CREATE INDEX idx_follows_follower ON public.follows(follower_id);
+CREATE INDEX idx_follows_following ON public.follows(following_id);
+
+-- ==================
 -- AUTO-UPDATE updated_at TRIGGER
 -- ==================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -120,6 +146,8 @@ ALTER TABLE public.songs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.practices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.decks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.deck_songs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 
 -- Songs RLS
 CREATE POLICY "Users can view own songs" ON public.songs
@@ -160,3 +188,39 @@ CREATE POLICY "Users can update own deck_songs" ON public.deck_songs
   FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own deck_songs" ON public.deck_songs
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Profiles RLS
+CREATE POLICY "Authenticated users can view all profiles" ON public.profiles
+  FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Users can insert own profile" ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Follows RLS
+CREATE POLICY "Users can view own follows" ON public.follows
+  FOR SELECT USING (auth.uid() = follower_id);
+CREATE POLICY "Users can insert own follows" ON public.follows
+  FOR INSERT WITH CHECK (auth.uid() = follower_id);
+CREATE POLICY "Users can delete own follows" ON public.follows
+  FOR DELETE USING (auth.uid() = follower_id);
+
+-- Social: followers can view songs of users they follow
+CREATE POLICY "Followers can view songs of followed users" ON public.songs
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.follows
+      WHERE follows.follower_id = auth.uid()
+        AND follows.following_id = songs.user_id
+    )
+  );
+
+-- Social: followers can view practices of users they follow
+CREATE POLICY "Followers can view practices of followed users" ON public.practices
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.follows
+      WHERE follows.follower_id = auth.uid()
+        AND follows.following_id = practices.user_id
+    )
+  );

@@ -38,6 +38,12 @@ function Auth() {
       return;
     }
 
+    if (username.length > 10) {
+      setError({ field: 'username', msg: 'max 10 characters' });
+      setIsSubmitting(false);
+      return;
+    }
+
     if (/[^a-z0-9._-]/.test(username)) {
       setError({ field: 'username', msg: 'invalid characters' });
       setIsSubmitting(false);
@@ -130,7 +136,13 @@ function Auth() {
               className="auth-input"
               id="auth-email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setEmail(val);
+                if (val.trim().length > 10) {
+                  setError({ field: 'username', msg: 'max 10 characters' });
+                }
+              }}
               autoCapitalize="off"
               autoComplete="username"
               autoCorrect="off"

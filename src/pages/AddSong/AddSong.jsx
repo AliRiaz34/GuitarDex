@@ -22,6 +22,10 @@ function AddSong() {
     if (titleParam) {
       setTitle(titleParam);
     }
+    const artistParam = searchParams.get('artist');
+    if (artistParam) {
+      setArtistName(artistParam);
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -127,6 +131,7 @@ function AddSong() {
     <div>
       <form id="song-form" onSubmit={handleSubmit}>
         <div className="add-form-content">
+        <h1 className="add-song-header">add a new song</h1>
         <div id="add-input-div">
           <div className="add-field">
             <label htmlFor="title-input" className="form-label">song name</label>

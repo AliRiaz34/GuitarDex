@@ -475,6 +475,179 @@ export async function getMasteredSongs() {
   return (data || []).map(r => toLocal('songs', r));
 }
 
+// ─── Social ───
+
+export async function ensureProfile() {
+  const userId = await getUserId();
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (!data) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const username = (session?.user?.email || '').split('@')[0] || 'unknown';
+    await supabase.from('profiles').insert({ id: userId, username });
+  }
+}
+
+export async function searchUsers(query) {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .ilike('username', `%${query}%`)
+    .neq('id', userId)
+    .limit(20);
+  if (error) throw error;
+  return data || [];
+}
+
+export async function followUser(followingId) {
+  const userId = await getUserId();
+  const { error } = await supabase
+    .from('follows')
+    .insert({ follower_id: userId, following_id: followingId });
+  if (error) throw error;
+}
+
+export async function unfollowUser(followingId) {
+  const userId = await getUserId();
+  const { error } = await supabase
+    .from('follows')
+    .delete()
+    .eq('follower_id', userId)
+    .eq('following_id', followingId);
+  if (error) throw error;
+}
+
+export async function getFollowing() {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId);
+  if (error) throw error;
+  return (data || []).map(r => r.following_id);
+}
+
+export async function getFollowingWithProfiles() {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId);
+  if (error) throw error;
+
+  const followingIds = (data || []).map(r => r.following_id);
+  if (followingIds.length === 0) return [];
+
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .in('id', followingIds);
+  if (profileError) throw profileError;
+
+  return (profiles || []).map(p => ({ userId: p.id, username: p.username }));
+}
+
+export async function getUserPractices(targetUserId, limit = 50) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: practices, error } = await supabase
+    .from('practices')
+    .select(`
+      id,
+      min_played,
+      practice_date,
+      song_id,
+      songs (title, artist_name)
+    `)
+    .eq('user_id', targetUserId)
+    .gte('practice_date', sevenDaysAgo)
+    .order('practice_date', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+
+  const seen = new Set();
+  const deduped = (practices || []).filter(p => {
+    if (seen.has(p.song_id)) return false;
+    seen.add(p.song_id);
+    return true;
+  });
+
+  return deduped.map(p => ({
+    practiceId: p.id,
+    songTitle: p.songs?.title || '',
+    artistName: p.songs?.artist_name || '',
+    minPlayed: p.min_played,
+    practiceDate: p.practice_date,
+  }));
+}
+
+export async function getActivityFeed(limit = 50, offset = 0) {
+  const userId = await getUserId();
+
+  // Get followed user IDs
+  const { data: followData, error: followError } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId);
+  if (followError) throw followError;
+
+  const followingIds = (followData || []).map(r => r.following_id);
+  if (followingIds.length === 0) return [];
+
+  // Fetch practices from followed users with song data (last 7 days)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: practices, error: practiceError } = await supabase
+    .from('practices')
+    .select(`
+      id,
+      user_id,
+      min_played,
+      practice_date,
+      song_id,
+      songs (title, artist_name)
+    `)
+    .in('user_id', followingIds)
+    .gte('practice_date', sevenDaysAgo)
+    .order('practice_date', { ascending: false })
+    .range(offset, offset + limit - 1);
+  if (practiceError) throw practiceError;
+
+  // Fetch usernames for relevant user IDs
+  const uniqueUserIds = [...new Set((practices || []).map(p => p.user_id))];
+  if (uniqueUserIds.length === 0) return [];
+
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .in('id', uniqueUserIds);
+  if (profileError) throw profileError;
+
+  const usernameMap = new Map((profiles || []).map(p => [p.id, p.username]));
+
+  // Deduplicate: keep only the most recent practice per user+song
+  const seen = new Set();
+  const dedupedPractices = (practices || []).filter(p => {
+    const key = `${p.user_id}|||${p.song_id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return dedupedPractices.map(p => ({
+    practiceId: p.id,
+    userId: p.user_id,
+    username: usernameMap.get(p.user_id) || 'unknown',
+    songTitle: p.songs?.title || '',
+    artistName: p.songs?.artist_name || '',
+    minPlayed: p.min_played,
+    practiceDate: p.practice_date,
+  }));
+}
+
 export async function updateDeckLevel(deckId) {
   const deckSongs = await getSongsInDeck(deckId);
 

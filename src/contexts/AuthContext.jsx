@@ -62,6 +62,18 @@ export function AuthProvider({ children }) {
   const signUp = async (email, password) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+
+    // Create profile row with username extracted from email
+    if (data?.user) {
+      const username = email.split('@')[0];
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({ id: data.user.id, username });
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      }
+    }
+
     return data;
   };
 
@@ -75,6 +87,7 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = async () => {
+    setUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };

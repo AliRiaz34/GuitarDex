@@ -134,10 +134,12 @@ export function applyDecay(songInfo) {
     if (daysSinceSongPracticed <= MASTERED_DECAY_GRACE_PERIOD_DAYS) {
       return songInfo;
     }
-    // Downgrade to refined only
+    // Downgrade to refined — drop level to refined threshold
     return {
       ...songInfo,
       status: "refined",
+      level: MAX_LEVEL_BEFORE_REFINED,
+      xp: 0,
       lastDecayDate: new Date().toISOString()
     };
   }

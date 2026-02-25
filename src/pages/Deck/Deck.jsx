@@ -66,6 +66,31 @@ function Deck() {
     };
   }, [songs]);
 
+  // Compute virtual Refined deck
+  const refinedDeck = useMemo(() => {
+    const refinedSongs = songs
+      .filter(s => s.status === 'refined')
+      .sort((a, b) => {
+        const dateA = new Date(a.lastPracticed || a.creationDate || 0);
+        const dateB = new Date(b.lastPracticed || b.creationDate || 0);
+        return dateB - dateA;
+      });
+
+    if (refinedSongs.length === 0) return null;
+
+    const totalDuration = refinedSongs.reduce((sum, song) => sum + (song.songDuration ? Number(song.songDuration) : 0), 0);
+
+    return {
+      deckId: 'refined',
+      title: 'refined',
+      level: 10,
+      totalDuration,
+      creationDate: new Date(0).toISOString(),
+      isVirtual: true,
+      songs: refinedSongs
+    };
+  }, [songs]);
+
   // Handle navigation state (new deck from DeckCreateView, or reset from nav button)
   useEffect(() => {
     if (location.state?.newDeck) {
@@ -123,14 +148,21 @@ function Deck() {
     return sortReversed ? -result : result;
   });
 
-  // Add Mastered deck at top if it matches search and has songs
+  // Add virtual decks at top if they match search and have songs
   const showMasteredDeck = masteredDeck &&
     masteredDeck.songs.length > 0 &&
     masteredDeck.title.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const sortedDecks = showMasteredDeck
-    ? [masteredDeck, ...sortedRegularDecks]
-    : sortedRegularDecks;
+  const showRefinedDeck = refinedDeck &&
+    refinedDeck.songs.length > 0 &&
+    refinedDeck.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const virtualDecks = [
+    ...(showMasteredDeck ? [masteredDeck] : []),
+    ...(showRefinedDeck ? [refinedDeck] : []),
+  ];
+
+  const sortedDecks = [...virtualDecks, ...sortedRegularDecks];
 
   const handleSortSelect = (newSort) => {
     if (newSort === sortState) {
@@ -424,13 +456,13 @@ function Deck() {
   }
 
   // Deck List View
-  // Include mastered deck in allDecks count if it has songs
-  const allDecksWithMastered = showMasteredDeck ? [masteredDeck, ...decks] : decks;
+  // Include virtual decks in allDecks count
+  const allDecksWithVirtual = [...virtualDecks, ...decks];
 
   return (
     <DeckListView
       decks={sortedDecks}
-      allDecks={allDecksWithMastered}
+      allDecks={allDecksWithVirtual}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       onSelectDeck={(deck) => {

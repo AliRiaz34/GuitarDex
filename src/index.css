@@ -70,13 +70,10 @@ th {
 
 /* Navbar */
 #navbar {
-  padding-top: 5px;
-  padding-left: 5px;
+  padding: 5px 0;
   display: flex;
-  gap: 25px;
-  flex-wrap: nowrap;
   position: fixed;
-  bottom: 5%;
+  bottom: 3%;
   left: 3%;
   right: 3%;
   z-index: 1000;
@@ -85,52 +82,35 @@ th {
   border-image: url('/images/white-fram-hd.png') 42 round;
   border-color: white;
   background-color: #0e0e13;
-  font-size: 1em;
   will-change: transform;
   backface-visibility: hidden;
-  text-align: center;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
 
 #navbar::-webkit-scrollbar {
   display: none;
 }
 
-#navlink-1 {
-  min-width: 73px;
-  padding-left: 10px;
-  white-space: nowrap;
-}
-
-#navlink-2 {
-  min-width: 128px;
-}
-
-#navlink-3 {
-  min-width: 72px;
-  white-space: nowrap;
-}
-
-#navlink-4 {
-  min-width: fit-content;
-  padding-right: 10px;
-}
-
-#navlink-1, #navlink-2, #navlink-3, #navlink-4,:visited {
+#navlink-1, #navlink-2, #navlink-3, #navlink-4 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  color: rgb(114, 114, 114);
-  transition: all 0.3s ease;
   position: relative;
   padding-bottom: 8px;
 }
 
+.nav-icon {
+  height: 70px;
+  image-rendering: pixelated;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+  margin: -18px 0 -24px;
+}
+
 /* Active navigation state */
-#navbar .active {
-  color: rgb(255, 255, 255);
-  font-weight: bold;
+#navbar .active .nav-icon {
+  opacity: 1;
 }
 
 #navbar .active::after {

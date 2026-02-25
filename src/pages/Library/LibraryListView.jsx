@@ -79,7 +79,7 @@ function LibraryListView({
               spellCheck="false"
             />
             {!searchQuery && !isSearchFocused && (
-              <div className="custom-placeholder">
+              <div className="library-placeholder">
                 whatcha lookin for<span className="blinking-question">?</span>
               </div>
             )}
@@ -137,13 +137,14 @@ function LibraryListView({
             <tbody>
               <AnimatePresence>
                 {songs.map((song, index) => {
-                  const isInitialLoad = !hasAnimatedLibrary && index < 10;
+                  const isInitialLoad = !hasAnimatedLibrary && index < 11;
                   const isNewWhileMounted = hasAnimatedLibrary && hasMountedRef.current;
 
                   return (
                     <motion.tr
                       key={song.songId}
                       className="song-tr"
+                      layout
                       initial={
                         isInitialLoad
                           ? { opacity: 0 }
