@@ -3,14 +3,14 @@
 // XP System Configuration
 const XP_BASE_AMOUNT = 50;  // Base XP required for level 1
 const XP_SCALING_EXPONENT = 1.2;  // How quickly XP requirements increase per level
-const XP_PRACTICE_BASE = 60;  // Base XP earned per practice session
+const XP_PRACTICE_BASE = 140;  // Base XP earned per practice session
 
 // Streak Bonus Configuration (index = consecutive days practiced)
 // 0=first day, 1=second consecutive day, etc. Caps at 30% bonus
 const STREAK_BONUS_VALUES = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.30, 0.30];
 
 // Decay System Configuration
-const DECAY_GRACE_PERIOD_DAYS = 7;
+const DECAY_GRACE_PERIOD_DAYS = 10;
 const MASTERED_DECAY_GRACE_PERIOD_DAYS = 90;
 const DECAY_RATE_PER_DAY = 0.0075;  // 0.75% per day - balanced for realistic skill retention
 
@@ -21,8 +21,8 @@ const MAX_LEVEL_BEFORE_MASTERY = 20;
 // Difficulty Multipliers
 const DIFFICULTY_MULTIPLIERS = {
   easy: 1,
-  normal: 2,
-  hard: 3
+  normal: 1.75,
+  hard: 2.25
 };
 
 // Helper function to calculate days between two dates
@@ -90,7 +90,7 @@ export function calculateXpGain(songInfo, minPlayed) {
     XP_PRACTICE_BASE *
     (1 / DIFFICULTY_MULTIPLIERS[difficulty]) *
     (Number(minPlayed) / songDuration) *
-    (1 + 0.1 * highestLevelReached) *
+    (1 + 0.2 * highestLevelReached) *
     (1 + streakBonus)
   );
 }
@@ -149,10 +149,11 @@ export function applyDecay(songInfo) {
     return songInfo;
   }
 
-  // Apply decay to XP and level
-  let xp = songInfo.xp;
-  let level = songInfo.level;
-  let newStatus = status;
+  // Calculate total accumulated XP (sum of all previous level thresholds + current xp)
+  let totalXp = songInfo.xp;
+  for (let i = 1; i < songInfo.level; i++) {
+    totalXp += xpThreshold(i);
+  }
 
   const decayDays = daysSinceSongPracticed - DECAY_GRACE_PERIOD_DAYS;
 
@@ -160,19 +161,21 @@ export function applyDecay(songInfo) {
   // easy: 1.0x, normal: 1.1x, hard: 1.2x decay rate
   const difficultyDecayModifier = 1 + (0.10 * (DIFFICULTY_MULTIPLIERS[songInfo.difficulty] - 1));
 
-  // Apply decay: base decay rate is multiplied by difficulty modifier
+  // Apply decay to total XP
   const effectiveDecayRate = DECAY_RATE_PER_DAY * difficultyDecayModifier;
   const decayFactor = Math.pow(1 - effectiveDecayRate, decayDays);
+  let adjustedTotalXp = Math.floor(totalXp * decayFactor);
 
-  const adjustedXp = Math.floor(xp * decayFactor);
-
-  // Adjust level based on XP
-  while (level > 1 && adjustedXp < xpThreshold(level - 1)) {
-    level -= 1;
+  // Derive level and remainder XP from decayed total
+  let level = 1;
+  while (adjustedTotalXp >= xpThreshold(level)) {
+    adjustedTotalXp -= xpThreshold(level);
+    level += 1;
   }
 
   // Update status based on level
-  if (level === 1 && songInfo.highestLevelReached > 1) {
+  let newStatus = status;
+  if (level === 1 && adjustedTotalXp === 0 && songInfo.highestLevelReached > 1) {
     newStatus = "stale";
   } else if (level < MAX_LEVEL_BEFORE_REFINED) {
     newStatus = "learning";
@@ -181,7 +184,7 @@ export function applyDecay(songInfo) {
   return {
     ...songInfo,
     level,
-    xp: adjustedXp,
+    xp: adjustedTotalXp,
     status: newStatus,
     lastDecayDate: new Date().toISOString()
   };

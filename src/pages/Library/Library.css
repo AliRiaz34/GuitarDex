@@ -514,7 +514,9 @@
 }
 
 .form__button {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 30px auto;
     padding: 6px 20px;
     width: 100%;
@@ -523,10 +525,11 @@
     font-family: 'Pokemon-Classic';
     font-size: 0.8em;
     color: rgb(240, 172, 45);
-    background-color: transparent;
+    background-color: #0e0e13;
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .form__button:active {
