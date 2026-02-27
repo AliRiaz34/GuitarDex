@@ -124,7 +124,7 @@ export function DataProvider({ children }) {
   }
 
   return (
-    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, deckSongs, friends, setFriends, followingIds, setFollowingIds, isLoading, refreshSongs, updateDeckMembership }}>
+    <DataContext.Provider value={{ songs, setSongs, decks, setDecks, deckSongs, setDeckSongs, friends, setFriends, followingIds, setFollowingIds, isLoading, refreshSongs, updateDeckMembership }}>
       {children}
     </DataContext.Provider>
   );

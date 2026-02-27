@@ -49,6 +49,12 @@ function TunerView({ song, onBack, onGoToSong }) {
     onBack();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => { if (e.key === 'Escape') handleBack(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleGoToSong = () => {
     stopListening();
     onGoToSong();

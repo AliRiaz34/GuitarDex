@@ -96,7 +96,7 @@ function SortableRow({ song, onPractice, onSelectSong }) {
 }
 
 function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSong }) {
-  const { songs: allSongs, deckSongs: allDeckSongs } = useData();
+  const { songs: allSongs, deckSongs: allDeckSongs, setDeckSongs } = useData();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [songs, setSongs] = useState([]);
@@ -263,20 +263,30 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
       return;
     }
 
-    setSongs((items) => {
-      const oldIndex = items.findIndex((item) => item.songId === active.id);
-      const newIndex = items.findIndex((item) => item.songId === over.id);
+    const oldIndex = songs.findIndex((item) => item.songId === active.id);
+    const newIndex = songs.findIndex((item) => item.songId === over.id);
+    const newOrder = arrayMove(songs, oldIndex, newIndex);
 
-      const newOrder = arrayMove(items, oldIndex, newIndex);
+    // Update local display
+    setSongs(newOrder);
 
-      // Save the new order to the database
-      const songOrderArray = newOrder.map((song) => song.songId);
-      updateDeckSongOrder(deck.deckId, songOrderArray).catch((error) => {
-        console.error('Error updating song order:', error);
-        alert('Failed to save new order');
+    // Optimistically update DataContext deckSongs so the useEffect
+    // doesn't clobber local order when realtime events arrive mid-update
+    setDeckSongs(prev => {
+      const updated = [...prev];
+      newOrder.forEach((song, idx) => {
+        const dsIdx = updated.findIndex(ds => ds.deckId === deck.deckId && ds.songId === song.songId);
+        if (dsIdx !== -1) {
+          updated[dsIdx] = { ...updated[dsIdx], order: idx };
+        }
       });
+      return updated;
+    });
 
-      return newOrder;
+    // Persist to Supabase
+    const songOrderArray = newOrder.map((song) => song.songId);
+    updateDeckSongOrder(deck.deckId, songOrderArray).catch((error) => {
+      console.error('Error updating song order:', error);
     });
   };
 

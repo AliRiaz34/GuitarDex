@@ -428,18 +428,20 @@ export async function updateDeckSongOrder(deckId, songOrderArray) {
 
   if (fetchError) throw fetchError;
 
-  // Update sort_order for each song
-  for (let idx = 0; idx < songOrderArray.length; idx++) {
-    const songId = songOrderArray[idx];
+  // Update all sort_orders in parallel to minimize realtime race conditions
+  const updates = songOrderArray.map((songId, idx) => {
     const row = deckSongs.find(ds => ds.song_id === songId);
-    if (row) {
-      await supabase
-        .from('deck_songs')
-        .update({ sort_order: idx })
-        .eq('id', row.id)
-        .eq('user_id', userId);
-    }
-  }
+    if (!row) return null;
+    return supabase
+      .from('deck_songs')
+      .update({ sort_order: idx })
+      .eq('id', row.id)
+      .eq('user_id', userId);
+  }).filter(Boolean);
+
+  const results = await Promise.all(updates);
+  const failed = results.find(r => r.error);
+  if (failed) throw failed.error;
 }
 
 export async function getDecksForMenu(songId = null) {

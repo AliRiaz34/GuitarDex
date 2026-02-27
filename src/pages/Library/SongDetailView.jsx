@@ -149,6 +149,12 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
     onBack();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => { if (e.key === 'Escape') handleBack(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const onTouchEnd = () => {
     if (!touchStartX || !touchEndX || touchInLyrics.current) return;
 

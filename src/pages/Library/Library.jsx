@@ -12,7 +12,7 @@ import './Library.css';
 function Library() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { songs, setSongs, isLoading, updateDeckMembership } = useData();
+  const { songs, setSongs, decks, deckSongs, isLoading, updateDeckMembership } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState(location.state?.newSong || null);
   const [sortState, setSortState] = useState('recent');
@@ -27,6 +27,10 @@ function Library() {
   const [practiceView, setPracticeView] = useState(null); // { song, fromSongView }
 
   const [editView, setEditView] = useState(null); // song to edit
+
+  // Multi-select state
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedSongIds, setSelectedSongIds] = useState(new Set());
 
   useEffect(() => {
     async function loadDecks() {
@@ -269,6 +273,51 @@ function Library() {
     openPracticeView(cleanSong);
   };
 
+  const toggleSelectSong = (songId) => {
+    setSelectedSongIds(prev => {
+      const next = new Set(prev);
+      if (next.has(songId)) next.delete(songId);
+      else next.add(songId);
+      return next;
+    });
+  };
+
+  const getDecksForSelect = () => {
+    // Compute which decks contain ALL selected songs
+    const selectedIds = [...selectedSongIds];
+    return decks.filter(d => !d.isVirtual).map(d => {
+      const allIn = selectedIds.every(songId =>
+        deckSongs.some(ds => ds.deckId === d.deckId && ds.songId === songId)
+      );
+      return { deckId: d.deckId, title: d.title, containsSong: allIn };
+    });
+  };
+
+  const handleBatchToggleDeck = async (deckId, isInDeck) => {
+    const songIds = [...selectedSongIds];
+
+    // Optimistic UI
+    songIds.forEach(songId => {
+      updateDeckMembership(deckId, songId, !isInDeck);
+    });
+
+    // Persist
+    try {
+      await Promise.all(songIds.map(songId =>
+        isInDeck ? removeSongFromDeck(deckId, songId) : addSongToDeck(deckId, songId)
+      ));
+    } catch (error) {
+      // Revert
+      songIds.forEach(songId => {
+        updateDeckMembership(deckId, songId, isInDeck);
+      });
+      console.error('Error batch toggling deck:', error);
+    }
+
+    setSelectMode(false);
+    setSelectedSongIds(new Set());
+  };
+
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
     // Optimistic UI updates
     setPlaylists(prev => (prev || []).map(d =>
@@ -423,6 +472,13 @@ function Library() {
       scrollPositionRef={scrollPositionRef}
       returnFromSong={returnFromSong}
       onReturnAnimationDone={() => setReturnFromSong(false)}
+      selectMode={selectMode}
+      selectedSongIds={selectedSongIds}
+      onToggleSelect={toggleSelectSong}
+      onActivateSelectMode={() => setSelectMode(true)}
+      onDeactivateSelectMode={() => { setSelectMode(false); setSelectedSongIds(new Set()); }}
+      getDecksForSelect={getDecksForSelect}
+      onBatchToggleDeck={handleBatchToggleDeck}
     />
   );
 }

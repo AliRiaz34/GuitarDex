@@ -7,7 +7,7 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { addPractice, getNextPracticeId, updateSong, getDecksForMenu, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
+import { addPractice, getNextPracticeId, updateSong, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
 
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
@@ -16,7 +16,7 @@ import './Deck.css';
 function Deck() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { songs, decks, setDecks, updateDeckMembership } = useData();
+  const { songs, decks, setDecks, deckSongs, updateDeckMembership } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sortState, setSortState] = useState('recent');
@@ -258,7 +258,7 @@ function Deck() {
   };
 
   // Song Detail View handlers
-  const openSongDetailView = async (song, songsInDeck) => {
+  const openSongDetailView = (song, songsInDeck) => {
     const fullSong = songs.find(s => s.songId === song.songId) || song;
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
 
@@ -266,8 +266,15 @@ function Deck() {
     setSongEntryDirection(null);
     setSelectedSong(cleanSong);
 
-    // Load decks for menu in background (needs per-song containsSong check)
-    getDecksForMenu(song.songId).then(setDecksForMenu).catch(console.error);
+    // Compute deck menu data synchronously from DataContext
+    const deckIdsWithSong = new Set(
+      deckSongs.filter(ds => ds.songId === song.songId).map(ds => ds.deckId)
+    );
+    setDecksForMenu(decks.filter(d => !d.isVirtual).map(d => ({
+      deckId: d.deckId,
+      title: d.title,
+      containsSong: deckIdsWithSong.has(d.deckId)
+    })));
   };
 
   const handleSongNavigate = (direction) => {
@@ -281,6 +288,16 @@ function Deck() {
       const fullSong = songs.find(s => s.songId === nextSong.songId) || nextSong;
       const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = fullSong;
       setSelectedSong(cleanSong);
+
+      // Recompute deck menu for the new song
+      const deckIdsWithSong = new Set(
+        deckSongs.filter(ds => ds.songId === nextSong.songId).map(ds => ds.deckId)
+      );
+      setDecksForMenu(decks.filter(d => !d.isVirtual).map(d => ({
+        deckId: d.deckId,
+        title: d.title,
+        containsSong: deckIdsWithSong.has(d.deckId)
+      })));
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import './Library.css';
 
@@ -90,6 +90,12 @@ function EditView({ song, onSubmit, onBack }) {
   const handleBack = () => {
     onBack();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => { if (e.key === 'Escape') handleBack(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <motion.div

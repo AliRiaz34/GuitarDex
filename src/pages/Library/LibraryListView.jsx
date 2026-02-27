@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import './Library.css';
@@ -21,10 +22,18 @@ function LibraryListView({
   onRandomSelect,
   scrollPositionRef,
   returnFromSong,
-  onReturnAnimationDone
+  onReturnAnimationDone,
+  selectMode,
+  selectedSongIds,
+  onToggleSelect,
+  onActivateSelectMode,
+  onDeactivateSelectMode,
+  getDecksForSelect,
+  onBatchToggleDeck
 }) {
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [deckMenuOpen, setDeckMenuOpen] = useState(false);
   const containerRef = useRef(null);
   const hasMountedRef = useRef(false);
 
@@ -129,6 +138,43 @@ function LibraryListView({
               )}
             </AnimatePresence>
 
+            <div className="select-toggle-area">
+              <AnimatePresence mode="wait">
+                {selectMode ? (
+                  <motion.div
+                    key="select-actions"
+                    className="select-actions"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <img
+                      className="select-add-icon"
+                      src="./images/addToDeckIcon.png"
+                      alt="Add to deck"
+                      onClick={() => {
+                        if (selectedSongIds.size > 0) setDeckMenuOpen(true);
+                      }}
+                      style={{ opacity: selectedSongIds.size > 0 ? 1 : 0.3 }}
+                    />
+                    <span className="select-close" onClick={onDeactivateSelectMode}>x</span>
+                  </motion.div>
+                ) : (
+                  <motion.span
+                    key="select-standby"
+                    className="select-standby"
+                    onClick={onActivateSelectMode}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    §
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         )}
 
@@ -143,7 +189,7 @@ function LibraryListView({
                   return (
                     <motion.tr
                       key={song.songId}
-                      className="song-tr"
+                      className={`song-tr${selectMode && selectedSongIds.has(song.songId) ? ' selected' : ''}`}
                       layout
                       initial={
                         isInitialLoad
@@ -159,12 +205,13 @@ function LibraryListView({
                           ? { duration: 0.4, ease: 'easeOut', delay: index * 0.05 }
                           : { duration: 0.25, ease: 'easeOut' }
                       }
+                      onClick={selectMode ? () => onToggleSelect(song.songId) : undefined}
                     >
-                      <td className="song-td" onClick={() => onSelectSong(song)}>
+                      <td className="song-td" onClick={selectMode ? undefined : () => onSelectSong(song)}>
                         <div className="song-title">{song.title}</div>
                         <div className="song-artist">{song.artistName}</div>
                       </td>
-                      <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
+                      <td className="song-td-lv" onClick={selectMode ? undefined : () => onQuickPractice(song)}>
                         {song.level != null ? `Lv ${song.level}` : '???'}
                       </td>
                     </motion.tr>
@@ -188,6 +235,60 @@ function LibraryListView({
         <button id="library-practice-button" onClick={onRandomSelect}>
           random
         </button>
+      )}
+
+      {createPortal(
+        <>
+          <AnimatePresence>
+            {deckMenuOpen && (
+              <motion.div
+                className="menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setDeckMenuOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {deckMenuOpen && (
+              <motion.div
+                id="addToDeck-menu-dropdown"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                {(() => {
+                  const deckList = getDecksForSelect();
+                  return deckList.length > 0 ? (
+                    deckList.map(deck => (
+                      <div
+                        key={deck.deckId}
+                        className="deck-menu-item"
+                        onClick={() => {
+                          onBatchToggleDeck(deck.deckId, deck.containsSong);
+                          setDeckMenuOpen(false);
+                        }}
+                      >
+                        <span className="deck-menu-title">{deck.title}</span>
+                        <img
+                          src={deck.containsSong ? './images/addedIcon.png' : './images/addToDeckIcon.png'}
+                          alt={deck.containsSong ? 'Remove' : 'Add'}
+                          className="deck-menu-icon"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p className="deck-menu-empty">No decks yet</p>
+                  );
+                })()}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
       )}
     </motion.div>
   );

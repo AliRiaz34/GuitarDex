@@ -77,6 +77,12 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
     onBack();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => { if (e.key === 'Escape') handleBack(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
