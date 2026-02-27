@@ -274,6 +274,25 @@ export async function getTotalPracticeSessions(songId) {
   return count || 0;
 }
 
+export async function getAllPracticeStats() {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('practices')
+    .select('song_id, min_played')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+
+  const stats = {};
+  for (const row of data || []) {
+    const songId = row.song_id;
+    if (!stats[songId]) stats[songId] = { totalMinPlayed: 0, totalSessions: 0 };
+    stats[songId].totalMinPlayed += Number(row.min_played) || 0;
+    stats[songId].totalSessions += 1;
+  }
+  return stats;
+}
+
 // ─── Decks ───
 
 export async function getAllDecks() {

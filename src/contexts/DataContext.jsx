@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { getAllSongs, getAllDecks, getAllDeckSongs, getTotalMinutesPlayed, getTotalPracticeSessions, updateSong, getFollowingWithProfiles, getFollowing } from '../utils/supabaseDb';
+import { getAllSongs, getAllDecks, getAllDeckSongs, getAllPracticeStats, updateSong, getFollowingWithProfiles, getFollowing } from '../utils/supabaseDb';
 import { xpThreshold, applyDecay } from '../utils/levelingSystem';
 import { useAuth } from './AuthContext';
 
 const DataContext = createContext(null);
 
-async function enrichSong(song) {
+async function enrichSong(song, practiceStats) {
   const decayed = applyDecay(song);
 
   if (
@@ -17,9 +17,10 @@ async function enrichSong(song) {
   }
 
   if (decayed.status !== 'seen') {
+    const stats = practiceStats[decayed.songId] || { totalMinPlayed: 0, totalSessions: 0 };
     decayed.xpThreshold = xpThreshold(decayed.level);
-    decayed.totalMinPlayed = await getTotalMinutesPlayed(decayed.songId);
-    decayed.totalSessions = await getTotalPracticeSessions(decayed.songId);
+    decayed.totalMinPlayed = stats.totalMinPlayed;
+    decayed.totalSessions = stats.totalSessions;
   }
 
   return decayed;
@@ -72,15 +73,16 @@ export function DataProvider({ children }) {
     async function loadAll() {
       if (!isBackgroundRefresh) setIsLoading(true);
       try {
-        const [songsData, decksData, deckSongsData, friendsData, followingData] = await Promise.all([
+        const [songsData, decksData, deckSongsData, friendsData, followingData, practiceStats] = await Promise.all([
           getAllSongs(),
           getAllDecks(),
           getAllDeckSongs(),
           getFollowingWithProfiles(),
-          getFollowing()
+          getFollowing(),
+          getAllPracticeStats()
         ]);
 
-        const processed = await Promise.all(songsData.map(enrichSong));
+        const processed = await Promise.all(songsData.map(s => enrichSong(s, practiceStats)));
         const enrichedDecks = enrichDecks(decksData, deckSongsData, processed);
 
         setSongs(processed);
@@ -100,8 +102,11 @@ export function DataProvider({ children }) {
 
   async function refreshSongs() {
     try {
-      const songsData = await getAllSongs();
-      const processed = await Promise.all(songsData.map(enrichSong));
+      const [songsData, practiceStats] = await Promise.all([
+        getAllSongs(),
+        getAllPracticeStats()
+      ]);
+      const processed = await Promise.all(songsData.map(s => enrichSong(s, practiceStats)));
       setSongs(processed);
     } catch (error) {
       console.error('Error refreshing songs:', error);

@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
       );
       channel.on(
         'postgres_changes',
-        { event: 'DELETE', schema: 'public', table },
+        { event: 'DELETE', schema: 'public', table, filter: `user_id=eq.${user.id}` },
         bumpRevision
       );
     });
