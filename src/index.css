@@ -90,7 +90,7 @@ th {
   display: none;
 }
 
-#navlink-1, #navlink-2, #navlink-3, #navlink-4 {
+#navlink-1, #navlink-2, #navlink-3, #navlink-4, #navlink-5 {
   flex: 1;
   display: flex;
   align-items: center;
@@ -105,13 +105,18 @@ th {
   height: 70px;
   image-rendering: pixelated;
   opacity: 0.4;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   margin: -18px 0 -24px;
+}
+
+#navlink-5 .nav-icon {
+  height: 40px;
 }
 
 /* Active navigation state */
 #navbar .active .nav-icon {
   opacity: 1;
+  transform: scale(1.15);
 }
 
 #navbar .active::after {

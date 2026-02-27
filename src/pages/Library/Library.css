@@ -487,10 +487,13 @@
 }
 
 #practice-button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 10px auto 0;
     padding: 6px 20px;
     width: 100%;
     max-width: 200px;
@@ -498,11 +501,12 @@
     font-family: 'Pokemon-Classic';
     font-size: 0.8em;
     color: rgb(240, 172, 45);
-    background-color: transparent;
+    background-color: #0e0e13;
     border: 2px solid rgba(240, 172, 45, 0.7);
     border-radius: 4px;
     cursor: pointer;
     white-space: nowrap;
+    z-index: 10;
 }
 
 #practice-button:active {
@@ -1005,9 +1009,14 @@
 
 
 /* edit page */
+#edit-view {
+    position: relative;
+    height: 86vh;
+}
+
 #edit-song-form {
     width: 100%;
-    height: 86vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1023,7 +1032,12 @@
 }
 
 #edit-song-form > .form__button {
-    margin: 10px auto 0;
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0e0e13;
+    z-index: 10;
     flex-shrink: 0;
 }
 
@@ -1187,12 +1201,17 @@
     color: rgb(145, 143, 143);
 }
 
+.practice-head-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
 #practice-back-icon {
     margin: 0px;
     font-size: 1.1em;
-    position: fixed;
-    padding-top: 10px;
-    top: 5px;
     cursor: pointer;
     font-weight: bolder;
 }
@@ -1322,9 +1341,59 @@
     color: rgba(240, 172, 45, 0.7);
 }
 
+/* Fretboard Widget */
+.fretboard-button {
+    cursor: pointer;
+}
+
+.fretboard-button img {
+    width: 20px;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+.fretboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1001;
+    padding-top: 0vh;
+}
+
+.fretboard-widget {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0e0e13;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    overflow: hidden;
+    max-width: 60vw;
+}
+
+.fretboard-image {
+    display: block;
+    width: 82vh;
+    transform: rotate(90deg);
+    transform-origin: center center;
+    image-rendering: pixelated;
+    margin: calc(38vh - 50%) 0;
+}
+
+#practice-view {
+    position: relative;
+    height: 86vh;
+}
+
 #practice-form {
     width: 100%;
-    height: 86vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1341,7 +1410,12 @@
 }
 
 #practice-form > .form__button {
-    margin: 10px auto 0;
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0e0e13;
+    z-index: 10;
     flex-shrink: 0;
 }
 

@@ -12,6 +12,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
   const [selectedMinButton, setSelectedMinButton] = useState(null);
   const [selectedDurationButton, setSelectedDurationButton] = useState(null);
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
+  const [fretboardOpen, setFretboardOpen] = useState(false);
 
   const minSwipeDistance = 50;
 
@@ -120,7 +121,12 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
         onSubmit={handleSubmit}
       >
         <div className="practice-form-content">
-        <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
+        <div className="practice-head-div">
+          <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
+          <div className="fretboard-button" onClick={() => setFretboardOpen(true)}>
+            <img src="/images/fretboard-button.png" alt="Fretboard" />
+          </div>
+        </div>
         <h1 id="song-practice-title" onClick={onGoToSong} style={{ cursor: 'pointer' }}>{song.title}</h1>
         <p className="practice-song-info">
           <span className="tuning-container">{formatTuning(song.tuning)}</span>
@@ -323,6 +329,40 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
           Save
         </button>
       </form>
+
+      {createPortal(
+        <>
+          <AnimatePresence>
+            {fretboardOpen && (
+              <motion.div
+                className="menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setFretboardOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {fretboardOpen && (
+              <div className="fretboard-overlay" onClick={() => setFretboardOpen(false)}>
+                <motion.div
+                  className="fretboard-widget"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img src="/images/fretboard.png" alt="Fretboard Notes" className="fretboard-image" />
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
 
       {createPortal(
         <>

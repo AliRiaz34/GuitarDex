@@ -93,6 +93,7 @@ function EditView({ song, onSubmit, onBack }) {
 
   return (
     <motion.div
+      id="edit-view"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: '100%' }}

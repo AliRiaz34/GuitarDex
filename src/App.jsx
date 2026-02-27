@@ -6,6 +6,7 @@ import Library from './pages/Library'
 import AddSong from './pages/AddSong'
 import Deck from './pages/Deck'
 import Social from './pages/Social'
+import ChordFinder from './pages/ChordFinder'
 import Auth from './pages/Auth'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { DataProvider, useData } from './contexts/DataContext'
@@ -31,6 +32,9 @@ function AnimatedRoutes() {
         } />
         <Route path="/social" element={
           <ProtectedRoute><Social /></ProtectedRoute>
+        } />
+        <Route path="/chordfinder" element={
+          <ProtectedRoute><ChordFinder /></ProtectedRoute>
         } />
       </Routes>
   )

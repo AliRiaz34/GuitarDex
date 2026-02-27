@@ -128,7 +128,7 @@ function AddSong() {
   }
 
   return (
-    <div>
+    <div id="add-song-view">
       <form id="song-form" onSubmit={handleSubmit}>
         <div className="add-form-content">
         <h1 className="add-song-header">add a new song</h1>
