@@ -1,5 +1,5 @@
 # GuitarDex
-A guitar practice tracking app that gamifies learning through a Pokemon-inspired leveling system. 
+A guitar practice tracking app that gamifies learning through a Pokemon-inspired leveling system and a lot of useful features. 
 Track your progress on songs, earn XP through practice sessions, quickly tune between songs and practice songs from "learning", "refined" and "mastered".
 
 ## How to install on your phone
@@ -25,16 +25,23 @@ Track your progress on songs, earn XP through practice sessions, quickly tune be
 - Organize songs into custom playlists/decks
 - Track average level and total duration per deck
 
+**Social**
+- Follow other users and see their recent practice activity
+- Search for friends by username
+
+**Tools**
+- Built-in guitar tuner with pitch detection based on song
+- Chord finder
+
 **PWA Support**
 - Installable on mobile devices
-- Works fully offline
-- All data stored locally in IndexedDB (browser cache)
+- Data synced across devices via Supabase
 
 ## Tech Stack
 - React 19
 - React Router v7
 - Framer Motion
 - Vite
-- IndexedDB for local storage
+- Supabase (PostgreSQL, Auth, Realtime)
 - PWA with Workbox
 
