@@ -3,7 +3,7 @@
 // XP System Configuration
 const XP_BASE_AMOUNT = 50;  // Base XP required for level 1
 const XP_SCALING_EXPONENT = 1.2;  // How quickly XP requirements increase per level
-const XP_PRACTICE_BASE = 140;  // Base XP earned per practice session
+const XP_PRACTICE_BASE = 100;  // Base XP earned per practice session
 
 // Streak Bonus Configuration (index = consecutive days practiced)
 // 0=first day, 1=second consecutive day, etc. Caps at 30% bonus
