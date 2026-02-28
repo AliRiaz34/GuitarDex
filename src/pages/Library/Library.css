@@ -732,7 +732,7 @@
 .lyrics-text {
     font-size: 0.8em;
     line-height: 1.8;
-    color: rgba(255, 255, 255, 0.5);
+    color: #fff;
     white-space: pre-wrap;
     word-wrap: break-word;
     text-align: center;
@@ -830,7 +830,7 @@
 .lyrics-suggest-text {
     font-size: 0.75em;
     line-height: 1.8;
-    color: rgba(255, 255, 255, 0.5);
+    color: #fff;
     white-space: pre-wrap;
     word-wrap: break-word;
     text-align: center;
