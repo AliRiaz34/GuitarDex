@@ -219,63 +219,6 @@
     backface-visibility: hidden;
 }
 
-/* Select mode */
-.select-toggle-area {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-.select-standby {
-    cursor: pointer;
-    font-size: 1.4em;
-    line-height: 0;
-    color: white;
-    padding: 0 4px;
-    user-select: none;
-    transition: color 0.2s;
-}
-
-.select-standby:hover {
-    color: white;
-}
-
-.select-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    line-height: 0;
-}
-
-.select-add-icon {
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    image-rendering: pixelated;
-    transition: opacity 0.2s;
-    filter: brightness(2);
-}
-
-.select-close {
-    cursor: pointer;
-    font-size: 1.15em;
-    color: white;
-    transition: color 0.2s;
-    user-select: none;
-}
-
-.select-close:hover {
-    color: white;
-}
-
-.song-tr.selected {
-    background-color: rgba(240, 172, 45, 0.1);
-}
-
-.song-tr.selected .song-td {
-    border-left: 2px solid rgba(240, 172, 45, 0.6);
-}
-
 /* Backup menu */
 .backup-menu-container {
     position: relative;
