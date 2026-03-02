@@ -128,8 +128,8 @@ function Library() {
     setSortMenuOpen(false);
   };
 
-  const openPracticeView = (song, fromSongView = false) => {
-    setPracticeView({ song, fromSongView });
+  const openPracticeView = (song, fromSongView = false, fromRandom = false) => {
+    setPracticeView({ song, fromSongView, fromRandom });
   };
 
   const handlePracticeSubmit = async ({ minPlayed, songDuration }) => {
@@ -266,7 +266,7 @@ function Library() {
     let song = practicableSongs[selectedIndex];
     setEntryDirection(null); // Reset direction when selecting random
     const { _previousXp, _previousLevel, _xpGain, _fromPractice, ...cleanSong } = song;
-    openPracticeView(cleanSong);
+    openPracticeView(cleanSong, false, true);
   };
 
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
@@ -357,6 +357,7 @@ function Library() {
         onSubmit={handlePracticeSubmit}
         onBack={handlePracticeBack}
         onGoToSong={goToSongDetail}
+        onPass={practiceView.fromRandom ? handleRandomSelect : undefined}
       />
     );
   }

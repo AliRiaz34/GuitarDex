@@ -1426,14 +1426,19 @@
     mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
 }
 
-#practice-form > .form__button {
+.practice-buttons {
     position: absolute;
     bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #0e0e13;
+    display: flex;
+    gap: 10px;
     z-index: 10;
     flex-shrink: 0;
+}
+
+.practice-buttons .form__button {
+    margin: 0;
 }
 
 #practice-form .song-lyrics-display {

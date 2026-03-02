@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTuner, calculateTargetFrequencies, getTuningStatus } from '../../utils/tunerUtils';
 import './Library.css';
 
-function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
+function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
   const [minPlayed, setMinPlayed] = useState(song.songDuration || "");
   const [songDuration, setSongDuration] = useState("");
   const [touchStart, setTouchStart] = useState(null);
@@ -331,9 +331,16 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong }) {
           </div>
         )}
         </div>
-        <button type="submit" className="form__button">
-          Save
-        </button>
+        <div className="practice-buttons">
+          {onPass && (
+            <button type="button" className="form__button" onClick={onPass}>
+              Pass
+            </button>
+          )}
+          <button type="submit" className="form__button">
+            Save
+          </button>
+        </div>
       </form>
 
       {createPortal(
