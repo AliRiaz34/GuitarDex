@@ -1428,7 +1428,7 @@
 
 .practice-buttons {
     position: absolute;
-    bottom: -20px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1439,6 +1439,8 @@
 
 .practice-buttons .form__button {
     margin: 0;
+    min-width: 150px;
+    padding: 6px 20px;
 }
 
 #practice-form .song-lyrics-display {
