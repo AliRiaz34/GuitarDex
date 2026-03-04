@@ -204,9 +204,15 @@ function Deck() {
     setSelectedDeck(null);
   };
 
-  const openPracticeView = (song) => {
+  const openPracticeView = (song, fromRandom = false) => {
     const fullSong = songs.find(s => s.songId === song.songId) || song;
-    setPracticeView({ song: fullSong, fromDeckView: true });
+    setPracticeView({ song: fullSong, fromDeckView: true, fromRandom });
+  };
+
+  const handleDeckPass = () => {
+    if (songsInCurrentDeck.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * songsInCurrentDeck.length);
+    openPracticeView(songsInCurrentDeck[randomIndex], true);
   };
 
   const handlePracticeSubmit = async ({ minPlayed, songDuration }) => {
@@ -397,6 +403,7 @@ function Deck() {
           setPracticeView(null);
           setSelectedSong(practiceView.song);
         }}
+        onPass={practiceView.fromRandom ? handleDeckPass : undefined}
       />
     );
   }

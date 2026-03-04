@@ -62,7 +62,7 @@ function LibraryListView({
     >
       {hasAnySongs && (
         <>
-          <div className="searchbar-container">
+          <div className="searchbar-container" onClick={() => document.getElementById('searchbar').focus()}>
             <input
               id="searchbar"
               className="input"
