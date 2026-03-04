@@ -204,8 +204,9 @@ function Deck() {
     setSelectedDeck(null);
   };
 
-  const openPracticeView = (song, fromRandom = false) => {
+  const openPracticeView = (song, fromRandom = false, deckSongsList = null) => {
     const fullSong = songs.find(s => s.songId === song.songId) || song;
+    if (deckSongsList) setSongsInCurrentDeck(deckSongsList);
     setPracticeView({ song: fullSong, fromDeckView: true, fromRandom });
   };
 

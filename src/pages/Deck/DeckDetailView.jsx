@@ -253,7 +253,7 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
   const handleRandomPractice = () => {
     if (songs.length === 0) return;
     const randomIndex = Math.floor(Math.random() * songs.length);
-    onPractice(songs[randomIndex], true);
+    onPractice(songs[randomIndex], true, songs);
   };
 
   const handleDragEnd = async (event) => {
