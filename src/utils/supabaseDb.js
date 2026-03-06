@@ -669,6 +669,37 @@ export async function getActivityFeed(limit = 50, offset = 0) {
   }));
 }
 
+// ─── Spotify ───
+
+export async function getSpotifyToken() {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('spotify_refresh_token')
+    .eq('id', userId)
+    .single();
+  if (error) return null;
+  return data?.spotify_refresh_token || null;
+}
+
+export async function setSpotifyToken(refreshToken) {
+  const userId = await getUserId();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ spotify_refresh_token: refreshToken })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function clearSpotifyToken() {
+  const userId = await getUserId();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ spotify_refresh_token: null })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
 export async function updateDeckLevel(deckId) {
   const deckSongs = await getSongsInDeck(deckId);
 

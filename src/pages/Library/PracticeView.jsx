@@ -1,18 +1,22 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTuner, calculateTargetFrequencies, getTuningStatus } from '../../utils/tunerUtils';
+import { getAccessToken, isSpotifyConnected, isSpotifyConnectedAsync, loginWithSpotify, searchTrack } from '../../utils/spotify';
 import './Library.css';
 
 function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
   const [minPlayed, setMinPlayed] = useState(song.songDuration || "");
-  const [songDuration, setSongDuration] = useState("");
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [selectedMinButton, setSelectedMinButton] = useState(null);
-  const [selectedDurationButton, setSelectedDurationButton] = useState(null);
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
   const [fretboardOpen, setFretboardOpen] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+
 
   const minSwipeDistance = 50;
 
@@ -93,6 +97,114 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
     }
   };
 
+  // Spotify Web Playback SDK
+  const playerRef = useRef(null);
+  const deviceIdRef = useRef(null);
+  const progressInterval = useRef(null);
+  const [spotifyConnected, setSpotifyConnected] = useState(isSpotifyConnected());
+
+  // Check connection: sync first, then async (fetches from Supabase on new devices)
+  useEffect(() => {
+    isSpotifyConnectedAsync().then(setSpotifyConnected);
+    const check = () => setSpotifyConnected(isSpotifyConnected());
+    window.addEventListener('focus', check);
+    return () => window.removeEventListener('focus', check);
+  }, []);
+
+  useEffect(() => {
+    if (!spotifyConnected) return;
+    let cancelled = false;
+
+    async function initSpotify() {
+      const token = await getAccessToken();
+      if (!token || cancelled) return;
+
+      // Load SDK script if needed
+      if (!window.Spotify) {
+        const script = document.createElement('script');
+        script.src = 'https://sdk.scdn.co/spotify-player.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => {
+          window.onSpotifyWebPlaybackSDKReady = resolve;
+        });
+      }
+      if (cancelled) return;
+
+      const player = new window.Spotify.Player({
+        name: 'GuitarDex',
+        getOAuthToken: async cb => cb(await getAccessToken()),
+        volume: 0.5,
+      });
+
+      player.addListener('ready', async ({ device_id }) => {
+        if (cancelled) return;
+        deviceIdRef.current = device_id;
+        setAudioReady(true);
+
+        // Search and play the song
+        const uri = await searchTrack(song.title, song.artistName);
+        if (uri && !cancelled) {
+          const t = await getAccessToken();
+          await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${device_id}`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uris: [uri] }),
+          });
+        }
+      });
+
+      player.addListener('player_state_changed', (state) => {
+        if (!state || cancelled) return;
+        const playing = !state.paused;
+        setIsPlaying(playing);
+        setCurrentTime(state.position / 1000);
+        setAudioDuration(state.duration / 1000);
+
+        clearInterval(progressInterval.current);
+        if (playing) {
+          progressInterval.current = setInterval(() => {
+            player.getCurrentState().then(s => {
+              if (s) setCurrentTime(s.position / 1000);
+            });
+          }, 500);
+        }
+      });
+
+      player.connect();
+      playerRef.current = player;
+    }
+
+    initSpotify();
+
+    return () => {
+      cancelled = true;
+      clearInterval(progressInterval.current);
+      if (playerRef.current) {
+        playerRef.current.disconnect();
+        playerRef.current = null;
+      }
+    };
+  }, [song.title, song.artistName, spotifyConnected]);
+
+  const togglePlay = () => {
+    if (!playerRef.current || !audioReady) return;
+    playerRef.current.togglePlay();
+  };
+
+  const handleSeek = (e) => {
+    const ms = parseFloat(e.target.value) * 1000;
+    if (playerRef.current) {
+      playerRef.current.seek(ms);
+      setCurrentTime(ms / 1000);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -101,14 +213,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
       return;
     }
 
-    const finalSongDuration = song.songDuration !== null ? Number(song.songDuration) : Number(songDuration);
-
-    if (song.status === "seen" && song.songDuration === null && (songDuration > 999 || songDuration < 1)) {
-      alert("Invalid song duration G.");
-      return;
-    }
-
-    onSubmit({ minPlayed: Number(minPlayed), songDuration: finalSongDuration });
+    onSubmit({ minPlayed: Number(minPlayed), songDuration: song.songDuration ? Number(song.songDuration) : null });
   };
 
   return (
@@ -129,8 +234,15 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
         <div className="practice-form-content">
         <div className="practice-head-div">
           <p id="practice-back-icon" onClick={handleBack}>{'<'}</p>
-          <div className="fretboard-button" onClick={() => setFretboardOpen(true)}>
-            <img src="/images/fretboard-button.png" alt="Fretboard" />
+          <div className="practice-head-right">
+            {!spotifyConnected && (
+              <svg className="spotify-connect-icon" onClick={loginWithSpotify} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </svg>
+            )}
+            <div className="fretboard-button" onClick={() => setFretboardOpen(true)}>
+              <img src="/images/fretboard-button.png" alt="Fretboard" />
+            </div>
           </div>
         </div>
         <h1 id="song-practice-title" onClick={onGoToSong} style={{ cursor: 'pointer' }}>{song.title}</h1>
@@ -188,6 +300,30 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
             </span>
           </div>
         </div>
+
+        {spotifyConnected && (
+          audioReady ? (
+            <div className="yt-player-widget">
+              <span className="yt-time">{formatTime(currentTime)}</span>
+              <input
+                type="range"
+                className="yt-progress"
+                min={0}
+                max={audioDuration || 1}
+                step={0.5}
+                value={currentTime}
+                onChange={handleSeek}
+              />
+              <span className="yt-play-btn" onClick={togglePlay}>
+                {isPlaying ? '||' : '>'}
+              </span>
+            </div>
+          ) : (
+            <div className="yt-player-widget" style={{ justifyContent: 'center' }}>
+              <span className="yt-time">loading...</span>
+            </div>
+          )
+        )}
 
         <div id="minPlayed-input-div">
           <label className="form-label" style={{ textAlign: 'center' }}>practice duration</label>
@@ -259,68 +395,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
               <label className="min-label">min</label>
             </div>
         </div>
-        {song.songDuration === null && (
-          <div id="duration-div">
-            <label className="form-label" style={{ textAlign: 'center' }}>song duration</label>
-            <div className="quick-select-button-div">
-              <button
-                onClick={() => {
-                  setSongDuration(3);
-                  setSelectedDurationButton(3);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 3 ? 'selected-quick' : ''}`}
-              >
-                3
-              </button>
-              <p className="between-button-line"> |</p>
-              <button
-                onClick={() => {
-                  setSongDuration(4);
-                  setSelectedDurationButton(4);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 4 ? 'selected-quick' : ''}`}
-              >
-                4
-              </button>
-              <p className="between-button-line">|</p>
-              <button
-                onClick={() => {
-                  setSongDuration(5);
-                  setSelectedDurationButton(5);
-                }}
-                type="button"
-                className={`quick-select-button ${selectedDurationButton === 5 ? 'selected-quick' : ''}`}
-              >
-                5
-              </button>
-            </div>
-            <div className="practice-input-group">
-              <p className="practice-input-arrow">{'> '}</p>
-              <input
-                type="number"
-                className="practice-input"
-                id="songDuration-input"
-                value={songDuration}
-                onChange={(e) => {
-                  setSongDuration(e.target.value);
-                  setSelectedDurationButton(null);
-                }}
-                inputMode="numeric"
-                autoCapitalize="off"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck="false"
-                min="0"
-                max="30"
-                required
-              />
-              <label className="min-label">min</label>
-            </div>
-          </div>
-        )}
-        {song.songDuration !== null && song.lyrics && (
+        {song.lyrics && (
           <div className={`song-lyrics-display ${song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
             <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
             {song.lyrics.split('\n').length > 6 && (

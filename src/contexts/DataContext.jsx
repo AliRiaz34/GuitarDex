@@ -46,6 +46,23 @@ function enrichDecks(decksData, deckSongsData, songsData) {
   });
 }
 
+export async function fetchSongInfo(title, artistName) {
+  try {
+    const params = new URLSearchParams({ artist_name: artistName, track_name: title });
+    const response = await fetch(`https://lrclib.net/api/search?${params}`);
+    if (!response.ok) return null;
+    const results = await response.json();
+    if (!results || results.length === 0) return null;
+    const result = results[0];
+    return {
+      duration: result.duration ? Math.round(result.duration / 60) : null,
+      lyrics: result.plainLyrics || null
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function DataProvider({ children }) {
   const { user, dataRevision } = useAuth();
   const [songs, setSongs] = useState([]);
@@ -56,6 +73,20 @@ export function DataProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const songsRef = useRef(songs);
   songsRef.current = songs;
+
+  async function backfillSongInfo(songs) {
+    for (const song of songs) {
+      const info = await fetchSongInfo(song.title, song.artistName);
+      if (!info) continue;
+      const updates = {};
+      if (info.duration != null && song.songDuration == null) updates.songDuration = info.duration;
+      if (info.lyrics && !song.lyrics) updates.lyrics = info.lyrics;
+      if (Object.keys(updates).length > 0) {
+        await updateSong(song.songId, updates);
+        setSongs(prev => prev.map(s => s.songId === song.songId ? { ...s, ...updates } : s));
+      }
+    }
+  }
 
   useEffect(() => {
     if (!user) {
@@ -90,6 +121,12 @@ export function DataProvider({ children }) {
         setDecks(enrichedDecks);
         setFriends(friendsData);
         setFollowingIds(followingData);
+
+        // Backfill songDuration and lyrics from lrclib for songs missing them
+        const needsBackfill = processed.filter(s => (s.songDuration == null || !s.lyrics) && s.title && s.artistName);
+        if (needsBackfill.length > 0) {
+          backfillSongInfo(needsBackfill);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {

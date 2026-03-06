@@ -96,6 +96,7 @@ CREATE INDEX idx_deck_songs_updated_at ON public.deck_songs(user_id, updated_at)
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT NOT NULL UNIQUE,
+  spotify_refresh_token TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

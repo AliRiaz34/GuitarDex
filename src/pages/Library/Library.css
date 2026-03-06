@@ -169,8 +169,8 @@
     font-weight: normal;
     font-size: 0.9em;
     padding-bottom: 5px;
-    width: 90%;
-    margin: auto;
+    width: calc(100% - 30px);
+    margin: 0 15px;
     border-bottom: 2px solid rgba(145, 143, 143, 0.301);
     margin-bottom: 10px;
 
@@ -676,7 +676,7 @@
 .lyrics-text {
     font-size: 0.8em;
     line-height: 1.8;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.5);
     white-space: pre-wrap;
     word-wrap: break-word;
     text-align: center;
@@ -1342,6 +1342,24 @@
     color: rgba(240, 172, 45, 0.7);
 }
 
+.practice-head-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.spotify-connect-icon {
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.spotify-connect-icon:active {
+    opacity: 1;
+}
+
 /* Fretboard Widget */
 .fretboard-button {
     cursor: pointer;
@@ -1442,6 +1460,67 @@
     margin: 0;
     min-width: 150px;
     padding: 6px 20px;
+}
+
+.yt-player-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.yt-player-widget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 5px;
+    margin-top: 15px;
+}
+
+.yt-time {
+    font-size: 0.65em;
+    color: rgba(255, 255, 255, 0.5);
+    min-width: 28px;
+}
+
+.yt-progress {
+    flex: 1;
+    height: 2px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0;
+    outline: none;
+    cursor: pointer;
+}
+
+.yt-progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.yt-progress::-moz-range-thumb {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.yt-play-btn {
+    cursor: pointer;
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.5);
+    min-width: 16px;
+    text-align: center;
+    user-select: none;
 }
 
 #practice-form .song-lyrics-display {

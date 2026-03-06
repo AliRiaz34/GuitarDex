@@ -522,19 +522,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                 <p id="duration">{song.songDuration} min</p>
               )}
             </div>
-            {song.level == null && (
-              <>
-                <p id="empty-info-p">practice to get stats schmuck</p>
-                <p id="empty-info-arrow">↓</p>
-              </>
-            )}
           </div>
 
-          {song.level != null && (
-            <>
               <div id="song-xp-div" style={{ position: 'relative' }}>
                 <p id="level">
-                  Lv {Math.floor(displayLevel)}
+                  Lv {song.level != null ? Math.floor(displayLevel) : 0}
                   {showLevelUp && (
                     <motion.span
                       initial={{ opacity: 0 }}
@@ -554,7 +546,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                     }}
                   ></div>
                 </div>
-                <p id="xp">XP {Math.floor(displayXp)} / {Math.floor(song.xpThreshold)}</p>
+                <p id="xp">XP {Math.floor(displayXp || 0)} / {Math.floor(song.xpThreshold || 0)}</p>
 
                 <AnimatePresence>
                   {xpGain && (
@@ -620,8 +612,6 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                   </span>
                 )}
               </div>
-            </>
-          )}
         </div>
         <button id="practice-button" onClick={onPractice}>PRACTICE</button>
       </motion.div>

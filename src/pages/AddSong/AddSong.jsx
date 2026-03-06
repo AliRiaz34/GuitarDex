@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addSong, getNextSongId } from '../../utils/supabaseDb';
+import { addSong, getNextSongId, updateSong } from '../../utils/supabaseDb';
 import { xpThreshold } from '../../utils/levelingSystem';
-import { useData } from '../../contexts/DataContext';
+import { useData, fetchSongInfo } from '../../contexts/DataContext';
 import './AddSong.css';
 
 function AddSong() {
@@ -117,7 +117,19 @@ function AddSong() {
       navigate('/', { state: { newSong } });
 
       // Supabase write in background
-      addSong(newSong).catch(error => {
+      addSong(newSong).then(() => {
+        // Fetch duration from lrclib in background
+        fetchSongInfo(title, artistName).then(info => {
+          if (!info) return;
+          const updates = {};
+          if (info.duration != null) updates.songDuration = info.duration;
+          if (info.lyrics) updates.lyrics = info.lyrics;
+          if (Object.keys(updates).length > 0) {
+            updateSong(songId, updates);
+            setSongs(prev => prev.map(s => s.songId === songId ? { ...s, ...updates } : s));
+          }
+        });
+      }).catch(error => {
         console.error("Error saving song:", error);
       });
     } catch (error) {
