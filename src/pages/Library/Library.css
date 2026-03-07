@@ -706,8 +706,10 @@
     font-size: 0.85em;
     font-style: italic;
     color: rgba(255, 255, 255, 0.5);
-    margin: 0;
-    padding-bottom: 8px;
+    margin: 30px 0 0;
+    padding: 8px 12px;
+    border: 1px solid rgba(145, 143, 143, 0.301);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -730,8 +732,8 @@
     bottom: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding-bottom: 15vh;
+    align-items: flex-start;
+    padding-top: 2vh;
     z-index: 1200;
     overflow: hidden;
 }
@@ -739,7 +741,7 @@
 #lyrics-suggest-widget {
     background-color: #0e0e13;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 20px 5px 5px;
+    padding: 10px 5px;
     width: 85vw;
     text-align: center;
     position: relative;
@@ -781,10 +783,13 @@
 }
 
 #lyrics-suggest-status {
-    margin: 10px 0;
+    margin: 0;
+    padding: 15px 0;
     font-size: 0.9em;
     font-style: italic;
     color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    width: 100%;
 }
 
 #lyrics-suggest-preview {
@@ -1499,7 +1504,7 @@
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
+    gap: 25px;
     z-index: 10;
     flex-shrink: 0;
 }
