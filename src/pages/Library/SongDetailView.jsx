@@ -10,6 +10,8 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
   const [addToDeckMenuOpen, setAddToDeckMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
+  const lyricsPreviewRef = useRef(null);
+  const lyricsWidgetRef = useRef(null);
   const [showLyricsSuggest, setShowLyricsSuggest] = useState(false);
   const [lyricsFetchState, setLyricsFetchState] = useState('idle');
   const [fetchedLyrics, setFetchedLyrics] = useState('');
@@ -49,6 +51,17 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
   useEffect(() => {
     setExitDirection(null);
   }, [song.songId]);
+
+  useEffect(() => {
+    if (lyricsExpanded && lyricsPreviewRef.current && lyricsWidgetRef.current) {
+      const preview = lyricsPreviewRef.current;
+      const widget = lyricsWidgetRef.current;
+      requestAnimationFrame(() => {
+        const contentWidth = preview.scrollWidth;
+        widget.style.width = (contentWidth + 26) + 'px';
+      });
+    }
+  }, [lyricsExpanded]);
 
   useEffect(() => {
     document.body.style.cursor = 'auto';
@@ -464,6 +477,7 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
           <div id="lyrics-suggest-overlay" onClick={() => setLyricsExpanded(false)}>
             <motion.div
               id="lyrics-suggest-widget"
+              ref={lyricsWidgetRef}
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -471,8 +485,29 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
               onClick={(e) => e.stopPropagation()}
             >
               <span className="lyrics-suggest-close" style={{ right: 'auto', left: 14, textTransform: 'none', fontSize: '0.8em' }} onClick={() => setLyricsExpanded(false)}>X</span>
-              <div id="lyrics-suggest-preview">
-                <p className="lyrics-suggest-text">{song.lyrics}</p>
+              <div id="lyrics-suggest-preview" ref={lyricsPreviewRef}>
+                {song.lyrics.split(/\n\n+/).map((verse, i) => {
+                  const lines = verse.split('\n');
+                  const collapsed = [];
+                  for (let j = 0; j < lines.length; j++) {
+                    const line = lines[j];
+                    if (collapsed.length && collapsed[collapsed.length - 1].text === line) {
+                      collapsed[collapsed.length - 1].count++;
+                    } else {
+                      collapsed.push({ text: line, count: 1 });
+                    }
+                  }
+                  return (
+                    <p key={i} className="lyrics-suggest-text lyrics-verse">
+                      {collapsed.map((l, k) => (
+                        <span key={k}>
+                          {l.text}{l.count > 1 && <span className="lyrics-repeat-count"> x{l.count}</span>}
+                          {k < collapsed.length - 1 && <br />}
+                        </span>
+                      ))}
+                    </p>
+                  );
+                })}
               </div>
             </motion.div>
           </div>

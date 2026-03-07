@@ -111,7 +111,11 @@ export async function getAccessToken() {
       }
       return data.access_token;
     }
-  } catch {}
+    // Refresh token was rejected — clear stale credentials so user can re-auth
+    await disconnectSpotify();
+  } catch {
+    await disconnectSpotify();
+  }
 
   return null;
 }
