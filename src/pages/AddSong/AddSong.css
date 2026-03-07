@@ -17,7 +17,7 @@
 
 #add-song-view {
     position: relative;
-    height: 86vh;
+    height: 100vh;
 }
 
 #song-form {
@@ -39,10 +39,11 @@
 }
 
 #song-form > .form__button {
-    position: absolute;
-    bottom: -20px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
+    margin: 0;
     background-color: #0e0e13;
     z-index: 10;
     flex-shrink: 0;

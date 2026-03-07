@@ -1,7 +1,7 @@
 /* Library */
 #library-view {
     max-width: 100vw;
-    height: 86vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -119,8 +119,8 @@
     overflow-x: hidden;
     position: relative;
     padding-bottom: 100px;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 50px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 50px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
 }
 
 #library-table {
@@ -248,7 +248,7 @@
 
 /* Song view */
 #song-view {
-    height: 86vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -488,8 +488,8 @@
 }
 
 #practice-button {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -542,8 +542,8 @@
 }
 
 #library-practice-button {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1046,7 +1046,7 @@
 /* edit page */
 #edit-view {
     position: relative;
-    height: 86vh;
+    height: 100vh;
 }
 
 #edit-song-form {
@@ -1067,8 +1067,8 @@
 }
 
 #edit-song-form > .form__button {
-    position: absolute;
-    bottom: -20px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #0e0e13;
@@ -1470,7 +1470,7 @@
 
 #practice-view {
     position: relative;
-    height: 86vh;
+    height: 100vh;
 }
 
 #practice-form {
@@ -1494,8 +1494,8 @@
 }
 
 .practice-buttons {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;

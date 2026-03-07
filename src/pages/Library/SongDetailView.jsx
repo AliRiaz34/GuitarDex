@@ -534,6 +534,11 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
             <div id="song-head-div-1">
               <p className="song-back-icon" onClick={handleBack}>{'<'}</p>
               <div id="song-icons-container" ref={addToDeckMenuRef}>
+                {song.lyrics && (
+                  <div className="lyrics-icon-button" onClick={() => setLyricsExpanded(true)}>
+                    <img src="/images/smalllyricscroll.png" alt="Lyrics" />
+                  </div>
+                )}
                 <img
                   id="song-addToDeck-icon"
                    onClick={() => setAddToDeckMenuOpen(!addToDeckMenuOpen)}
@@ -635,18 +640,9 @@ function SongDetailView({ song, onBack, onPractice, onEdit, onDelete, entryDirec
                 {formatTuning(song.tuning)}
               </div>
 
-              <div className={`song-lyrics-display ${song.lyrics && song.lyrics.split('\n').length > 6 ? 'has-toggle' : ''}`}>
-                {song.lyrics ? (
-                  <p className="lyrics-text lyrics-truncated">{song.lyrics}</p>
-                ) : (
-                  <p className="lyrics-placeholder">no lyrics yet <span className="lyrics-add-icon" onClick={handleLyricsFetch}>+</span></p>
-                )}
-                {song.lyrics && song.lyrics.split('\n').length > 6 && (
-                  <span className="lyrics-show-more" onClick={() => setLyricsExpanded(true)}>
-                    <span style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>^</span>
-                  </span>
-                )}
-              </div>
+              {!song.lyrics && (
+                <p className="lyrics-placeholder">no lyrics yet <span className="lyrics-add-icon" onClick={handleLyricsFetch}>+</span></p>
+              )}
         </div>
         <button id="practice-button" onClick={onPractice}>PRACTICE</button>
       </motion.div>

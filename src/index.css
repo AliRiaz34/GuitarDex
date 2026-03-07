@@ -70,17 +70,15 @@ th {
 
 /* Navbar */
 #navbar {
-  padding: 5px 0;
+  padding: 12px 0;
   display: flex;
   position: fixed;
-  bottom: 3%;
-  left: 3%;
-  right: 3%;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  border-width: 15px;
-  border-style: solid;
-  border-image: url('/images/white-fram-hd.png') 42 round;
-  border-color: white;
+  border: none;
+  border-top: 2px solid rgba(145, 143, 143, 0.301);
   background-color: #0e0e13;
   will-change: transform;
   backface-visibility: hidden;

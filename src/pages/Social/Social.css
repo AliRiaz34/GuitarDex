@@ -1,7 +1,7 @@
 /* Social Feed View */
 .social-feed-view {
     max-width: 100vw;
-    height: 86vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -26,8 +26,8 @@
 }
 
 .social-search-btn {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -335,8 +335,8 @@
 }
 
 .social-unfollow-floating-btn {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
