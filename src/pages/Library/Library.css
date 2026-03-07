@@ -489,7 +489,7 @@
 
 #practice-button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -543,7 +543,7 @@
 
 #library-practice-button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1068,7 +1068,7 @@
 
 #edit-song-form > .form__button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #0e0e13;
@@ -1495,7 +1495,7 @@
 
 .practice-buttons {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;

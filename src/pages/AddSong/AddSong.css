@@ -40,7 +40,7 @@
 
 #song-form > .form__button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     margin: 0;

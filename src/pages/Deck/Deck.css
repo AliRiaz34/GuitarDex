@@ -263,7 +263,7 @@
 
 #deck-new-button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -404,7 +404,7 @@
 
 #deck-practice-button {
     position: fixed;
-    bottom: 80px;
+    bottom: 95px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
