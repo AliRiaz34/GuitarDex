@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import './Library.css';
@@ -21,8 +22,19 @@ function LibraryListView({
   onRandomSelect,
   scrollPositionRef,
   returnFromSong,
-  onReturnAnimationDone
+  onReturnAnimationDone,
+  selectionMode,
+  setSelectionMode,
+  selectedSongIds,
+  onToggleSelect,
+  onExitSelection,
+  showDeckPicker,
+  setShowDeckPicker,
+  playlists,
+  onBulkAddToDeck,
+  onCreateDeckWithSongs
 }) {
+  const navigate = useNavigate();
   const hasAnySongs = allSongs.length > 0;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const containerRef = useRef(null);
@@ -128,6 +140,13 @@ function LibraryListView({
                 </motion.p>
               )}
             </AnimatePresence>
+
+            <p
+              className={`selection-toggle${selectionMode ? ' active' : ''}`}
+              onClick={() => selectionMode ? onExitSelection() : setSelectionMode(true)}
+            >
+              select
+            </p>
           </div>
         )}
 
@@ -159,11 +178,14 @@ function LibraryListView({
                           : { duration: 0.25, ease: 'easeOut' }
                       }
                     >
-                      <td className="song-td" onClick={() => onSelectSong(song)}>
+                      <td
+                        className={`song-td${selectionMode ? ' selectable' : ''}${selectedSongIds.has(song.songId) ? ' selected' : ''}`}
+                        onClick={() => selectionMode ? onToggleSelect(song.songId) : onSelectSong(song)}
+                      >
                         <div className="song-title">{song.title}</div>
                         <div className="song-artist">{song.artistName}</div>
                       </td>
-                      <td className="song-td-lv" onClick={() => onQuickPractice(song)}>
+                      <td className="song-td-lv" onClick={() => selectionMode ? onToggleSelect(song.songId) : onQuickPractice(song)}>
                         {song.level != null ? `Lv ${song.level}` : '???'}
                       </td>
                     </motion.tr>
@@ -183,10 +205,88 @@ function LibraryListView({
         )}
       </div>
 
-      {hasAnySongs && songs.length > 0 && (
-        <button id="library-practice-button" onClick={onRandomSelect}>
-          random
-        </button>
+      <AnimatePresence mode="wait">
+        {hasAnySongs && songs.length > 0 && !selectionMode && (
+          <motion.button
+            key="random"
+            id="library-practice-button"
+            onClick={onRandomSelect}
+            initial={false}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            random
+          </motion.button>
+        )}
+
+        {selectionMode && selectedSongIds.size > 0 && (
+          <motion.button
+            key="add-to-deck"
+            id="library-practice-button"
+            className="add-to-deck-btn"
+            onClick={() => setShowDeckPicker(true)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            add to deck ({selectedSongIds.size})
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {createPortal(
+        <AnimatePresence>
+          {showDeckPicker && (
+            <>
+              <motion.div
+                className="menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setShowDeckPicker(false)}
+              />
+              <motion.div
+                id="addToDeck-menu-dropdown"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                {playlists && playlists.length > 0 && (
+                  playlists.map(deck => (
+                    <div
+                      key={deck.deckId}
+                      className="deck-menu-item"
+                      onClick={() => onBulkAddToDeck(deck.deckId)}
+                    >
+                      <span className="deck-menu-title">{deck.title}</span>
+                      <img
+                        src="./images/addToDeckIcon.png"
+                        alt="Add"
+                        className="deck-menu-icon"
+                      />
+                    </div>
+                  ))
+                )}
+                <div
+                  className="deck-menu-item deck-menu-create"
+                  onClick={() => {
+                    const songIds = [...selectedSongIds];
+                    setShowDeckPicker(false);
+                    onExitSelection();
+                    navigate('/deck', { state: { pendingSongIds: songIds } });
+                  }}
+                >
+                  <span className="deck-menu-title">+ new deck</span>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
 
     </motion.div>

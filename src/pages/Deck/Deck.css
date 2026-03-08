@@ -42,7 +42,7 @@
     padding: 15px;
     max-width: 320px;
     margin: 0 auto;
-    margin-top: 25vh;
+    margin-top: 10vh;
     box-sizing: border-box;
 }
 
@@ -69,14 +69,21 @@
     display: flex;
     flex-direction: column;
     margin-top: 40px;
+    padding-bottom: 35px;
+}
+
+#description-input-div .error-bubble {
+    bottom: 0;
+    right: 0;
+    margin-top: 0;
 }
 
 .deck-description-textarea {
     width: 100%;
     margin-top: 6px;
-    padding: 10px;
+    padding: 8px;
     font-family: 'Pokemon-Classic';
-    font-size: 0.9em;
+    font-size: 0.75em;
     line-height: 1.8;
     color: white;
     background-color: rgba(255, 255, 255, 0.05);
@@ -85,9 +92,6 @@
     outline: none;
     resize: vertical;
     box-sizing: border-box;
-    transform: scale(0.85);
-    transform-origin: top left;
-    width: 118%;
 }
 
 .deck-description-textarea:focus {
@@ -167,8 +171,8 @@
 }
 
 #deck-list-divider {
-    width: 90%;
-    margin: auto;
+    width: 100%;
+    margin: 0;
     border-bottom: 2px solid rgba(145, 143, 143, 0.301);
     margin-bottom: 10px;
 }

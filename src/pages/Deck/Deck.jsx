@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import DeckCreateView from './DeckCreateView';
@@ -7,7 +7,7 @@ import DeckDetailView from './DeckDetailView';
 import PracticeView from '../Library/PracticeView';
 import SongDetailView from '../Library/SongDetailView';
 import EditView from '../Library/EditView';
-import { addPractice, getNextPracticeId, updateSong, addSongToDeck, removeSongFromDeck, deleteSong } from '../../utils/supabaseDb';
+import { addPractice, getNextPracticeId, updateSong, addSongToDeck, removeSongFromDeck, deleteSong, addDeck, getNextDeckId } from '../../utils/supabaseDb';
 
 import { xpThreshold, updateSongWithPractice } from '../../utils/levelingSystem';
 import { useData } from '../../contexts/DataContext';
@@ -40,6 +40,8 @@ function Deck() {
   const [showCreateView, setShowCreateView] = useState(false);
   const [createInitialTitle, setCreateInitialTitle] = useState("");
   const [editingDeck, setEditingDeck] = useState(null);
+  const [pendingSongIds, setPendingSongIds] = useState(null);
+  const consumedStateKeys = useRef(new Set());
 
   // Compute virtual Mastered deck from songs already in DataContext
   const masteredDeck = useMemo(() => {
@@ -93,18 +95,27 @@ function Deck() {
 
   // Handle navigation state (new deck from DeckCreateView, or reset from nav button)
   useEffect(() => {
-    if (location.state?.newDeck) {
+    if (location.state?.pendingSongIds && !consumedStateKeys.current.has(location.key)) {
+      // Coming from Library with songs to add to a new deck
+      consumedStateKeys.current.add(location.key);
+      setPendingSongIds(location.state.pendingSongIds);
+      setShowCreateView(true);
+      setCreateInitialTitle("");
+      setSelectedDeck(null);
+      return;
+    } else if (location.state?.newDeck) {
       // New deck added - add to list and show detail view
       const newDeck = location.state.newDeck;
       setDecks(prevDecks => [newDeck, ...prevDecks]);
       setSelectedDeck(newDeck);
-    } else if (location.pathname === '/deck') {
+    } else if (location.pathname === '/deck' && !location.state?.pendingSongIds) {
       // Nav button clicked - reset to list view
       setSelectedDeck(null);
       setPracticeView(null);
       setEditView(null);
       setSelectedSong(null);
       setShowCreateView(false);
+      setPendingSongIds(null);
     }
   }, [location.key]);
 
@@ -181,7 +192,7 @@ function Deck() {
     setSelectedDeck(null);
   };
 
-  const handleDeckCreated = (newDeck) => {
+  const handleDeckCreated = async (newDeck) => {
     if (editingDeck) {
       // Preserve enriched fields (level, totalDuration) from existing deck
       const existing = decks.find(d => d.deckId === newDeck.deckId);
@@ -195,6 +206,19 @@ function Deck() {
       setDecks(prevDecks => [enriched, ...prevDecks]);
       setShowCreateView(false);
       setSelectedDeck(enriched);
+
+      // If there are pending songs from Library selection, add them to the new deck
+      if (pendingSongIds && pendingSongIds.length > 0) {
+        const songIds = pendingSongIds;
+        setPendingSongIds(null);
+        // Optimistic UI — update local deck membership immediately
+        songIds.forEach(songId => updateDeckMembership(newDeck.deckId, songId, true));
+        try {
+          await Promise.all(songIds.map(songId => addSongToDeck(newDeck.deckId, songId)));
+        } catch (error) {
+          console.error('Error adding songs to new deck:', error);
+        }
+      }
     }
   };
 
@@ -437,6 +461,7 @@ function Deck() {
       <DeckCreateView
         onBack={() => {
           setShowCreateView(false);
+          setPendingSongIds(null);
           if (editingDeck) {
             // If editing, go back to deck detail view
             setSelectedDeck(editingDeck);

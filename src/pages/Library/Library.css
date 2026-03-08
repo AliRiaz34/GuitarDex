@@ -119,8 +119,8 @@
     overflow-x: hidden;
     position: relative;
     padding-bottom: 100px;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 10px, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
+    mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 200px), transparent calc(100% - 80px), transparent 100%);
 }
 
 #library-table {
@@ -133,7 +133,9 @@
 .song-td {
     padding: 0px;
     padding-bottom: 10px;
-    padding-left: 5px;
+    padding-left: 8px;
+    border-left: 3px solid transparent;
+    transition: border-left-color 0.25s ease-out;
 }
 
 .song-td-lv{
@@ -218,6 +220,40 @@
     flex-direction: row;
     will-change: transform, opacity;
     backface-visibility: hidden;
+}
+
+/* Selection mode */
+.selection-toggle {
+    margin: 0;
+    margin-left: auto;
+    padding: 2px 18px;
+    font-size: 0.75em;
+    font-family: 'Pokemon-Classic';
+    cursor: pointer;
+    color: rgba(240, 172, 45, 0.8);
+    background-color: transparent;
+    border: 2px solid rgba(240, 172, 45, 0.4);
+    border-radius: 4px;
+    font-weight: bolder;
+    white-space: nowrap;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.selection-toggle:active {
+    background-color: rgba(240, 172, 45, 0.2);
+}
+
+.selection-toggle.active {
+    background-color: rgba(240, 172, 45, 0.15);
+    border-color: rgba(240, 172, 45, 0.9);
+}
+
+.song-td.selectable {
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.song-td.selected {
+    border-left-color: rgba(240, 172, 45, 0.9);
 }
 
 /* Backup menu */
@@ -374,6 +410,15 @@
     font-style: italic;
     color: rgba(255, 255, 255, 0.5);
     text-align: center;
+}
+
+.deck-menu-create {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+}
+
+.deck-menu-create .deck-menu-title {
+    color: rgba(240, 172, 45, 0.8);
 }
 
 .song-menu-option {
@@ -562,6 +607,10 @@
     cursor: pointer;
     white-space: nowrap;
     z-index: 10;
+}
+
+#library-practice-button.add-to-deck-btn {
+    max-width: 260px;
 }
 
 #library-practice-button:active {

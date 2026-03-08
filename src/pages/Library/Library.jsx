@@ -28,6 +28,10 @@ function Library() {
 
   const [editView, setEditView] = useState(null); // song to edit
 
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedSongIds, setSelectedSongIds] = useState(new Set());
+  const [showDeckPicker, setShowDeckPicker] = useState(false);
+
   useEffect(() => {
     async function loadDecks() {
       try {
@@ -269,6 +273,36 @@ function Library() {
     openPracticeView(cleanSong, false, true);
   };
 
+  const handleToggleSelect = (songId) => {
+    setSelectedSongIds(prev => {
+      const next = new Set(prev);
+      if (next.has(songId)) next.delete(songId);
+      else next.add(songId);
+      return next;
+    });
+  };
+
+  const handleExitSelection = () => {
+    setSelectionMode(false);
+    setSelectedSongIds(new Set());
+    setShowDeckPicker(false);
+  };
+
+  const handleBulkAddToDeck = async (deckId) => {
+    const songIds = [...selectedSongIds];
+    // Optimistic UI
+    updateDeckMembership(deckId, songIds[0], true); // triggers reload
+    setShowDeckPicker(false);
+    handleExitSelection();
+
+    try {
+      await Promise.all(songIds.map(songId => addSongToDeck(deckId, songId)));
+    } catch (error) {
+      console.error('Error bulk adding to deck:', error);
+      alert('Error adding songs to deck');
+    }
+  };
+
   const handleToggleDeck = async (deckId, songId, isInDeck) => {
     // Optimistic UI updates
     setPlaylists(prev => (prev || []).map(d =>
@@ -424,6 +458,15 @@ function Library() {
       scrollPositionRef={scrollPositionRef}
       returnFromSong={returnFromSong}
       onReturnAnimationDone={() => setReturnFromSong(false)}
+      selectionMode={selectionMode}
+      setSelectionMode={setSelectionMode}
+      selectedSongIds={selectedSongIds}
+      onToggleSelect={handleToggleSelect}
+      onExitSelection={handleExitSelection}
+      showDeckPicker={showDeckPicker}
+      setShowDeckPicker={setShowDeckPicker}
+      playlists={playlists}
+      onBulkAddToDeck={handleBulkAddToDeck}
     />
   );
 }
