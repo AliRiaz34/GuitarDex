@@ -103,6 +103,19 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
   const [loading, setLoading] = useState(true);
   const [totalMinutes, setTotalMinutes] = useState(0);
   const menuRef = useRef(null);
+  const pendingOrderRef = useRef(null); // tracks unsaved reorder changes
+
+  // Flush pending reorder on unmount (safety net)
+  useEffect(() => {
+    return () => {
+      if (pendingOrderRef.current) {
+        const songOrderArray = pendingOrderRef.current;
+        updateDeckSongOrder(deck.deckId, songOrderArray).catch((error) => {
+          console.error('Error updating song order on unmount:', error);
+        });
+      }
+    };
+  }, [deck.deckId]);
 
   // Swipe gesture detection
   const touchStartX = useRef(0);
@@ -138,15 +151,30 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
 
     const songMap = new Map(allSongs.map(s => [s.songId, s]));
     const memberEntries = allDeckSongs.filter(ds => ds.deckId === deck.deckId);
-    const validSongs = memberEntries
-      .map(ds => {
-        const song = songMap.get(ds.songId);
-        return song ? { ...song, deckSongId: ds.id, order: ds.order } : null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-    setSongs(validSongs);
+    // If we have pending reorder changes, preserve local order but update song data
+    if (pendingOrderRef.current) {
+      const pendingIds = pendingOrderRef.current;
+      const memberMap = new Map(memberEntries.map(ds => [ds.songId, ds]));
+      const validSongs = pendingIds
+        .map(songId => {
+          const song = songMap.get(songId);
+          const ds = memberMap.get(songId);
+          return song && ds ? { ...song, deckSongId: ds.id, order: ds.order } : null;
+        })
+        .filter(Boolean);
+      setSongs(validSongs);
+    } else {
+      const validSongs = memberEntries
+        .map(ds => {
+          const song = songMap.get(ds.songId);
+          return song ? { ...song, deckSongId: ds.id, order: ds.order } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setSongs(validSongs);
+    }
+
     setTotalMinutes(deck.totalDuration || 0);
     setLoading(false);
   }, [deck.deckId, deck.totalDuration, deck.isVirtual, deck.songs, allSongs, allDeckSongs]);
@@ -222,7 +250,30 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     };
   }, [menuOpen]);
 
+  const flushPendingOrder = () => {
+    if (pendingOrderRef.current) {
+      const songOrderArray = pendingOrderRef.current;
+      // Update DataContext so other views see the new order
+      setDeckSongs(prev => {
+        const updated = [...prev];
+        songOrderArray.forEach((songId, idx) => {
+          const dsIdx = updated.findIndex(ds => ds.deckId === deck.deckId && ds.songId === songId);
+          if (dsIdx !== -1) {
+            updated[dsIdx] = { ...updated[dsIdx], order: idx };
+          }
+        });
+        return updated;
+      });
+      // Persist to Supabase
+      updateDeckSongOrder(deck.deckId, songOrderArray).catch((error) => {
+        console.error('Error updating song order:', error);
+      });
+      pendingOrderRef.current = null;
+    }
+  };
+
   const handleBack = () => {
+    flushPendingOrder();
     onBack();
   };
 
@@ -256,7 +307,7 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     onPractice(songs[randomIndex], true, songs);
   };
 
-  const handleDragEnd = async (event) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -267,27 +318,9 @@ function DeckDetailView({ deck, onBack, onDelete, onEdit, onPractice, onSelectSo
     const newIndex = songs.findIndex((item) => item.songId === over.id);
     const newOrder = arrayMove(songs, oldIndex, newIndex);
 
-    // Update local display
+    // Update local display only — save deferred to page exit
     setSongs(newOrder);
-
-    // Optimistically update DataContext deckSongs so the useEffect
-    // doesn't clobber local order when realtime events arrive mid-update
-    setDeckSongs(prev => {
-      const updated = [...prev];
-      newOrder.forEach((song, idx) => {
-        const dsIdx = updated.findIndex(ds => ds.deckId === deck.deckId && ds.songId === song.songId);
-        if (dsIdx !== -1) {
-          updated[dsIdx] = { ...updated[dsIdx], order: idx };
-        }
-      });
-      return updated;
-    });
-
-    // Persist to Supabase
-    const songOrderArray = newOrder.map((song) => song.songId);
-    updateDeckSongOrder(deck.deckId, songOrderArray).catch((error) => {
-      console.error('Error updating song order:', error);
-    });
+    pendingOrderRef.current = newOrder.map((song) => song.songId);
   };
 
   return (

@@ -40,11 +40,12 @@ function UserSearchView({ onBack, followingIds, onFollow, onUnfollow }) {
     >
       <p className="song-back-icon" onClick={onBack}>&lt;</p>
 
-      <div className="social-searchbar-container">
+      <form className="social-searchbar-container" onSubmit={e => { e.preventDefault(); e.target.querySelector('input').blur(); }}>
         <input
           className="input"
           id="searchbar"
-          type="text"
+          type="search"
+          enterKeyHint="search"
           placeholder="search users"
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -59,7 +60,7 @@ function UserSearchView({ onBack, followingIds, onFollow, onUnfollow }) {
             search users
           </div>
         )}
-      </div>
+      </form>
 
       <div className="search-results-container">
         {results.map(user => (

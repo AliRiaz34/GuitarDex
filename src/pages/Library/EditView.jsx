@@ -147,37 +147,35 @@ function EditView({ song, onSubmit, onBack }) {
               required
             />
           </div>
-          <div className="tuning-difficulty-row">
-            <div id="tuning-editor">
-              <div className="tuning-strings-vertical">
-                {tuning.map((note, index) => (
-                  <div key={index} className="tuning-string-row">
-                    <button
-                      type="button"
-                      className="tuning-side-arrow"
-                      onClick={() => changeTuning(index, 'down')}
-                    >
-                      {'<'}
-                    </button>
-                    <div className="tuning-note-inline">
-                      {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
-                    </div>
-                    <button
-                      type="button"
-                      className="tuning-side-arrow"
-                      onClick={() => changeTuning(index, 'up')}
-                    >
-                      {'>'}
-                    </button>
+          <div id="tuning-editor">
+            <div className="tuning-strings-horizontal">
+              {tuning.map((note, index) => (
+                <div key={index} className="tuning-string-col">
+                  <button
+                    type="button"
+                    className="tuning-vert-arrow"
+                    onClick={() => changeTuning(index, 'up')}
+                  >
+                    ^
+                  </button>
+                  <div className="tuning-note-inline">
+                    {note.includes('#') ? <>{note.split('#')[0]}<sup>#</sup></> : note}
                   </div>
-                ))}
-              </div>
+                  <button
+                    type="button"
+                    className="tuning-vert-arrow tuning-vert-arrow-down"
+                    onClick={() => changeTuning(index, 'down')}
+                  >
+                    ^
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="edit-difficulty-column">
-              <button type="button" className={difficulty === "easy" ? "selected" : ""} onClick={() => setDifficulty("easy")}>Easy</button>
-              <button type="button" className={difficulty === "normal" ? "selected" : ""} onClick={() => setDifficulty("normal")}>Normal</button>
-              <button type="button" className={difficulty === "hard" ? "selected" : ""} onClick={() => setDifficulty("hard")}>Hard</button>
-            </div>
+          </div>
+          <div className="edit-difficulty-row">
+            <button type="button" className={difficulty === "easy" ? "selected" : ""} onClick={() => setDifficulty("easy")}>Easy</button>
+            <button type="button" className={difficulty === "normal" ? "selected" : ""} onClick={() => setDifficulty("normal")}>Normal</button>
+            <button type="button" className={difficulty === "hard" ? "selected" : ""} onClick={() => setDifficulty("hard")}>Hard</button>
           </div>
           <div className="edit-inputs-row">
             <div className="edit-input-group">

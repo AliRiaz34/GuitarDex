@@ -875,64 +875,45 @@
 }
 
 
-.tuning-difficulty-row {
-    display: flex;
-    margin-top: 50px;
-    justify-content: space-between;
-    max-width: 250px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.edit-difficulty-column {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-size: 1.1em;
-    gap: 20px;
-    margin-top: 45px;
-}
-
-.edit-difficulty-column button {
-    transition: color 0.3s ease;
-    padding: 0;
-    font-size: 0.9em;
-    text-align: center;
-    width: 100%;
-}
-
 /* Tuning Editor */
 #tuning-editor {
     text-align: center;
+    margin-top: 50px;
 }
 
-.tuning-strings-vertical {
+.tuning-strings-horizontal {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.tuning-string-col {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: -4px;
-}
-
-.tuning-string-row {
-    display: flex;
     align-items: center;
 }
 
-.tuning-side-arrow {
+.tuning-vert-arrow {
+    text-align: center;
     background: none;
     border: none;
     color: #b0b0b0;
     font-size: 1.1em;
     cursor: pointer;
-    padding: 3px 6px;
+    padding: 5px 5px;
     transition: color 0.2s;
 }
 
-.tuning-side-arrow:hover {
+.tuning-vert-arrow-down {
+    transform: rotate(180deg);
+    padding-left: 15px;
+}
+
+.tuning-vert-arrow:hover {
     color: #ffffff;
 }
 
-.tuning-side-arrow:active {
+.tuning-vert-arrow:active {
     color: #f0ac2d;
 }
 
@@ -947,6 +928,22 @@
 .tuning-note-inline sup {
     vertical-align: top;
     line-height: 1;
+}
+
+/* Difficulty Row */
+.edit-difficulty-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 30px;
+    font-size: 1.1em;
+}
+
+.edit-difficulty-row button {
+    transition: color 0.3s ease;
+    padding: 0;
+    font-size: 0.9em;
+    text-align: center;
 }
 
 .tuning-strings-container {
