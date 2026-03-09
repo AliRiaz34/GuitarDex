@@ -78,7 +78,7 @@ export function getStreakMultiplier(songInfo) {
 // Calculate XP gain from a practice session
 export function calculateXpGain(songInfo, minPlayed) {
   const difficulty = songInfo.difficulty;
-  const songDuration = Number(songInfo.songDuration);
+  const songDuration = Number(songInfo.songDuration) || 5;
   const highestLevelReached = songInfo.highestLevelReached;
 
   // Get streak-based bonus (consecutive days practiced)

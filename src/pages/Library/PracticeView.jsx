@@ -6,13 +6,21 @@ import { loadYouTubeAPI, searchYouTube } from '../../utils/youtube';
 import './Library.css';
 
 function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
-  const [minPlayed, setMinPlayed] = useState(song.songDuration || "");
+  const [minPlayed, setMinPlayed] = useState("");
+  const userHasTyped = useRef(false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [selectedMinButton, setSelectedMinButton] = useState(null);
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
   const lyricsPreviewRef = useRef(null);
   const lyricsWidgetRef = useRef(null);
+
+  // Prefill duration once songDuration arrives (async), but only if user hasn't typed yet
+  useEffect(() => {
+    if (song.songDuration && !userHasTyped.current && minPlayed === "") {
+      setMinPlayed(song.songDuration);
+    }
+  }, [song.songDuration]);
 
   useEffect(() => {
     if (lyricsExpanded && lyricsPreviewRef.current && lyricsWidgetRef.current) {
@@ -304,6 +312,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
           <div className="quick-select-button-div">
             <button
               onClick={() => {
+                userHasTyped.current = true;
                 setMinPlayed(15);
                 setSelectedMinButton(15);
               }}
@@ -315,6 +324,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
             <p className="between-button-line">|</p>
             <button
               onClick={() => {
+                userHasTyped.current = true;
                 setMinPlayed(30);
                 setSelectedMinButton(30);
               }}
@@ -326,6 +336,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
             <p className="between-button-line">|</p>
             <button
               onClick={() => {
+                userHasTyped.current = true;
                 setMinPlayed(45);
                 setSelectedMinButton(45);
               }}
@@ -337,6 +348,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
             <p className="between-button-line">|</p>
             <button
               onClick={() => {
+                userHasTyped.current = true;
                 setMinPlayed(60);
                 setSelectedMinButton(60);
               }}
@@ -354,6 +366,7 @@ function PracticeView({ song, onSubmit, onBack, onGoToSong, onPass }) {
                 id="minPlayed-input"
                 value={minPlayed}
                 onChange={(e) => {
+                  userHasTyped.current = true;
                   setMinPlayed(e.target.value);
                   setSelectedMinButton(null);
                 }}
